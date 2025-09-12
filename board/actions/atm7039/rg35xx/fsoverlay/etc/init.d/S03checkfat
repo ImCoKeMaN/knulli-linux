@@ -1,0 +1,43 @@
+#!/bin/sh
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+DEVICE="/dev/mmcblk0p3"
+
+if [ -d /dev/mmcblk1p1 ]; then
+	DEVICE="/dev/mmcblk1p1"
+fi
+
+case "$1" in
+  start)
+    sync
+    # Check if the device is mounted
+    MOUNTPOINT=$(grep $DEVICE /etc/mtab | cut -d ' ' -f 2)
+    if [ -n "$MOUNTPOINT" ]; then
+      # Unmount the device
+      echo "Unmounting $DEVICE..."
+      umount $DEVICE
+    fi
+
+	p3_dirty="$(/usr/bin/hexdump -e '1/1 "%01x""\n"' $DEVICE -n 1 -s 65)"
+	if [ $p3_dirty = 1 ];then
+	    # Check and repair the filesystem
+	    echo "Checking FAT32 filesystem on $DEVICE..."
+	    fsck.vfat -aw $DEVICE
+	fi
+
+    # If the device was originally mounted, remount it
+    if [ -n "$MOUNTPOINT" ]; then
+      echo "Remounting $DEVICE to $MOUNTPOINT..."
+      mount $DEVICE $MOUNTPOINT
+    fi
+    ;;
+  stop)
+    ;;
+  *)
+    echo "Usage: /etc/init.d/S03checkfat {start}"
+    exit 1
+    ;;
+esac
+
+exit 0
+

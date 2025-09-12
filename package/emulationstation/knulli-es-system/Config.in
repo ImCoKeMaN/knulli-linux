@@ -1,0 +1,5 @@
+config BR2_PACKAGE_KNULLI_ES_SYSTEM
+        bool "knulli-es-system"
+	select BR2_PACKAGE_KNULLI_CONFIGGEN
+        help
+          Generates the es_system.cfg file and the roms folder

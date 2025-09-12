@@ -1,0 +1,5 @@
+config BR2_PACKAGE_KNULLI_SETTINGS
+	bool "knulli-settings"
+
+	help
+	  knulli-settings-get/set binaries

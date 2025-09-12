@@ -1,0 +1,64 @@
+#!/bin/sh
+
+SHUTDOWN_FLAG="/var/run/shutdown.flag"
+REBOOT_FLAG="/boot/restart.flag"
+
+check_ingame() {
+    HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:1234/runningGame")
+    test $? != 0                 && return 0
+    test "${HTTP_STATUS}" != 201 && return 0 # in game
+    return 1  # 201 when not in game
+}
+
+do_poweroff() {
+    POWEROFF=$1
+
+    touch "$SHUTDOWN_FLAG" # So the system or any scripts can tell if the shutdown sequence has started
+
+    # Lets hide what happens from the user during shutdown/reboot to make for a more seemless experience
+    batocera-brightness dispoff
+    amixer set Master mute
+
+    if check_ingame; then
+         batocera-es-swissknife --emukill
+    fi
+
+    if [ "$POWEROFF" = "reboot" ]; then
+        mount -o remount,rw /boot
+        touch "$REBOOT_FLAG" # So the system knows if it's restart or cold boot for the charging binary in rcS
+        sync
+        mount -o remount,ro /boot
+        shutdown -r now
+    else
+        sync
+
+        # Start a background process that waits for a timeout duration before forcing shutdown
+        ( sleep 5 && reboot -f -p ) &
+
+        # Try a clean shutdown
+        shutdown -Ph now
+
+        # If we reach this point, the shutdown was successful and we can kill the background job
+        kill $!
+    fi
+}
+
+case "$1" in
+    -s|--shutdown)
+        echo "Shutting down the system..."
+        do_poweroff
+        ;;
+    -r|--reboot)
+        echo "Rebooting the system..."
+        do_poweroff reboot
+        ;;
+    *)
+        echo "Invalid option."
+        echo "Usage:"
+        echo "  -s, --shutdown"
+        echo "  -r, --reboot"
+        exit 1
+        ;;
+esac
+
+exit 0

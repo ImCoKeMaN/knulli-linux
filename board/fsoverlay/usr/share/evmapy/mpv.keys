@@ -1,0 +1,69 @@
+{
+    "actions_player1": [
+        {
+            "trigger": "hotkey",
+            "type": "key",
+            "target": "KEY_LEFTSHIFT"
+        },
+        {
+            "trigger": "up",
+            "type": "key",
+            "target": "KEY_UP"
+        },
+        {
+            "trigger": "down",
+            "type": "key",
+            "target": "KEY_DOWN"
+        },
+        {
+            "trigger": "left",
+            "type": "key",
+            "target": "KEY_LEFT"
+        },
+        {
+            "trigger": "right",
+            "type": "key",
+            "target": "KEY_RIGHT"
+        },
+        {
+            "trigger": "select",
+            "type": "key",
+            "target": "KEY_J"
+        },
+        {
+            "trigger": "start",
+            "type": "key",
+            "target": "KEY_S"
+        },
+        {
+            "trigger": "a",
+            "type": "key",
+            "target": "KEY_A"
+        },
+        {
+            "trigger": "b",
+            "type": "key",
+            "target": "KEY_B"
+        },
+        {
+            "trigger": "pagedown",
+            "type": "key",
+            "target": "KEY_PAGEUP"
+        },
+        {
+            "trigger": "pageup",
+            "type": "key",
+            "target": "KEY_PAGEDOWN"
+        },
+        {
+            "trigger": "x",
+            "type": "key",
+            "target": "KEY_X"
+        },
+        {
+            "trigger": "y",
+            "type": "key",
+            "target": "KEY_Y"
+        }
+    ]
+}

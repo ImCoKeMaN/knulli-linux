@@ -1,0 +1,7 @@
+config BR2_PACKAGE_KNULLI_ES_WEB_UI
+        bool "knulli Emulationstation Web UI"
+	depends on BR2_PACKAGE_KNULLI_EMULATIONSTATION
+
+        help
+          A modern UI for ES web services
+

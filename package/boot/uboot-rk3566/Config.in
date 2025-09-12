@@ -1,0 +1,4 @@
+config BR2_PACKAGE_UBOOT_RK3566
+    bool "uboot-rk3566"
+    help
+      uboot files for rk3566

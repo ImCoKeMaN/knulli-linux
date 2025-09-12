@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Knulli feature requests
+    url: https://discord.com/channels/1173228527605272666/1229419354832109568
+    about: Knulli requests, for emulation and general operating system features
+  - name: Help and support
+    url: https://discord.com/channels/1173228527605272666/1229419106332311665
+    about: For support with using Knulli
+

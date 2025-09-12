@@ -1,0 +1,119 @@
+#!/bin/sh
+
+notify() {
+    [ -n "$1" ] && curl -s http://localhost:1234/notify -d "$1" >/dev/null
+}
+
+do_help() {
+    echo "$0 scanlist\n$0 list" >&2
+}
+
+do_list() {
+    connmanctl services | sed 's/^...[ ]*//' | awk -F '[ ]*[ ]wifi_[[:alnum:]]*_' '{if (NF==2) print $1}' | sort -u # remove duplicates (a single wifi can appear under 2 interfaces)
+}
+
+do_scanlist() {
+    connmanctl scan wifi >/dev/null 2>/dev/null
+    sleep 1
+    do_list
+}
+
+wait_for_ip() {
+    local mode=$1
+    local success=false
+
+    for i in $(seq 1 30); do
+        if [ "$mode" = "up" ]; then
+            if ip -4 addr show | grep "inet " | grep -qv "127\.0\.0\.1"; then
+                success=true
+                break
+            fi
+        elif [ "$mode" = "down" ]; then
+            if ! ip -4 addr show | grep "inet " | grep -qv "127\.0\.0\.1"; then
+                success=true
+                break
+            fi
+        fi
+        sleep 0.5
+    done
+
+    if [ "$mode" = "up" ] && [ "$success" = false ]; then
+        notify "Wi-Fi failed to connect"
+    fi
+}
+
+get_route() {
+    echo $(ip route show default | awk '/^default/ && $0 ~ /wl/ { print $3 }')
+}
+
+get_interface() {
+    echo $(ip link show | awk -F: '$2 ~ /w[l]/ { gsub(/ /, "", $2); print $2 }' | head -n1)
+}
+
+has_ap_mode() {
+    WIFI_DEV=$(get_interface)
+    PHY=$(basename "$(readlink /sys/class/net/${WIFI_DEV}/phy80211)")
+    if iw phy "${PHY}" info | sed -n '/Supported interface modes/,/^[^*]*$/s|^.*[*] ||p' | grep -q 'AP'; then
+        exit 0
+    else
+        exit 1
+    fi
+}
+
+if [ $# -eq 0 ]; then
+    do_help
+    exit 1
+fi
+
+ACTION=$1
+shift
+
+case "${ACTION}" in
+    "list")
+        do_list
+        ;;
+    "scanlist")
+        do_scanlist
+        ;;
+    "start")
+        /etc/init.d/S20connman restart
+        ;;
+    "enable")
+        knulli-settings-set wifi.enabled 1
+        if [ $# -eq 2 ]; then
+            knulli-settings-set wifi.ssid "$1"
+            knulli-settings-set wifi.key "$2"
+        fi
+        /etc/init.d/S20connman reload
+
+        settings_ssid="$(knulli-settings-get wifi.ssid)"
+
+        # We don't need to wait for an IP if no saved ssid
+        if [ -n "${settings_ssid}" ]; then
+            wait_for_ip up
+        else
+            sleep 1 # wait 1 second for connman to initialize and start scanning
+        fi
+        ;;
+    "disable")
+        knulli-settings-set wifi.enabled 0
+        /etc/init.d/S20connman reload
+        wait_for_ip down
+        ;;
+    "get_route")
+        get_route
+        ;;
+    "get_interface")
+        get_interface
+        ;;
+    "has_ap_mode")
+        has_ap_mode
+        ;;
+    *)
+        do_help
+        >&2 echo "error: invalid command ${ACTION}"
+        exit 1
+        ;;
+esac
+
+exit 0

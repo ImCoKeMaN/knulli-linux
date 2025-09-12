@@ -1,0 +1,70 @@
+--- glibc-2.39-74-g198632a05f6c7b9ab67d3331d8caace9ceabb685/include/stdlib.h	2024-06-15 13:22:20.000000000 +0000
++++ new_glibc-2.39-74-g198632a05f6c7b9ab67d3331d8caace9ceabb685/include/stdlib.h	2025-01-22 14:31:06.780500376 +0000
+@@ -180,15 +180,6 @@
+ libc_hidden_proto (grantpt)
+ libc_hidden_proto (unlockpt)
+ 
+-__typeof (arc4random) __arc4random;
+-libc_hidden_proto (__arc4random);
+-__typeof (arc4random_buf) __arc4random_buf;
+-libc_hidden_proto (__arc4random_buf);
+-__typeof (arc4random_uniform) __arc4random_uniform;
+-libc_hidden_proto (__arc4random_uniform);
+-extern void __arc4random_buf_internal (void *buffer, size_t len)
+-     attribute_hidden;
+-
+ extern double __strtod_internal (const char *__restrict __nptr,
+ 				 char **__restrict __endptr, int __group)
+      __THROW __nonnull ((1)) __wur;
+diff -urN glibc-2.39-74-g198632a05f6c7b9ab67d3331d8caace9ceabb685/stdlib/Makefile new_glibc-2.39-74-g198632a05f6c7b9ab67d3331d8caace9ceabb685/stdlib/Makefile
+--- glibc-2.39-74-g198632a05f6c7b9ab67d3331d8caace9ceabb685/stdlib/Makefile	2024-06-15 13:22:20.000000000 +0000
++++ new_glibc-2.39-74-g198632a05f6c7b9ab67d3331d8caace9ceabb685/stdlib/Makefile	2025-01-22 14:30:47.044523816 +0000
+@@ -55,8 +55,6 @@
+   a64l \
+   abort \
+   abs \
+-  arc4random \
+-  arc4random_uniform \
+   at_quick_exit \
+   atof \
+   atoi \
+@@ -263,9 +261,6 @@
+   testrand \
+   testsort \
+   tst-abs \
+-  tst-arc4random-fork \
+-  tst-arc4random-stats \
+-  tst-arc4random-thread \
+   tst-at_quick_exit \
+   tst-atexit \
+   tst-atof1 \
+@@ -382,8 +377,6 @@
+ LDLIBS-test-cxa_atexit-race2 = $(shared-thread-library)
+ LDLIBS-test-on_exit-race = $(shared-thread-library)
+ LDLIBS-tst-canon-bz26341 = $(shared-thread-library)
+-LDLIBS-tst-arc4random-fork = $(shared-thread-library)
+-LDLIBS-tst-arc4random-thread = $(shared-thread-library)
+ LDLIBS-tst-system = $(shared-thread-library)
+ 
+ LDLIBS-test-dlclose-exit-race = $(shared-thread-library)
+diff -urN glibc-2.39-74-g198632a05f6c7b9ab67d3331d8caace9ceabb685/stdlib/stdlib.h new_glibc-2.39-74-g198632a05f6c7b9ab67d3331d8caace9ceabb685/stdlib/stdlib.h
+--- glibc-2.39-74-g198632a05f6c7b9ab67d3331d8caace9ceabb685/stdlib/stdlib.h	2024-06-15 13:22:20.000000000 +0000
++++ new_glibc-2.39-74-g198632a05f6c7b9ab67d3331d8caace9ceabb685/stdlib/stdlib.h	2025-01-22 14:30:25.260549152 +0000
+@@ -654,17 +654,6 @@
+      __THROW __nonnull ((1, 2));
+ 
+ /* Return a random integer between zero and 2**32-1 (inclusive).  */
+-extern __uint32_t arc4random (void)
+-     __THROW __wur;
+-
+-/* Fill the buffer with random data.  */
+-extern void arc4random_buf (void *__buf, size_t __size)
+-     __THROW __nonnull ((1));
+-
+-/* Return a random number between zero (inclusive) and the specified
+-   limit (exclusive).  */
+-extern __uint32_t arc4random_uniform (__uint32_t __upper_bound)
+-     __THROW __wur;
+ # endif	/* Use misc.  */
+ #endif	/* Use misc or X/Open.  */
+ 

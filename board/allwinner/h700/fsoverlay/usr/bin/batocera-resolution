@@ -1,0 +1,113 @@
+#!/bin/sh
+
+DISPLAY="/sys/kernel/debug/dispdbg"
+HDMI_STATE="/sys/devices/platform/soc/6000000.hdmi/extcon/hdmi/state"
+BOARD=$(cat /boot/boot/knulli.board)
+
+f_usage() {
+    echo "$0 listOutputs" >&2
+    echo "$0 currentResolution" >&2
+    echo "$0 setOutput" >&2
+}
+
+if [ $# -eq 0 ]; then
+    f_usage
+    exit 1
+fi
+
+# use for syntax only
+PSCREEN=
+if test "${1}" = "--screen"
+then
+    shift
+    PSCREEN=$1
+    shift
+fi
+
+set_output() {
+    OUTPUT=$1
+    case "$OUTPUT" in
+        hdmi)
+            VIDEO=$(knulli-settings-get global.videooutput)
+            echo disp0 > $DISPLAY/name
+            echo switch1 > $DISPLAY/command
+            if [ "$VIDEO" = "hdmi-480p" ]; then
+                echo 4 2 0 0 0x4 0x201 0 1 0 8 > $DISPLAY/param
+                echo 1 > $DISPLAY/start
+                fbset -g 640 480 640 960 32 -t 25175 40 24 32 9 96 2
+            elif [ "$VIDEO" = "hdmi-720p" ]; then
+                echo 4 5 0 0 0x4 0x201 0 1 0 8 > $DISPLAY/param
+                echo 1 > $DISPLAY/start
+                fbset -g 1280 720 1280 1440 32 -t 13468 220 40 20 5 110 5
+            elif [ "$VIDEO" = "hdmi-1080p" ] || [ "$VIDEO" = "" ]; then
+                echo 4 10 0 0 0x4 0x201 0 1 0 8 > $DISPLAY/param
+                echo 1 > $DISPLAY/start
+                fbset -g 1280 720 1280 1440 32 -t 13468 220 40 20 5 110 5
+            fi
+            ;;
+        internal)
+            echo disp0 > $DISPLAY/name
+            echo switch > $DISPLAY/command
+            echo 1 0 > $DISPLAY/param
+            echo 1 > $DISPLAY/start
+            if [ "$BOARD" = "rg28xx" ]; then
+                fbset -g 480 640 480 1280 32
+            elif [ "$BOARD" = "rg-cubexx" ]; then
+                fbset -g 720 720 720 1440 32
+            elif [ "$BOARD" = "rg34xx" ] || [ "$BOARD" = "rg34xx-sp" ]; then
+                fbset -g 720 480 720 960 32
+            else
+                fbset -g 640 480 640 960 32
+            fi
+            ;;
+        *)
+            f_usage
+            ;;
+    esac
+}
+
+ACTION=$1
+
+case "${ACTION}" in
+    "listOutputs")
+        echo "hdmi-1080p"
+        echo "hdmi-720p"
+        echo "hdmi-480p"
+        ;;
+    "listModes")
+        ;;
+    "setOutput")
+        STATE=$(cat "$HDMI_STATE")
+        if [ "$STATE" = "HDMI=1" ]; then
+            set_output hdmi
+        else
+            set_output internal
+        fi
+        ;;
+    "currentResolution")
+        if [ "$BOARD" = "rg28xx" ]; then
+            fbset | grep "geometry" | awk '{print $3"x"$2}'
+        else
+            fbset | grep "geometry" | awk '{print $2"x"$3}'
+        fi
+        ;;
+    "currentOutput")
+        ;;
+    "currentMode")
+        ;;
+    "minTomaxResolution" | "minTomaxResolution-secure")
+        ;;
+    "supportSystemReflection")
+        exit 1
+        ;;
+    "supportSystemRotation")
+        exit 1
+        ;;
+    *)
+        echo "error: invalid command ${ACTION}" >&2
+        f_usage
+        exit 1
+        ;;
+esac
+
+exit 0

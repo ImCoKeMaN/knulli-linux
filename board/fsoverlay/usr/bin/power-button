@@ -1,0 +1,55 @@
+#!/bin/bash
+
+LOCK_FILE="/var/run/power-button-script.lock"
+
+exec 200>"${LOCK_FILE}"
+if ! flock -n 200; then
+    exit 0
+fi
+
+trap 'flock -u 200;' EXIT
+
+POWER_BUTTON_STATE="/var/run/power-button-state.flag"
+DEBOUNCE_FILE="/var/run/suspend.debounce"
+
+# Threshold for long press to shutdown (in seconds) (some boards cut power when power button is held too long)
+LONG_PRESS_THRESHOLD=2
+
+# Global suspend debounce
+if [ -f "$DEBOUNCE_FILE" ]; then
+    exit 0
+fi
+
+wait_exit() {
+    sleep 1
+}
+
+suspend_system() {
+    pm-is-supported --suspend && pm-suspend
+    wait_exit
+}
+
+shutdown_system() {
+    knulli-shutdown -s
+}
+
+# Set starting state
+echo "1" > "$POWER_BUTTON_STATE"
+
+# Wait for modification of flag file
+if inotifywait -qq -t "$LONG_PRESS_THRESHOLD" -e close_write "$POWER_BUTTON_STATE"; then
+    # Power button state changed within timeout (short press)
+    if [ "$(cat "$POWER_BUTTON_STATE")" = "0" ]; then
+        suspend_system
+    fi
+else
+    # Shutdown if timeout is reached (long press)
+    if [ "$(cat "$POWER_BUTTON_STATE")" = "1" ]; then
+        if [ -f /usr/bin/knulli-rumble ]; then
+            knulli-rumble 0.1
+        fi
+        shutdown_system
+    fi
+fi
+
+exit 0

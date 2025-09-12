@@ -1,0 +1,15 @@
+#!/bin/sh
+
+case "$1" in
+  start)
+    echo 1 > /sys/class/graphics/fb0/mirror_to_hdmi
+    ;;
+  
+  stop)
+    echo 0 > /sys/class/graphics/fb0/mirror_to_hdmi
+    ;;
+  *)
+    exit 1
+    ;;
+esac
+exit 0

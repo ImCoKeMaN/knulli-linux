@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+#
+# Tooling to allow configuration of Batocera settings from files located on the boot partition.
+#
+# This can be invoked manually or during the postshare.sh process to start a new system with a preferred configuration.
+# If the postshare.sh script is used, the configurations will be applied on each boot.
+# This can make it such that your preferred wifi network will be reapplied on every boot,
+# So if you change networks as you travel, it would always reset to your /boot/bootstrap.knulli.conf.<named> setting upon reboot.
+#
+# Recommended usage is to place files directly on the boot partition after flashing a new image and place bootstrap files in that directory.
+#
+# An example can be found here: https://gist.github.com/Skeeg/9b5a68f0d18c2df0b589274ca534363c#file-batocera-bootstrapper-sh
+# With a postshare.sh example here: https://gist.github.com/Skeeg/9b5a68f0d18c2df0b589274ca534363c#file-postshare-sh
+#
+# @skeeg on Batocera Discord.  https://github.com/Skeeg
+#
+# 20241103 - Initial revision
+#
+
+import os
+import sys
+import xml.etree.ElementTree as ET
+import xml.dom.minidom as minidom
+
+def backup_file(file_to_backup):
+    # Determine the next available backup file number
+    counter = 1
+    while os.path.exists(f"{file_to_backup}.bak{counter}"):
+        counter += 1
+    backup_destination_file = f"{file_to_backup}.bak{counter}"
+
+    if os.path.exists(file_to_backup):
+        with open(file_to_backup, 'rb') as src_file:
+            with open(backup_destination_file, 'wb') as dst_file:
+                dst_file.write(src_file.read())
+
+    print(f'Backed up {file_to_backup} to {backup_destination_file}.')
+    return backup_destination_file
+
+def prettify_xml(elem):
+    """Return a pretty-printed XML string for the Element."""
+    rough_string = ET.tostring(elem, 'utf-8')
+    reparsed = minidom.parseString(rough_string)
+    pretty_string = reparsed.toprettyxml(indent="  ")
+
+    # Remove unnecessary blank lines
+    lines = pretty_string.split('\n')
+    non_empty_lines = [line for line in lines if line.strip()]
+    return '\n'.join(non_empty_lines)
+
+def update_xml(source_file, target_file):
+    # Parse the XML files
+    tree1 = ET.parse(source_file)
+    tree2 = ET.parse(target_file)
+
+    root1 = tree1.getroot()
+    root2 = tree2.getroot()
+
+    # Create a dictionary to store key-value pairs from the first file
+    config1 = {
+        (child.attrib['name'], child.tag): child.attrib['value'] for child in root1
+    }
+    # Update the second file with values from the first file
+    for child in root2:
+        name = child.attrib['name']
+        child_type = child.tag  # e.g., 'bool', 'int', 'string'
+        if (name, child_type) in config1:
+            child.attrib['value'] = config1[(name, child_type)]
+            config1.pop((name, child_type))# Remove the updated key from the dictionary
+
+    # Add any remaining entries from the first file to the second file
+    for (name, child_type), value in config1.items():
+        new_element = ET.Element(child_type)
+        new_element.attrib = {'name': name, 'value': value}
+        root2.append(new_element)
+
+    # Prettify the XML and write to the same second file
+    pretty_xml_as_string = prettify_xml(root2)
+    with open(target_file, 'w', encoding='utf-8') as f:
+        f.write(pretty_xml_as_string)
+
+    print(f"Updated '{target_file}' with values from '{source_file}.")
+
+def update_keyvalue(source_file, target_file):
+    # Read the source file and target file
+    with open(source_file, 'r') as src_file:
+        source_lines = src_file.readlines()
+        filtered_lines = [line for line in source_lines if line.strip() and not line.strip().startswith('#')]
+
+    # Load existing target file data
+    target_dict = {}
+    if os.path.exists(target_file):
+        with open(target_file, 'r') as tgt_file:
+            for line in tgt_file:
+                if line.strip() and not line.strip().startswith('#'):
+                    key, _, value = line.partition('=')
+                    target_dict[key.strip()] = value.strip()
+
+    # Process the source file lines
+    for line in filtered_lines:
+        key, _, value = line.partition('=')
+        key = key.strip()
+        value = value.strip()
+
+        if key in target_dict:
+            target_dict[key] = value
+            # print(f"Processed key '{key}': changed value to '{value}'.")
+        else:
+            target_dict[key] = value
+            # print(f"Added key '{key}' with value '{value}'.")
+
+    # Write updated target file
+    with open(target_file, 'w') as tgt_file:
+        # Write all key-value pairs, sort them
+        for key in sorted(target_dict):
+            tgt_file.write(f"{key}={target_dict[key]}\n")
+
+    print(f"Updated '{target_file}' with values from '{source_file}.")
+
+if __name__ == "__main__":
+    if len(sys.argv) != 5:
+        print("Usage: knulli-bootstrap <data_structure> <directory path with bootstrap.\{filename\}* files> <conf file to update> <[True|False] for backup>")
+        print("Example for keyvalue: knulli-bootstrap keyvalue /boot /userdata/system/knulli.conf True")
+        print("Example for xml: knulli-bootstrap xml /boot /userdata/system/configs/emulationstation/es_settings.cfg True")
+        print("The destination base filename is used as the filter, so all /boot/bootstrap.knulli.conf* files in this example will be read")
+        sys.exit(1)
+
+    data_structure = str.lower(sys.argv[1])
+    bootstrap_directory = sys.argv[2]
+    config_to_update = sys.argv[3]
+    config_backup = sys.argv[4]
+
+    if config_backup:
+        backup_file(config_to_update)
+
+    for file in sorted(os.listdir(bootstrap_directory)):
+        if file.startswith('bootstrap.' + os.path.basename(config_to_update)):
+            if data_structure == 'xml':
+                update_xml(os.path.join(bootstrap_directory, file), config_to_update)
+            elif data_structure == 'keyvalue':
+                update_keyvalue(os.path.join(bootstrap_directory, file), config_to_update)
+
+    print(f'Configuration bootstrapping complete.')

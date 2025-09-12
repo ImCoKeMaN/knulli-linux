@@ -1,0 +1,27 @@
+#!/bin/sh
+
+command -v knulli-brightness >/dev/null || exit 0
+
+case $1 in
+    start)
+        # don't set if under 5%, while it can cause false positive issues
+        BRI=$(knulli-settings-get display.brightness)
+        if [ $? -eq 0 ]; then
+            if [ "$BRI" -lt 5 ]; then
+                BRI=5
+            fi
+            knulli-brightness "$BRI"
+        fi
+        ;;
+    stop)
+        current_brightness=$(knulli-brightness)
+        stored_brightness=$(knulli-settings-get display.brightness)
+        if [ "$stored_brightness" != "$current_brightness" ]; then
+            if [ -e "/userdata/system/knulli.conf" ]; then
+                knulli-settings-set display.brightness "$current_brightness"
+            fi
+        fi
+        ;;
+esac
+
+exit 0

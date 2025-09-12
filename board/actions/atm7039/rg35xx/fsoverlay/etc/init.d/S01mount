@@ -1,0 +1,48 @@
+#!/bin/sh
+
+case "$1" in
+  start)
+    mkdir /dev/pts
+    mount -t devpts devpts /dev/pts
+    #mount -t devpts -o gid=5,mode=620 devpts /dev/pts
+
+    mkdir /dev/shm
+    mount -t tmpfs -o mode=0755,nosuid,nodev tmpfs /dev/shm
+
+    mount -o rw /dev/mmcblk0p1 /boot
+    ;;
+  
+  stop)
+    umount /dev/pts
+    umount /dev/shm
+    umount /boot 
+
+    sync
+    for i in 1p0 1p1 1p2 1p3 0p3; do
+      DEVICE="/dev/mmcblk"$i 
+      MOUNTPOINT=$(grep $DEVICE /etc/mtab | cut -d ' ' -f 2)
+      if [ -n "$MOUNTPOINT" ]; then     # Unmount the device
+        umount $DEVICE
+      fi
+    done
+
+    p3_dirty="$(/usr/bin/hexdump -e '1/1 "%01x""\n"' $DEVICE -n 1 -s 65)"
+        if [ $p3_dirty = 1 ];then     #removing Dirty bit
+            printf '\x00' |dd of=$DEVICE bs=1 seek=65 count=1 conv=notrunc status=none    
+	sleep 1
+        fi
+
+    DEVICE="/dev/mmcblk0p1"
+    p1_dirty="$(/usr/bin/hexdump -e '1/1 "%01x""\n"' $DEVICE -n 1 -s 65)"
+        if [ $p1_dirty = 1 ];then     #removing Dirty bit
+            printf '\x00' |dd of=$DEVICE bs=1 seek=65 count=1 conv=notrunc status=none
+        sleep 1
+	fi
+
+    sync
+    ;;
+  *)
+    exit 1
+    ;;
+esac
+exit 0

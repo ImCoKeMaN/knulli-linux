@@ -1,0 +1,301 @@
+#!/bin/bash
+
+# Allow environment variables to override defaults for testing
+updateurl="https://updates.knulli.org"
+update_dir="/userdata/system/upgrade"
+log="/userdata/system/logs/knulli.log"
+firmware_sig="/boot/boot/firmware.sig"
+access_key_file="/userdata/system/.access_key"
+
+# Function to get board name
+get_board_name() {
+    if [ -n "$TEST_BOARD" ]; then
+        echo "$TEST_BOARD"
+    elif [ -f "/boot/boot/knulli.board" ]; then
+        cat "/boot/boot/knulli.board"
+    else
+        echo "unknown"
+    fi
+}
+
+# Function to load access key for protected channels
+load_access_key() {
+    if [ -f "$access_key_file" ]; then
+        cat "$access_key_file" 2>/dev/null | tr -d '\n'
+    fi
+}
+
+# Function to parse JSON response - requires jq
+parse_json_response() {
+    local json_file="$1"
+    local key="$2"
+    
+    # Check if jq is installed
+    if ! command -v jq &> /dev/null; then
+        echo "ERROR: jq is required but not installed"
+        return 1
+    fi
+    
+    # Check if file exists
+    if [ ! -f "$json_file" ]; then
+        return 1
+    fi
+    
+    # Get value using jq
+    value=$(jq -r ".$key" "$json_file")
+    echo "$value"
+    return 0
+}
+
+# Check which update channel to use - set using environment variable for testing
+if [ -n "$TEST_CHANNEL" ]; then
+    upgrade_channel="$TEST_CHANNEL"
+else
+    # In production, use the batocera settings
+    if command -v /usr/bin/knulli-settings-get &> /dev/null; then
+        upgrade_channel="$(/usr/bin/knulli-settings-get updates.type)"
+    else
+        # For testing, default to dev channel
+        upgrade_channel="dev"
+        echo "Using default channel: $upgrade_channel (knulli-settings-get not available)" >&2
+    fi
+fi
+
+# Validate channel
+if test "${upgrade_channel}" != "stable" -a "${upgrade_channel}" != "alpha" -a "${upgrade_channel}" != "dev"; then
+    # force a default value in case the value is removed or miswritten
+    upgrade_channel="dev"
+fi
+
+# Check for custom update URL - set using environment variable for testing
+if [ -n "$TEST_URL" ]; then
+    updateurl="$TEST_URL"
+else
+    # In production, use the batocera settings
+    if command -v /usr/bin/knulli-settings-get &> /dev/null; then
+        settingsupdateurl="$(/usr/bin/knulli-settings-get updates.url)"
+        # customizable upgrade url website
+        if test -n "${settingsupdateurl}"; then
+            updateurl="${settingsupdateurl}"
+        fi
+    else
+        echo "Using default URL: $updateurl (knulli-settings-get not available)" >&2
+    fi
+fi
+
+# Create the update directory if it doesn't exist
+if [ ! -d "$update_dir" ]; then
+        mkdir -p "$update_dir"
+fi
+
+# Function to read firmware metadata from firmware.sig file
+get_firmware_info() {
+    local sig_file="$firmware_sig"
+
+    # Check if firmware.sig file exists
+    if [ ! -f "$sig_file" ]; then
+        echo "ERROR: firmware.sig file not found at $sig_file" >&2
+        return 1
+    fi
+    
+    # Extract the rootfs.squashfs MD5 hash
+    local md5_hash=$(grep "rootfs.squashfs_md5=" "$sig_file" | cut -d'=' -f2)
+    
+    if [ -z "$md5_hash" ]; then
+        echo "ERROR: Could not find rootfs MD5 in firmware.sig" >&2
+        return 1
+    fi
+    
+    # Extract version from metadata section
+    local version=$(grep -A 10 '\[metadata\]' "$sig_file" | grep 'version=' | cut -d'=' -f2 | tr -d '"')
+    
+    if [ -z "$version" ]; then
+        echo "ERROR: Could not find version in firmware.sig" >&2
+        return 1
+    fi
+    
+    # Return both values separated by a delimiter
+    echo "$md5_hash|$version"
+}
+
+# Function to extract partition MD5s from firmware.sig
+get_partition_info() {
+    local sig_file="$firmware_sig"
+    local partitions_json=""
+    
+    if [ ! -f "$sig_file" ]; then
+        echo "{}"
+        return 0
+    fi
+    
+    # Extract partition MD5s from [partitions] section
+    local in_partitions=false
+    local partition_entries=""
+    
+    while IFS= read -r line; do
+        # Remove leading/trailing whitespace
+        line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        
+        # Check for section headers
+        if [[ "$line" == "[partitions]" ]]; then
+            in_partitions=true
+            continue
+        elif [[ "$line" =~ ^\[.*\]$ ]]; then
+            in_partitions=false
+            continue
+        fi
+        
+        # If we're in partitions section and line contains =
+        if [ "$in_partitions" = true ] && [[ "$line" =~ = ]]; then
+            key=$(echo "$line" | cut -d'=' -f1)
+            value=$(echo "$line" | cut -d'=' -f2)
+            
+            # Add to partition entries (JSON format)
+            if [ -n "$partition_entries" ]; then
+                partition_entries="$partition_entries,"
+            fi
+            partition_entries="$partition_entries\"$key\":\"$value\""
+        fi
+    done < "$sig_file"
+    
+    # Return JSON object
+    echo "{$partition_entries}"
+}
+
+# Get current system information
+board_name=$(get_board_name)
+if [ -z "$board_name" ] || [ "$board_name" = "unknown" ]; then
+    echo "ERROR: Could not determine board name" >&2
+    exit 1
+fi
+
+firmware_info=$(get_firmware_info)
+if [ -z "$firmware_info" ]; then
+    echo "ERROR: Failed to get firmware information" >&2
+    exit 1
+fi
+
+# Parse the MD5 and version
+current_rootfs_md5=$(echo "$firmware_info" | cut -d'|' -f1)
+current_version=$(echo "$firmware_info" | cut -d'|' -f2)
+
+if [ -z "$current_rootfs_md5" ] || [ -z "$current_version" ]; then
+    echo "ERROR: Failed to parse firmware information" >&2
+    exit 1
+fi
+
+# Get partition information
+partition_info=$(get_partition_info)
+
+# Load access key if available
+access_key=$(load_access_key)
+
+echo "Board: $board_name" >> "$log"
+echo "Current rootfs MD5: $current_rootfs_md5" >> "$log"
+echo "Current version: $current_version" >> "$log"
+echo "Channel: $upgrade_channel" >> "$log"
+
+# Create JSON payload for API request
+json_payload="{\"board\":\"$board_name\",\"version\":\"$current_version\",\"channel\":\"$upgrade_channel\",\"rootfs_md5\":\"$current_rootfs_md5\",\"partitions\":$partition_info"
+
+# Add access key for protected channels
+if [ "$upgrade_channel" = "dev" ] || [ "$upgrade_channel" = "alpha" ]; then
+    if [ -n "$access_key" ]; then
+        json_payload="$json_payload,\"access_key\":\"$access_key\""
+        echo "Using access key for $upgrade_channel channel" >> "$log"
+    else
+        echo "WARNING: No access key found for $upgrade_channel channel" >> "$log"
+    fi
+fi
+
+json_payload="$json_payload}"
+
+# Create update response file path
+response_file="$update_dir/update_response.json"
+
+# Ensure parent directory exists
+mkdir -p "$(dirname "$response_file")" 2>/dev/null || true
+
+# Call the API to check for updates
+if ! curl -s -X POST -H "Content-Type: application/json" \
+    -d "$json_payload" \
+    "$updateurl/ota/check" > "$response_file"; then
+        echo "ERROR: Failed to download updates list"
+        exit 2
+fi
+
+# Verify we got valid JSON
+if ! jq empty "$response_file" 2>/dev/null; then
+    echo "ERROR: Invalid JSON response"
+    cat "$response_file"
+    exit 2
+fi
+
+# Check if updates are available
+updates_available=$(parse_json_response "$response_file" "updates_available")
+if [ "$updates_available" != "true" ]; then
+    # Try to get reason
+    reason=$(parse_json_response "$response_file" "reason")
+    message=$(parse_json_response "$response_file" "message")
+    
+    if [ -n "$message" ]; then
+        echo "No updates available: $message" | tee -a "$log"
+    elif [ -n "$reason" ]; then
+        echo "No updates available: $reason" | tee -a "$log"
+    else
+        echo "No updates available" | tee -a "$log"
+    fi
+    
+    exit 2
+fi
+
+# Check for rootfs update
+rootfs_update_available=$(jq -r '.rootfs_update != null' "$response_file")
+if [ "$rootfs_update_available" = "true" ]; then
+    # Get rootfs update information
+    update_version=$(parse_json_response "$response_file" "rootfs_update.version")
+    update_md5=$(parse_json_response "$response_file" "rootfs_update.target_md5")
+    update_build_date=$(parse_json_response "$response_file" "rootfs_update.build_date")
+    update_url=$(parse_json_response "$response_file" "rootfs_update.full_url")
+    
+    # Check if patch is available
+    patch_available=$(parse_json_response "$response_file" "rootfs_update.patch_available")
+    if [ "$patch_available" = "true" ]; then
+        patch_url=$(parse_json_response "$response_file" "rootfs_update.patch_url")
+    fi
+    
+    # Log found rootfs update
+    echo "Found rootfs update: $update_version (Build date: $update_build_date)" >> "$log"
+    echo "  Current version: $current_version" >> "$log"
+    echo "  Target MD5: $update_md5" >> "$log"
+    if [ "$patch_available" = "true" ]; then
+        echo "  Patch available: Yes (URL: $patch_url)" >> "$log"
+    else
+        echo "  Patch available: No" >> "$log"
+    fi
+    
+    # Output the update version for scripts that expect it
+    echo "$update_version"
+fi
+
+# Check for partition updates
+partition_updates_count=$(jq -r '.partition_updates | length' "$response_file")
+if [ "$partition_updates_count" -gt 0 ]; then
+    echo "Found $partition_updates_count partition update(s)" >> "$log"
+    
+    # Log partition updates
+    for i in $(seq 0 $((partition_updates_count - 1))); do
+        partition=$(jq -r ".partition_updates[$i].partition" "$response_file")
+        current_md5=$(jq -r ".partition_updates[$i].current_md5" "$response_file")
+        target_md5=$(jq -r ".partition_updates[$i].target_md5" "$response_file")
+        partition_url=$(jq -r ".partition_updates[$i].url" "$response_file")
+        
+        echo "  Partition: $partition" >> "$log"
+        echo "    Current MD5: $current_md5" >> "$log"
+        echo "    Target MD5: $target_md5" >> "$log"
+        echo "    URL: $partition_url" >> "$log"
+    done
+fi
+
+# Return success status for updates available
+exit 0

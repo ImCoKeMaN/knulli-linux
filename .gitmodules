@@ -1,0 +1,6 @@
+[submodule "batocera"]
+	path = batocera
+	url = https://github.com/batocera-linux/batocera.linux.git
+[submodule "buildroot"]
+	path = buildroot
+	url = https://github.com/knulli-cfw/buildroot.git

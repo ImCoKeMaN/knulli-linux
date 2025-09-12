@@ -1,0 +1,80 @@
+diff -urN a/gfx/common/gl2_common.h b/gfx/common/gl2_common.h
+--- a/gfx/common/gl2_common.h	2025-01-05 02:50:47.000000000 +0000
++++ b/gfx/common/gl2_common.h	2025-02-08 04:43:20.074210794 +0000
+@@ -247,7 +247,7 @@
+ 
+    struct scaler_ctx pbo_readback_scaler;
+    struct video_viewport vp;                          /* int alignment */
+-   math_matrix_4x4 mvp, mvp_no_rot;
++   math_matrix_4x4 mvp, mvp_no_rot, mvp_screen_rot;
+    struct video_coords coords;                        /* ptr alignment */
+    struct scaler_ctx scaler;
+    video_info_t video_info;
+diff -urN a/gfx/drivers/gl2.c b/gfx/drivers/gl2.c
+--- a/gfx/drivers/gl2.c	2025-01-05 02:50:47.000000000 +0000
++++ b/gfx/drivers/gl2.c	2025-02-08 04:38:15.673781496 +0000
+@@ -514,7 +514,7 @@
+    if (!draw->coords->lut_tex_coord)
+       draw->coords->lut_tex_coord = &gl2_tex_coords[0];
+ 
+-   glViewport(draw->x, draw->y, draw->width, draw->height);
++   glViewport(video_height - draw->y - draw->height, draw->x, draw->height, draw->width);
+    glBindTexture(GL_TEXTURE_2D, (GLuint)draw->texture);
+ 
+    gl->shader->set_coords(gl->shader_data, draw->coords);
+@@ -616,7 +616,7 @@
+       int x, int y,
+       unsigned width, unsigned height)
+ {
+-   glScissor(x, video_height - y - height, width, height);
++   glScissor(video_height - y - height, x, height, width);
+    glEnable(GL_SCISSOR_TEST);
+ #ifdef MALI_BUG
+    /* TODO/FIXME: If video width/height changes between
+@@ -1250,6 +1250,11 @@
+    matrix_4x4_ortho(gl->mvp_no_rot, ortho->left, ortho->right,
+          ortho->bottom, ortho->top, ortho->znear, ortho->zfar);
+ 
++   /* Calculate rotation. */
++   matrix_4x4_rotate_z(rot, M_PI * 90 / 180.0f);
++   matrix_4x4_multiply(gl->mvp_screen_rot, rot, gl->mvp_no_rot);
++   gl->mvp_no_rot = gl->mvp_screen_rot;
++
+    if (!allow_rotate)
+    {
+       gl->mvp = gl->mvp_no_rot;
+@@ -1303,7 +1308,7 @@
+       gl->vp.height = vp_height;
+    }
+ 
+-   glViewport(gl->vp.x, gl->vp.y, gl->vp.width, gl->vp.height);
++   glViewport(gl->vp.y, gl->vp.x, gl->vp.height, gl->vp.width);
+    gl2_set_projection(gl, &default_ortho, allow_rotate);
+ 
+    /* Set last backbuffer viewport. */
+@@ -3328,9 +3333,10 @@
+ 
+    if (gl->flags & GL2_FLAG_MENU_TEXTURE_FULLSCREEN)
+    {
+-      glViewport(0, 0, width, height);
++      glViewport(0, 0, height, width);
+       glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+       glViewport(gl->vp.x, gl->vp.y, gl->vp.width, gl->vp.height);
++      glViewport(gl->vp.y, gl->vp.x, gl->vp.height, gl->vp.width);
+    }
+    else
+       glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+diff -urN a/gfx/drivers_context/mali_fbdev_ctx.c b/gfx/drivers_context/mali_fbdev_ctx.c
+--- a/gfx/drivers_context/mali_fbdev_ctx.c	2025-01-05 02:50:47.000000000 +0000
++++ b/gfx/drivers_context/mali_fbdev_ctx.c	2025-02-08 04:47:23.794329338 +0000
+@@ -91,8 +91,8 @@
+    close(fd);
+    fd = -1;
+ 
+-   mali->width                = vinfo.xres;
+-   mali->height               = vinfo.yres;
++   mali->width                = vinfo.yres;
++   mali->height               = vinfo.xres;
+ 
+    mali->native_window.width  = vinfo.xres;
+    mali->native_window.height = vinfo.yres;

@@ -1,0 +1,1 @@
+knulli 1000 knulli 1000 x /userdata/system /bin/bash input,audio,video

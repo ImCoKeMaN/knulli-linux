@@ -1,0 +1,87 @@
+name: Report a bug
+description: Report a bug and help us improve Knulli.
+body:
+  - type: markdown
+    attributes:
+      value: "## Welcome!"
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report. We appreciate you taking the time & effort.
+        Note: Bug reports are NOT for feature requests or for help with coding or compiling.
+        If you need real-time help or need to discuss knulli, join us on Discord - https://discord.gg/HXPS3DAeeB
+  - type: input
+    id: knulli_build
+    attributes:
+      label: Knulli build version
+      description: |
+        Knulli version used.
+        GUI: SYSTEM SETTINGS -> INFORMATION
+        Terminal: cat /usr/share/batocera/knulli.version
+        Or details can be obtained from batocera-info in your support file. (See logs below)
+      placeholder: 39-dev-2da5edeea0 2024/02/03 03:28
+    validations:
+      required: true
+  - type: input
+    id: arch
+    attributes:
+      label: Your architecture
+      description: |
+        Architecture and board type on which Knulli is running.
+        Outline if the device is a handheld or a laptop or a Single Board Computer (SBC).
+      placeholder: RG35XX, RG35XX Plus, RG35XX H, TrimUI Smart Pro, RGB30, etc.
+    validations:
+      required: true
+  - type: textarea
+    id: issue_description
+    attributes:
+      label: Issue description
+      description: A brief explanation of the issue. Keep this concise. We don't need your life story.
+      placeholder: I have a black screen after the splash screen when booting Knulli.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce_issue
+    attributes:
+      label: Detailed reproduction steps
+      description: |
+        1. Note the detailed steps in the order they are required to be done in order to successfully reproduce this issue.
+        2. Include any "but only when" conditions you have discovered.
+        3. Describe what happens when the issue occurs, anything to look out for, anything to check the issue has indeed occurred.
+      placeholder: |
+        I installed Knulli on a SDCARD using Etcher.
+        I plugged the SDCARD into my RG35XX TF port 1.
+        I can see the splash screen, a progress bar, but stays there at the end
+        of the progress bar and nothing else happens 
+        I tried resetting the board, but still it's not working.
+    validations:
+      required: true
+  - type: textarea
+    id: tried_fixes
+    attributes:
+      label: Details of any attempts to fix this yourself
+      description: |
+        1. Details of what you have tried to fix this yourself.
+        2. i.e. Connected HDMI while booting up
+        3. Tried these instructions from the wiki here...
+      placeholder: |
+        I spoke to someone on discord and they told me to change this file.
+  - type: textarea
+    id: any_mods
+    attributes:
+      label: Details of any modifications you have made to Knulli.
+      description: If you have modified Knulli in any way. Please let us know.
+      placeholder: I have installed a third-party package from ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs_and_data
+    attributes:
+      label: Logs and data
+      description: |
+        Provide all the relevant logs and information relevant to the issue.
+        Include any information about the stable versions of Knulli the issue is present/not present on, whether the issue is present on a fresh install or not.
+        Many useful logs are collected in a [Batocera support file](https://wiki.batocera.org/troubleshooting#create_a_batocera_support_file) which should be attached in your report.
+      placeholder: Attach logs and don't paste the content.
+    validations:
+      required: false

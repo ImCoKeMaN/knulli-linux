@@ -1,0 +1,53 @@
+default:
+  emulator:
+  core:
+  options:
+    videomode:      default
+    ratio:          auto
+    video_threaded: true
+    smooth:         false
+    rewind:         false
+    bezel:          default
+    forceNoBezel:   false
+    shaderset:      none
+
+amiga500:
+  emulator: libretro
+  core:     puae2021
+amiga1200:
+  emulator: libretro
+  core:     puae2021
+amigacd32:
+  emulator: libretro
+  core:     puae2021
+mastersystem:
+  emulator: libretro
+  core:     picodrive
+megadrive:
+  emulator: libretro
+  core:     picodrive
+nds:
+  emulator: drastic
+  core:     drastic
+snes:
+  emulator: libretro
+  core:     snes9x
+c64:
+  emulator: vice
+  core:     x64
+c128:
+  emulator: vice
+  core:     x128
+c20:
+  emulator: vice
+  core:     xvic
+pet:
+  emulator: vice
+  core:     xpet
+cplus4:
+  emulator: vice
+  core:     xplus4
+fbneo:
+  options:
+    frameskip: auto
+
