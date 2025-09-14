@@ -312,7 +312,7 @@ class EsSystemConf:
             if m:
                continue
             # skip floats (2.5)
-            m = re.search("^[0-9]+\.[0-9]+[+]?$", tr)
+            m = re.search(r"^[0-9]+\.[0-9]+[+]?$", tr)
             if m:
                continue
             # skip ratio (4:3)
@@ -332,7 +332,7 @@ class EsSystemConf:
             if m:
                 continue
             # skip resolutions (2x 640x480, 4x (640x480), x4 640x480, 3x 1080p (1920x1584), 2x 720p, 7x 2880p 5K
-            m = re.search("^[xX]?[0-9]*[xX]?[ ]*\(?[0-9]+[x]?[0-9]+[pK]?\)?[ ]*\(?[0-9]+[x]?[0-9]+[pK]?\)?$", tr)
+            m = re.search(r"^[xX]?[0-9]*[xX]?[ ]*\(?[0-9]+[x]?[0-9]+[pK]?\)?[ ]*\(?[0-9]+[x]?[0-9]+[pK]?\)?$", tr)
             if m:
                 continue
 

@@ -1,6 +1,6 @@
 ################################################################################
 #
-# batocera-configgen
+# knulli-configgen
 #
 ################################################################################
 
@@ -112,39 +112,39 @@ define KNULLI_CONFIGGEN_INSTALL_STAGING_CMDS
     @echo "Direct path: $(BR2_EXTERNAL_KNULLI_PATH)/package/system/knulli-configgen"
     @echo "System: $(KNULLI_CONFIGGEN_SYSTEM)"
     @echo "====================="
-    mkdir -p $(STAGING_DIR)/usr/share/batocera/configgen
+    mkdir -p $(STAGING_DIR)/usr/share/knulli/configgen
     cp $(BR2_EXTERNAL_KNULLI_PATH)/package/system/knulli-configgen/configs/configgen-defaults.yml \
-        $(STAGING_DIR)/usr/share/batocera/configgen/configgen-defaults.yml
+        $(STAGING_DIR)/usr/share/knulli/configgen/configgen-defaults.yml
     cp $(BR2_EXTERNAL_KNULLI_PATH)/package/system/knulli-configgen/configs/configgen-defaults-$(KNULLI_CONFIGGEN_SYSTEM).yml \
-        $(STAGING_DIR)/usr/share/batocera/configgen/configgen-defaults-arch.yml
+        $(STAGING_DIR)/usr/share/knulli/configgen/configgen-defaults-arch.yml
 endef
 
 define KNULLI_CONFIGGEN_CONFIGS
-    mkdir -p $(TARGET_DIR)/usr/share/batocera/configgen
+    mkdir -p $(TARGET_DIR)/usr/share/knulli/configgen
     cp -pr $(BR2_EXTERNAL_KNULLI_PATH)/package/system/knulli-configgen/data \
-        $(TARGET_DIR)/usr/share/batocera/configgen/
+        $(TARGET_DIR)/usr/share/knulli/configgen/
     cp $(BR2_EXTERNAL_KNULLI_PATH)/package/system/knulli-configgen/configs/configgen-defaults.yml \
-        $(TARGET_DIR)/usr/share/batocera/configgen/configgen-defaults.yml
+        $(TARGET_DIR)/usr/share/knulli/configgen/configgen-defaults.yml
     cp $(BR2_EXTERNAL_KNULLI_PATH)/package/system/knulli-configgen/configs/configgen-defaults-$(KNULLI_CONFIGGEN_SYSTEM).yml \
-        $(TARGET_DIR)/usr/share/batocera/configgen/configgen-defaults-arch.yml
+        $(TARGET_DIR)/usr/share/knulli/configgen/configgen-defaults-arch.yml
     cp $(BR2_EXTERNAL_KNULLI_PATH)/package/system/knulli-configgen/scripts/call_achievements_hooks.sh \
-        $(TARGET_DIR)/usr/share/batocera/configgen/
+        $(TARGET_DIR)/usr/share/knulli/configgen/
 endef
 
 define KNULLI_CONFIGGEN_ES_HOOKS
     install -D -m 0755 $(BR2_EXTERNAL_KNULLI_PATH)/package/system/knulli-configgen/scripts/powermode_launch_hooks.sh \
-        $(TARGET_DIR)/usr/share/batocera/configgen/scripts/powermode_launch_hooks.sh
+        $(TARGET_DIR)/usr/share/knulli/configgen/scripts/powermode_launch_hooks.sh
 
     install -D -m 0755 $(BR2_EXTERNAL_KNULLI_PATH)/package/system/knulli-configgen/scripts/adhoc_hooks.sh \
-        $(TARGET_DIR)/usr/share/batocera/configgen/scripts/adhoc_hooks.sh
+        $(TARGET_DIR)/usr/share/knulli/configgen/scripts/adhoc_hooks.sh
 endef
 
 define KNULLI_CONFIGGEN_X86_HOOKS
     install -D -m 0755 $(BR2_EXTERNAL_KNULLI_PATH)/package/system/knulli-configgen/scripts/tdp_hooks.sh \
-        $(TARGET_DIR)/usr/share/batocera/configgen/scripts/tdp_hooks.sh
+        $(TARGET_DIR)/usr/share/knulli/configgen/scripts/tdp_hooks.sh
 
     install -D -m 0755 $(BR2_EXTERNAL_KNULLI_PATH)/package/system/knulli-configgen/scripts/nvidia-workaround.sh \
-        $(TARGET_DIR)/usr/share/batocera/configgen/scripts/nvidia-workaround.sh
+        $(TARGET_DIR)/usr/share/knulli/configgen/scripts/nvidia-workaround.sh
 endef
 
 KNULLI_CONFIGGEN_POST_INSTALL_TARGET_HOOKS = KNULLI_CONFIGGEN_CONFIGS

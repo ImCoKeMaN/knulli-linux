@@ -529,7 +529,7 @@ config BR2_TARGET_KNULLI_IMAGES_DEFINITIONS
 	default "allwinner/h700/rg35xx-sp allwinner/h700/rg35xx-plus allwinner/h700/rg35xx-h allwinner/h700/rg40xx-h allwinner/h700/rg40xx-v allwinner/h700/rg-cubexx allwinner/h700/rg28xx allwinner/h700/rg34xx allwinner/h700/rg34xx-sp allwinner/h700/rg35xx-pro" \
 													if BR2_PACKAGE_KNULLI_TARGET_H700
 #	default "allwinner/a133/trimui-smart-pro allwinner/a133/trimui-brick allwinner/a133/magicx-zero-28 allwinner/a133/powkiddy-v90s allwinner/a133/powkiddy-v20" \
-	default "allwinner/a133/trimui-brick" \
+	default "allwinner/a133/magicx-zero-28" \
 													if BR2_PACKAGE_KNULLI_TARGET_A133
 	default "allwinner/r16/miyoo-a30"								if BR2_PACKAGE_KNULLI_TARGET_SUNXI_R16
 	default "actions/atm7039/rg35xx"								if BR2_PACKAGE_KNULLI_TARGET_ATM7039
