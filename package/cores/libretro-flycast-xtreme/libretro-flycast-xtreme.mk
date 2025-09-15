@@ -51,9 +51,10 @@ define LIBRETRO_FLYCAST_XTREME_BUILD_CMDS
 endef
 
 define LIBRETRO_FLYCAST_XTREME_INSTALL_TARGET_CMDS
-	$(INSTALL) -D $(@D)/flycast_libretro.so \
-		$(TARGET_DIR)/usr/lib/libretro/flycast-xtreme_libretro.so
+    $(INSTALL) -D $(@D)/flycast_libretro.so \
+	$(TARGET_DIR)/usr/lib/libretro/flycast-xtreme_libretro.so
 
+    mkdir -p $(TARGET_DIR)/usr/share/libretro/info
     cp "$(BR2_EXTERNAL_KNULLI_PATH)/package/cores/libretro-flycast-xtreme/flycast-xtreme_libretro.info" \
         "$(TARGET_DIR)/usr/share/libretro/info/"
 endef
