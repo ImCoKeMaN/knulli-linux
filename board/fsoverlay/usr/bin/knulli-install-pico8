@@ -98,6 +98,6 @@ echo "Pre-select Pico-8 as emulator for Pico-8 games."
 sleep 2
 
 echo "Installation done. Restarting ES."
-nohup batocera-es-swissknife --restart >/dev/null 2>&1 &
+nohup knulli-es-swissknife --restart >/dev/null 2>&1 &
 
 exit 0

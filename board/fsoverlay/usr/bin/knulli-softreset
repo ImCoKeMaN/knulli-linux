@@ -31,9 +31,9 @@ if [ "$count" -eq 1 ] && [ "$(awk -v e="$elapsed" -v w="$WINDOW" 'BEGIN { print 
     : > "$COUNTER_FILE"
     echo "$now" > "$DEBOUNCE_FILE"
     if check_ingame; then
-        batocera-es-swissknife --emukill
+        knulli-es-swissknife --emukill
     else
-        batocera-es-swissknife --restart
+        knulli-es-swissknife --restart
     fi
     exit 0
 fi

@@ -333,7 +333,7 @@ config BR2_PACKAGE_KNULLI_SYSTEM
 #	select BR2_PACKAGE_DMD_SIMULATOR
 #	select BR2_PACKAGE_DMD_SIMULATOR_PLAYER
 #	select BR2_PACKAGE_LIBDMDUTIL 		if !BR2_PACKAGE_KNULLI_TARGET_SUNXI_R16 && !BR2_PACKAGE_KNULLI_TARGET_ATM7039 # dependancy of vpinball, but vpinball is not everywhere
-	#select BR2_PACKAGE_BATOCERA_BACKGLASS if BR2_PACKAGE_XSERVER_XORG_SERVER || BR2_PACKAGE_BATOCERA_WAYLAND
+	select BR2_PACKAGE_BATOCERA_BACKGLASS if BR2_PACKAGE_XSERVER_XORG_SERVER || BR2_PACKAGE_BATOCERA_WAYLAND
 
 	# swap
 	select BR2_PACKAGE_SWAPIT		if BR2_PACKAGE_KNULLI_TARGET_RK3128	|| \
@@ -510,49 +510,23 @@ config BR2_TARGET_KNULLI_IMAGES_DEFINITIONS
 	bool "target images definitions"
 	config BR2_TARGET_KNULLI_IMAGES
 	string "target images"
-	default "amlogic/s905gen2/radxa-zero amlogic/s905gen2/khadas-vim2"				if BR2_PACKAGE_KNULLI_TARGET_S905GEN2
-	default "amlogic/s905gen3/odroidc4 amlogic/s905gen3/khadas-vim3l amlogic/s905gen3/tvbox-gen3"	if BR2_PACKAGE_KNULLI_TARGET_S905GEN3
-	default "amlogic/s9gen4/khadas-vim1s"								if BR2_PACKAGE_KNULLI_TARGET_S9GEN4
-	default "amlogic/a3gen2/khadas-vim4"								if BR2_PACKAGE_KNULLI_TARGET_A3GEN2
-	default "broadcom/bcm2835"									if BR2_PACKAGE_KNULLI_TARGET_BCM2835
-	default "broadcom/bcm2836"									if BR2_PACKAGE_KNULLI_TARGET_BCM2836
-	default "broadcom/bcm2837"									if BR2_PACKAGE_KNULLI_TARGET_BCM2837
-	default "broadcom/bcm2711"									if BR2_PACKAGE_KNULLI_TARGET_BCM2711
-	default "broadcom/bcm2712"									if BR2_PACKAGE_KNULLI_TARGET_BCM2712
-	default "rockchip/rk3326/pixel2 rockchip/rk3326/r36s rockchip/rk3326/g350"			if BR2_PACKAGE_KNULLI_TARGET_RK3326
-	default "rockchip/rk3328/rock64 rockchip/rk3328/roc-cc"						if BR2_PACKAGE_KNULLI_TARGET_RK3328
-	default "rockchip/rk3288/tinkerboard rockchip/rk3288/miqi"					if BR2_PACKAGE_KNULLI_TARGET_RK3288
+	#default "rockchip/rk3326/pixel2 rockchip/rk3326/r36s rockchip/rk3326/g350"			if BR2_PACKAGE_KNULLI_TARGET_RK3326
+	default "rockchip/rk3326/magicx-mini-m rockchip/rk3326/g350"					if BR2_PACKAGE_KNULLI_TARGET_RK3326
 	default "rockchip/rk3128/ps5000 rockchip/rk3128/ps7000 rockchip/rk3128/powkiddy_a13"		if BR2_PACKAGE_KNULLI_TARGET_RK3128
-	default "allwinner/h5/tritium-h5 allwinner/h5/orangepi-pc2"					if BR2_PACKAGE_KNULLI_TARGET_H5
-	default "allwinner/h6/orangepi-3-lts allwinner/h6/orangepi-3 allwinner/h6/orangepi-one-plus"	if BR2_PACKAGE_KNULLI_TARGET_H6
 	default "allwinner/h616/orangepi-zero2 allwinner/h616/orangepi-zero3 allwinner/h616/x96-mate"	if BR2_PACKAGE_KNULLI_TARGET_H616
 	default "allwinner/h700/rg35xx-sp allwinner/h700/rg35xx-plus allwinner/h700/rg35xx-h allwinner/h700/rg40xx-h allwinner/h700/rg40xx-v allwinner/h700/rg-cubexx allwinner/h700/rg28xx allwinner/h700/rg34xx allwinner/h700/rg34xx-sp allwinner/h700/rg35xx-pro" \
 													if BR2_PACKAGE_KNULLI_TARGET_H700
 #	default "allwinner/a133/trimui-smart-pro allwinner/a133/trimui-brick allwinner/a133/magicx-zero-28 allwinner/a133/powkiddy-v90s allwinner/a133/powkiddy-v20" \
-	default "allwinner/a133/magicx-zero-28" \
+	default "allwinner/a133/magicx-zero-28 allwinner/a133/trimui-brick" \
 													if BR2_PACKAGE_KNULLI_TARGET_A133
 	default "allwinner/r16/miyoo-a30"								if BR2_PACKAGE_KNULLI_TARGET_SUNXI_R16
 	default "actions/atm7039/rg35xx"								if BR2_PACKAGE_KNULLI_TARGET_ATM7039
-	default "amlogic/s812"										if BR2_PACKAGE_KNULLI_TARGET_S812
-	default "samsung/exynos5422/odroidxu4"								if BR2_PACKAGE_KNULLI_TARGET_XU4
-	default "x86"											if BR2_PACKAGE_KNULLI_TARGET_X86
-	default "x86_64"										if BR2_PACKAGE_KNULLI_TARGET_X86_64
-	default "x86-64-v3"										    if BR2_PACKAGE_KNULLI_TARGET_ZEN3
 	default "qualcomm/sd845/odin"									if BR2_PACKAGE_KNULLI_TARGET_ODIN
         default "qualcomm/sm8250/rp5 qualcomm/sm8250/rpmini qualcomm/sm8250/rpflip2"                    if BR2_PACKAGE_KNULLI_TARGET_SM8250
-	default "riscv/visionfive2"									if BR2_PACKAGE_KNULLI_TARGET_RISCV
-	default "amlogic/s922x/ogu amlogic/s922x/gtkingpro amlogic/s922x/gtking amlogic/s922x/odroidn2l amlogic/s922x/vim3 amlogic/s922x/odroidn2 amlogic/s922x/odroidn2plus amlogic/s922x/zero2" \
-													if BR2_PACKAGE_KNULLI_TARGET_S922X
-	default "amlogic/s905/odroidc2 amlogic/s905/tvbox amlogic/s905/lepotato amlogic/s905/vim amlogic/s905/p201 amlogic/s905/lepotatov2 amlogic/s905/minix-neo-u1" \
-													if BR2_PACKAGE_KNULLI_TARGET_S905
 	default "rockchip/rk3399/orangepi-800 rockchip/rk3399/rg552 rockchip/rk3399/rockpro64 rockchip/rk3399/rock960 rockchip/rk3399/orangepi4-lts rockchip/rk3399/rock-pi-4 rockchip/rk3399/nanopi-m4v2 rockchip/rk3399/hugsun-x99" \
 													if BR2_PACKAGE_KNULLI_TARGET_RK3399
 	default "rockchip/rk3566/miyoo-flip rockchip/rk3566/powkiddy-rgb30 rockchip/rk3566/rg-arc-s rockchip/rk3566/powkiddy-x55" \
 										 			if BR2_PACKAGE_KNULLI_TARGET_RK3568
-	default "rockchip/rk3588/orangepi-5-pro rockchip/rk3588/bananapi-m7 rockchip/rk3588/gameforce-ace rockchip/rk3588/rock-5c rockchip/rk3588/rock-5b rockchip/rk3588/rock-5a rockchip/rk3588/quartzpro64 rockchip/rk3588/orangepi-5 rockchip/rk3588/orangepi-5b rockchip/rk3588/orangepi-5-plus rockchip/rk3588/indiedroid-nova rockchip/rk3588/mekotronics-r58 rockchip/rk3588/khadas-edge-2 rockchip/rk3588/firefly-station-m3" \
-													if BR2_PACKAGE_KNULLI_TARGET_RK3588
-	default "allwinner/h3/orangepi-pc allwinner/h3/orangepi-one allwinner/h3/orangepi-plus2e allwinner/h3/bananapi-m2-zero allwinner/h3/cha" \
-													if BR2_PACKAGE_KNULLI_TARGET_H3
 
 	choice
 	prompt "knulli.linux target"
@@ -1145,9 +1119,9 @@ config BR2_PACKAGE_BATOCERA_PORTS_SYSTEMS
 	select BR2_PACKAGE_OPENJAZZ		# ALL
 
 	# Jazz Jackrabbit 2
-	select BR2_PACKAGE_JAZZ2_NATIVE    if !BR2_PACKAGE_KNULLI_TARGET_RISCV && !BR2_PACKAGE_KNULLI_TARGET_H700 && \
-					      !BR2_PACKAGE_KNULLI_TARGET_A133 && !BR2_PACKAGE_KNULLI_TARGET_SUNXI_R16 && \
-					      !BR2_PACKAGE_KNULLI_TARGET_RK3128 && !BR2_PACKAGE_KNULLI_TARGET_ATM7039
+#	select BR2_PACKAGE_JAZZ2_NATIVE    if !BR2_PACKAGE_KNULLI_TARGET_RISCV && !BR2_PACKAGE_KNULLI_TARGET_H700 && \
+#					      !BR2_PACKAGE_KNULLI_TARGET_A133 && !BR2_PACKAGE_KNULLI_TARGET_SUNXI_R16 && \
+#					      !BR2_PACKAGE_KNULLI_TARGET_RK3128 && !BR2_PACKAGE_KNULLI_TARGET_ATM7039
 
 	help
 	  Ports

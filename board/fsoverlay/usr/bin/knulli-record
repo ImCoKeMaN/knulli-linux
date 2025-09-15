@@ -1,10 +1,10 @@
 #!/bin/sh
 
 # knulli-record dopaz 20241117
-# modified version of batocera-record, modified by stripping most of it out
+# modified version of knulli-record, modified by stripping most of it out
 
 # resolution needed for ffmpeg
-RESOLUTION=$(batocera-resolution currentResolution)
+RESOLUTION=$(knulli-resolution currentResolution)
 
 # generate output filename
 OUTPUT="/userdata/recordings/knulli-record_${RESOLUTION}_$(date +%Y%m%d_%Hh%Mm%Ss).mkv"
@@ -70,7 +70,7 @@ check_hardware_encoding() {
     echo "Recording to file: ${OUTPUT}"
 }
 
-# in the full batocera-record script this IF block looks for hardware encoders that will never
+# in the full knulli-record script this IF block looks for hardware encoders that will never
 # exist in Knulli, ripped it all out and forced it to be software
 auto_detect_encoder() {
 	ENCODER="libx264"  # Fallback to software H.264 encoding

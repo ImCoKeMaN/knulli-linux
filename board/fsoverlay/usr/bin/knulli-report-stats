@@ -6,8 +6,8 @@
 
 MACHINEIDFILE=/userdata/system/knulli-machine-id
 USERID=$(cat ${MACHINEIDFILE})
-OS_VERSION=$(cat /usr/share/batocera/knulli.version)
-SOC_DEVICE=$(cat /usr/share/batocera/knulli.arch)
+OS_VERSION=$(cat /usr/share/knulli/knulli.version)
+SOC_DEVICE=$(cat /usr/share/knulli/knulli.arch)
 HW_DEVICE=$(cat /sys/firmware/devicetree/base/model 2>/dev/null | tr -d '\0' | sed -e s+"[^A-Za-z0-9]"+"_"+g)
 
 # Temporary workaround for A133/H700 devices without modified DTB

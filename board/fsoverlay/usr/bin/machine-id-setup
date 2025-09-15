@@ -15,7 +15,7 @@ umount ${MACHINEIDFILE} >/dev/null 2>&1
 mkdir -p $(dirname ${MACHINEIDFILE})
 STOREDMACHINEID="$(cat ${MACHINEIDFILE} 2>/dev/null)"
 
-HW_DEVICE=$(cat /usr/share/batocera/knulli.arch)
+HW_DEVICE=$(cat /usr/share/knulli/knulli.arch)
 
 # when possible, generate a consistent systemd-machine-id from unique bytes of hardware
 case "${HW_DEVICE}" in

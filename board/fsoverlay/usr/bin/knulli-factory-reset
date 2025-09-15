@@ -11,7 +11,7 @@ if [ $# -eq 0 ] || [ $1 != "-f" ]; then
 fi
 
 # Turn off the screen to avoid any weird behavior that might scare users
-batocera-brightness dispoff
+knulli-brightness dispoff
 amixer set Master mute
 
 # Kill EmulationStation to be sure it will not write any existing settings

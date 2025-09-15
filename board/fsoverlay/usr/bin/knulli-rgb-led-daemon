@@ -225,7 +225,7 @@ updateAppliedBrightness() {
   if [ $LED_BRIGHTNESS_ADAPTIVE -eq 1 ]; then
 
     # Determine current screen brightness:
-    SCREEN_BRIGHTNESS_PERCENT=$(batocera-brightness)
+    SCREEN_BRIGHTNESS_PERCENT=$(knulli-brightness)
 
     # Determine current HDMI state:
     HDMI_STATE="$(cat /sys/devices/platform/soc/6000000.hdmi/extcon/hdmi/state)"

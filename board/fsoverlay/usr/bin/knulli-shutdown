@@ -16,11 +16,11 @@ do_poweroff() {
     touch "$SHUTDOWN_FLAG" # So the system or any scripts can tell if the shutdown sequence has started
 
     # Lets hide what happens from the user during shutdown/reboot to make for a more seemless experience
-    batocera-brightness dispoff
+    knulli-brightness dispoff
     amixer set Master mute
 
     if check_ingame; then
-         batocera-es-swissknife --emukill
+         knulli-es-swissknife --emukill
     fi
 
     if [ "$POWEROFF" = "reboot" ]; then
