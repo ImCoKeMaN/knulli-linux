@@ -9,9 +9,9 @@ SHARP_SHIMMERLESS_SHADER_SITE = $(call github,Woohyun-Kang,Sharp-Shimmerless-Sha
 SHARP_SHIMMERLESS_SHADER_LICENSE = GPL
 
 define SHARP_SHIMMERLESS_SHADER_INSTALL_TARGET_CMDS
-  mkdir -p $(TARGET_DIR)/usr/share/batocera/shaders/sharp-shimmerless
-  cp -rf $(@D)/shaders_glsl         $(TARGET_DIR)/usr/share/batocera/shaders/sharp-shimmerless
-  cp -rf $(@D)/shaders_slang        $(TARGET_DIR)/usr/share/batocera/shaders/sharp-shimmerless
+  mkdir -p $(TARGET_DIR)/usr/share/knulli/shaders/sharp-shimmerless
+  cp -rf $(@D)/shaders_glsl         $(TARGET_DIR)/usr/share/knulli/shaders/sharp-shimmerless
+  cp -rf $(@D)/shaders_slang        $(TARGET_DIR)/usr/share/knulli/shaders/sharp-shimmerless
 endef
 
 $(eval $(generic-package))

@@ -34,7 +34,7 @@ endef
 define LIBRETRO_CROCODS_INSTALL_TARGET_CMDS
 	$(INSTALL) -D $(@D)/crocods_libretro.so \
 		$(TARGET_DIR)/usr/lib/libretro/crocods_libretro.so
-	cp -f $(BR2_EXTERNAL_KNULLI_PATH)/package/batocera/emulators/retroarch/libretro/libretro-crocods/amstradcpc.keys $(TARGET_DIR)/usr/share/evmapy/
+	cp -f $(BR2_EXTERNAL_KNULLI_PATH)/package/knulli/emulators/retroarch/libretro/libretro-crocods/amstradcpc.keys $(TARGET_DIR)/usr/share/evmapy/
 endef
 
 $(eval $(generic-package))

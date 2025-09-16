@@ -28,8 +28,12 @@ case "${ACTION}" in
     "currentMode"|"currentResolution")
         fbset | grep "geometry" | awk '{print $2"x"$3}'
 	;;
+    "currentOutput")
+        echo "INTERNAL"
+        exit 1
+     ;;
     *)
-	f_usage
+        f_usage
 	>&2 echo "error: invalid command ${ACTION}"
 	exit 1
 esac

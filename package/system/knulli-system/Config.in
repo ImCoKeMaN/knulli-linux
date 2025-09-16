@@ -510,14 +510,13 @@ config BR2_TARGET_KNULLI_IMAGES_DEFINITIONS
 	bool "target images definitions"
 	config BR2_TARGET_KNULLI_IMAGES
 	string "target images"
-	#default "rockchip/rk3326/pixel2 rockchip/rk3326/r36s rockchip/rk3326/g350"			if BR2_PACKAGE_KNULLI_TARGET_RK3326
-	default "rockchip/rk3326/magicx-mini-m rockchip/rk3326/g350"					if BR2_PACKAGE_KNULLI_TARGET_RK3326
+	default "rockchip/rk3326/pixel2 rockchip/rk3326/magicx-mini-m rockchip/rk3326/r36s rockchip/rk3326/g350" \
+													if BR2_PACKAGE_KNULLI_TARGET_RK3326
 	default "rockchip/rk3128/ps5000 rockchip/rk3128/ps7000 rockchip/rk3128/powkiddy_a13"		if BR2_PACKAGE_KNULLI_TARGET_RK3128
 	default "allwinner/h616/orangepi-zero2 allwinner/h616/orangepi-zero3 allwinner/h616/x96-mate"	if BR2_PACKAGE_KNULLI_TARGET_H616
 	default "allwinner/h700/rg35xx-sp allwinner/h700/rg35xx-plus allwinner/h700/rg35xx-h allwinner/h700/rg40xx-h allwinner/h700/rg40xx-v allwinner/h700/rg-cubexx allwinner/h700/rg28xx allwinner/h700/rg34xx allwinner/h700/rg34xx-sp allwinner/h700/rg35xx-pro" \
 													if BR2_PACKAGE_KNULLI_TARGET_H700
-#	default "allwinner/a133/trimui-smart-pro allwinner/a133/trimui-brick allwinner/a133/magicx-zero-28 allwinner/a133/powkiddy-v90s allwinner/a133/powkiddy-v20" \
-	default "allwinner/a133/magicx-zero-28 allwinner/a133/trimui-brick" \
+	default "allwinner/a133/trimui-smart-pro allwinner/a133/trimui-brick allwinner/a133/magicx-zero-28 allwinner/a133/powkiddy-v90s allwinner/a133/powkiddy-v20" \
 													if BR2_PACKAGE_KNULLI_TARGET_A133
 	default "allwinner/r16/miyoo-a30"								if BR2_PACKAGE_KNULLI_TARGET_SUNXI_R16
 	default "actions/atm7039/rg35xx"								if BR2_PACKAGE_KNULLI_TARGET_ATM7039

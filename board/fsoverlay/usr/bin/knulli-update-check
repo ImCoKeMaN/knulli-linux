@@ -51,7 +51,7 @@ parse_json_response() {
 if [ -n "$TEST_CHANNEL" ]; then
     upgrade_channel="$TEST_CHANNEL"
 else
-    # In production, use the batocera settings
+    # In production, use the knulli settings
     if command -v /usr/bin/knulli-settings-get &> /dev/null; then
         upgrade_channel="$(/usr/bin/knulli-settings-get updates.type)"
     else
@@ -71,7 +71,7 @@ fi
 if [ -n "$TEST_URL" ]; then
     updateurl="$TEST_URL"
 else
-    # In production, use the batocera settings
+    # In production, use the knulli settings
     if command -v /usr/bin/knulli-settings-get &> /dev/null; then
         settingsupdateurl="$(/usr/bin/knulli-settings-get updates.url)"
         # customizable upgrade url website

@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# Check if batocera-brightness command exists
-if ! command -v batocera-brightness >/dev/null; then
+# Check if knulli-brightness command exists
+if ! command -v knulli-brightness >/dev/null; then
     exit 0
 fi
 
@@ -21,15 +21,15 @@ case $1 in
             BRI=50
         fi
 
-        batocera-brightness "$BRI"
+        knulli-brightness "$BRI"
         ;;
     stop)
         # Get brightness values
-        # Determine current brightness from file or fallback to batocera-brightness
-        if [ -f "/var/run/batocera-brightness" ]; then
-            read -r CURRENT_BRI < /var/run/batocera-brightness
+        # Determine current brightness from file or fallback to knulli-brightness
+        if [ -f "/var/run/knulli-brightness" ]; then
+            read -r CURRENT_BRI < /var/run/knulli-brightness
         else
-            CURRENT_BRI=$(batocera-brightness)
+            CURRENT_BRI=$(knulli-brightness)
         fi
 
         SAVED_BRI=$(knulli-settings-get display.brightness)

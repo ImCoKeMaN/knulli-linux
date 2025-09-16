@@ -22,6 +22,8 @@ knulli-switch-screen-checker --init
 GAMELAUNCH=1
 while test -e "${REBOOT_FLAG}"
 do
+    EXTRA_OPTS=""
+    
     ### lang settings
     settings_lang="$(knulli-settings-get system.language)"
     [ -z "${settings_lang}" ] && settings_lang=en_US
@@ -303,7 +305,7 @@ do
     fi
 
     cd /userdata # es need a PWD
-    %KNULLI_EMULATIONSTATION_PREFIX% emulationstation ${GAMELAUNCHOPT} --exit-on-reboot-required %KNULLI_EMULATIONSTATION_ARGS% ${CUSTOMESOPTIONS}
+    %KNULLI_EMULATIONSTATION_PREFIX% emulationstation ${GAMELAUNCHOPT} --exit-on-reboot-required %KNULLI_EMULATIONSTATION_ARGS% ${CUSTOMESOPTIONS} ${EXTRA_OPTS}
 
     if which batocera-backglass
     then

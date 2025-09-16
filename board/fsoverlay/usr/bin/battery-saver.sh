@@ -24,7 +24,7 @@ trap 'cleanup' EXIT
 STATE="active"
 
 STATE_FLAG="/var/run/battery-saver/activity_state.flag"
-BRIGHTNESS="$(batocera-brightness)"
+BRIGHTNESS="$(knulli-brightness)"
 GOVERNOR=""
 SAVED_GOVERNOR=""
 
@@ -34,19 +34,19 @@ echo "1" > "$STATE_FLAG"
 cleanup() {
     if [[ "$STATE" == "inactive" ]]; then
         # Save pre-dimmed brightness if dispoff was called during shutdown
-        if [[ "$MODE" == "dim" ]] && [[ -f /var/run/batocera-brightness ]]; then
-            echo "$BRIGHTNESS" > "/var/run/batocera-brightness"
+        if [[ "$MODE" == "dim" ]] && [[ -f /var/run/knulli-brightness ]]; then
+            echo "$BRIGHTNESS" > "/var/run/knulli-brightness"
         fi
 
         # Restore if exit while inactive but not duriung shutdown process
         if [[ ! -f /var/run/shutdown.flag ]]; then
             if [[ "$MODE" == "dim" ]]; then
-                batocera-brightness "$BRIGHTNESS"
+                knulli-brightness "$BRIGHTNESS"
             elif [[ "$MODE" == "dispoff" ]]; then
-                batocera-brightness dispon
+                knulli-brightness dispon
             fi
 
-            batocera-audio setSystemVolume unmute
+            knulli-audio setSystemVolume unmute
             echo "1" > "$STATE_FLAG"
         fi
     fi
@@ -130,7 +130,7 @@ animate_brightness() {
     done
 
     for level in "${levels[@]}"; do
-        batocera-brightness "$level"
+        knulli-brightness "$level"
         sleep "$sleep_duration"
     done
 }
@@ -140,12 +140,12 @@ do_inactivity() {
     echo "0" > "$STATE_FLAG"
     case "$MODE" in
         dim)
-            BRIGHTNESS="$(batocera-brightness)"
+            BRIGHTNESS="$(knulli-brightness)"
             if [ "$BRIGHTNESS" -gt 1 ]; then
                 animate_brightness "$BRIGHTNESS" 1
             fi
 
-            batocera-audio setSystemVolume mute
+            knulli-audio setSystemVolume mute
 
             if [ "$AGGRESSIVE" == "1" ]; then
                 GOVERNOR="$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)"
@@ -162,8 +162,8 @@ do_inactivity() {
             fi
         ;;
         dispoff)
-            batocera-audio setSystemVolume mute
-            batocera-brightness dispoff
+            knulli-audio setSystemVolume mute
+            knulli-brightness dispoff
         ;;
         suspend)
             pm-is-supported --suspend && pm-suspend
@@ -202,16 +202,16 @@ do_activity() {
                 fi
             fi
 
-            batocera-audio setSystemVolume unmute
+            knulli-audio setSystemVolume unmute
 
-            local CUR_BRIGHTNESS="$(batocera-brightness)"
+            local CUR_BRIGHTNESS="$(knulli-brightness)"
             if [ "$CUR_BRIGHTNESS" != "$BRIGHTNESS" ]; then
                 animate_brightness "$CUR_BRIGHTNESS" "$BRIGHTNESS"
             fi
         ;;
         dispoff)
-            batocera-brightness dispon
-            batocera-audio setSystemVolume unmute
+            knulli-brightness dispon
+            knulli-audio setSystemVolume unmute
         ;;
     esac
 }

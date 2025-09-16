@@ -9,9 +9,9 @@ ES_BACKGROUND_MUSICS_LICENSE = See license.md, they are free to use with Batocer
 ES_BACKGROUND_MUSICS_SOURCE=
 
 define ES_BACKGROUND_MUSICS_INSTALL_TARGET_CMDS
-	mkdir -p $(TARGET_DIR)/usr/share/batocera/music
+	mkdir -p $(TARGET_DIR)/usr/share/knulli/music
 
-	cp -R $(BR2_EXTERNAL_KNULLI_PATH)/package/music/es-background-musics/music/* $(TARGET_DIR)/usr/share/batocera/music/
+	cp -R $(BR2_EXTERNAL_KNULLI_PATH)/package/music/es-background-musics/music/* $(TARGET_DIR)/usr/share/knulli/music/
 endef
 
 $(eval $(generic-package))

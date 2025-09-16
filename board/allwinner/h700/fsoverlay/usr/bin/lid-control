@@ -25,8 +25,8 @@ if [[ -z "$MODE" || ! "$MODE" =~ ^(suspend|shutdown|dispoff|none)$ ]]; then
 fi
 
 display_off() {
-    batocera-brightness dispoff
-    batocera-audio setSystemVolume mute
+    knulli-brightness dispoff
+    knulli-audio setSystemVolume mute
 }
 
 suspend_system() {
@@ -40,8 +40,8 @@ shutdown_system() {
 
 do_open() {
     if [ "$MODE" == "dispoff" ] || [ -f "$FLAG_FILE" ]; then
-        batocera-brightness dispon
-        batocera-audio setSystemVolume unmute
+        knulli-brightness dispon
+        knulli-audio setSystemVolume unmute
         [ -f "$FLAG_FILE" ] && rm -f "$FLAG_FILE"
     fi
 }
@@ -59,7 +59,7 @@ do_close() {
                 display_off
             fi
         else
-            batocera-brightness dispoff
+            knulli-brightness dispoff
             touch "$FLAG_FILE" # So we know if display is off for special case
         fi
     fi

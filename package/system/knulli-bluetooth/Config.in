@@ -1,5 +1,5 @@
 config BR2_PACKAGE_KNULLI_BLUETOOTH
-	bool "batocera-bluetooth"
+	bool "knulli-bluetooth"
    	select BR2_PACKAGE_BLUEZ5_UTILS
    	select BR2_PACKAGE_BLUEZ5_UTILS_CLIENT
    	select BR2_PACKAGE_BLUEZ5_UTILS_TEST

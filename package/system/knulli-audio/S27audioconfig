@@ -17,12 +17,12 @@ apply_audioconfig() {
     if test -n "${PROFILE}"
     then
 	# set card profile
-	if batocera-audio set-profile "${PROFILE}"
+	if knulli-audio set-profile "${PROFILE}"
 	then
 	    if test -n "${DEVICE}"
 	    then
 		# then set the default sink
-		if ! batocera-audio set "${DEVICE}"
+		if ! knulli-audio set "${DEVICE}"
 		then
 		    EXITCODE=1
 		fi
@@ -33,7 +33,7 @@ apply_audioconfig() {
     else
 	if test -n "${DEVICE}"
 	then
-	    if ! batocera-audio set "${DEVICE}"
+	    if ! knulli-audio set "${DEVICE}"
 	    then
 		EXITCODE=1
 	    fi
@@ -44,7 +44,7 @@ apply_audioconfig() {
     # but in case set ou set-profile fails, always set volume
     # because in case the audio card doesn't exist,
     # it is nice to have the volume applied on the default output
-    batocera-audio setSystemVolume "${VOLUME}"  || return 1
+    knulli-audio setSystemVolume "${VOLUME}"  || return 1
     return ${EXITCODE}
 }
 
@@ -91,7 +91,7 @@ start_audioconfig() {
 }
 
 stop_audioconfig() {
-    VOLUME=$(batocera-audio getSystemVolume)
+    VOLUME=$(knulli-audio getSystemVolume)
 	if [[ -e "/userdata/system/knulli.conf" ]]; then
 	    /usr/bin/knulli-settings-set audio.volume "${VOLUME}"
 	fi

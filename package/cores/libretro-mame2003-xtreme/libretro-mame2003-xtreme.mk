@@ -51,9 +51,9 @@ define LIBRETRO_MAME2003_XTREME_INSTALL_TARGET_CMDS
 	# Bios
     # Need to think of another way to use these files.
     # They take up a lot of space on tmpfs.
-	mkdir -p $(TARGET_DIR)/usr/share/batocera/datainit/bios/mame2003-xtreme/samples
+	mkdir -p $(TARGET_DIR)/usr/share/knulli/datainit/bios/mame2003-xtreme/samples
 	cp -r $(@D)/metadata/* \
-		$(TARGET_DIR)/usr/share/batocera/datainit/bios/mame2003-xtreme
+		$(TARGET_DIR)/usr/share/knulli/datainit/bios/mame2003-xtreme
 endef
 
 define LIBRETRO_MAME2003_XTREME_NAMCO_QUICK_FIX

@@ -8,7 +8,7 @@ BOARD=$(cat /boot/boot/knulli.board)
 case "$1" in
     start)
         # Restores old settings saved in userdata
-        batocera-bluetooth restore
+        knulli-bluetooth restore
         enabled="$(/usr/bin/knulli-settings-get controllers.bluetooth.enabled)"
         [ "$enabled" = "1" ] || exit 0
 
@@ -82,9 +82,9 @@ case "$1" in
 
         if [ -n "${btaddr}" ]
         then
-            start-stop-daemon -S -q -m -p /var/run/bluetooth-agent.pid --exec /usr/bin/batocera-bluetooth-agent -- --device "${btaddr}" &
+            start-stop-daemon -S -q -m -p /var/run/bluetooth-agent.pid --exec /usr/bin/knulli-bluetooth-agent -- --device "${btaddr}" &
         else
-            start-stop-daemon -S -q -m -p /var/run/bluetooth-agent.pid --exec /usr/bin/batocera-bluetooth-agent &
+            start-stop-daemon -S -q -m -p /var/run/bluetooth-agent.pid --exec /usr/bin/knulli-bluetooth-agent &
         fi
         # for OrangePi LTS devices we need to power on the controller & put in pairable mode
         if [ ${BOARD} = "orangepi4-lts" ] || [ ${BOARD} = "orangepi-3-lts" ] || [ ${BOARD} = "orangepi-zero2" ]
@@ -105,7 +105,7 @@ case "$1" in
         sleep 1
         echo 1 > /sys/class/rfkill/rfkill0/state
 
-        batocera-bluetooth save
+        knulli-bluetooth save
     ;;
 
     restart|reload)

@@ -41,7 +41,7 @@ case "${ACTION}" in
                     MODE="$BT_SINK"
                     LANG=C pactl set-default-sink "${MODE}" || exit 1
                 else
-                    ARCH=$(cat /usr/share/batocera/knulli.arch)
+                    ARCH=$(cat /usr/share/knulli/knulli.arch)
                     BOARD=$(cat /boot/boot/knulli.board)
 
                     case "${ARCH}" in
@@ -115,7 +115,7 @@ case "${ACTION}" in
     set-profile)
         MODE="$2"
         if [[ "${MODE}" != "auto" ]]; then
-            if batocera-audio list-profiles | grep -q "${MODE}"; then
+            if knulli-audio list-profiles | grep -q "${MODE}"; then
                 PROFILE_NAME=$(echo "${MODE}" | cut -d '@' -f 1)
                 CARD_NAME=$(echo "${MODE}" | cut -d '@' -f 2)
                 LANG=C pactl set-card-profile "${CARD_NAME}" "${PROFILE_NAME}" || exit 1

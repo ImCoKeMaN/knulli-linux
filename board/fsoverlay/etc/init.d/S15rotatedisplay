@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [ "$1" != "start" ]; then
+    exit 0
+fi
+
+# Check if display.rotate is already set
+current_rotate=$(knulli-settings-get display.rotate)
+
+# If display.rotate is not set, determine it based on display resolution
+if [ -z "$current_rotate" ]; then
+    # Get display resolution
+    resolution=$(fbset | grep geometry | awk '{print $2"x"$3}')
+    
+    if [ -n "$resolution" ]; then
+        # Extract width and height
+        width=$(echo "$resolution" | cut -d'x' -f1)
+        height=$(echo "$resolution" | cut -d'x' -f2)
+        
+        # Check if width < height (portrait mode)
+        if [ "$width" -lt "$height" ]; then
+            # Set rotation to 1 for portrait displays
+            knulli-settings-set display.rotate 1
+            echo "Display is portrait ($resolution), set display.rotate to 1"
+        else
+            echo "Display is landscape ($resolution), no rotation needed"
+        fi
+    else
+        echo "Could not determine display resolution"
+    fi
+else
+    echo "Display rotation already configured: $current_rotate"
+fi
