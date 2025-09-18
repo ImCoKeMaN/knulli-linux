@@ -82,7 +82,7 @@ class CorsixTHGenerator(Generator):
         else:
           source_config_file.write("play_intro = true\n")
 
-        # Now auto-set the language from batocera ES locale
+        # Now auto-set the language from knulli ES locale
         language_mapping = {
             'en_US': 'en',
             'en_GB': 'en',
@@ -107,7 +107,7 @@ class CorsixTHGenerator(Generator):
             'nb_NO': 'nb',
             'nn_NO': 'nb',
         }
-        # 1. Grab batocera system language
+        # 1. Grab knulli system language
         try:
             language = subprocess.check_output("knulli-settings-get system.language", shell=True, text=True).strip()
         except subprocess.CalledProcessError:

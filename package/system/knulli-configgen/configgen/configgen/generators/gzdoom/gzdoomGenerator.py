@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
 from ... import Command
-from ...batoceraPaths import BATOCERA_SHARE_DIR, CONFIGS, LOGS, mkdir_if_not_exists
+from ...batoceraPaths import KNULLI_SHARE_DIR, CONFIGS, LOGS, mkdir_if_not_exists
 from ..Generator import Generator
 
 if TYPE_CHECKING:
@@ -66,7 +66,7 @@ class GZDoomGenerator(Generator):
 
         # RPi4 workaround which has both ligl & libgles
         # For arm systems, we want to force OpenGL ES - 3
-        arch_path = BATOCERA_SHARE_DIR / "batocera.arch"
+        arch_path = KNULLI_SHARE_DIR / "batocera.arch"
         if gzdoom_api == "0":
             with arch_path.open("r") as file:
                 content = file.read().strip()

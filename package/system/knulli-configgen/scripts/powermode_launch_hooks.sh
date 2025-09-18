@@ -35,7 +35,7 @@ handle_game_stop() {
     fi
 
     # Apply global power mode or fall back to default
-    /usr/bin/batocera-power-mode "${POWER_MODE:-default}"
+    /usr/bin/knulli-power-mode "${POWER_MODE:-default}"
 }
 
 handle_game_start() {
@@ -67,7 +67,7 @@ handle_game_start() {
     fi
 
     # Apply power mode or fall back to default
-    /usr/bin/batocera-power-mode "${POWER_MODE:-default}"
+    /usr/bin/knulli-power-mode "${POWER_MODE:-default}"
 }
 
 # Check for events

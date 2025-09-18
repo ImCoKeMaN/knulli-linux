@@ -3,7 +3,7 @@
 log="/userdata/system/logs/display.log"
 
 DAEMON="splash-mpv"
-DEFAULT="/usr/share/batocera/splash/splash.mp4"
+DEFAULT="/usr/share/knulli/splash/splash.mp4"
 SPLASH_DIR=/userdata/splash
 
 FM_IMAGE=".*\.\(jpg\|jpeg\|png\)"
@@ -19,7 +19,7 @@ fi
 BOARD_MODEL="$(echo "$BOARD_MODEL" | sed -e s+"[^A-Za-z0-9]"+"_"+g)"
 BOARD_CHA="Capcom_Home_Arcade"
 if [ "${BOARD_MODEL}" = "${BOARD_CHA}" ]; then
-    DEFAULT="/usr/share/batocera/splash/Capcom.mp4"
+    DEFAULT="/usr/share/knulli/splash/Capcom.mp4"
 fi
 
 do_angels_conversion ()
@@ -108,7 +108,7 @@ do_videostart ()
     fi
 
     ## current drm output ##
-    effectiveDrmOutput=$(for GPU in /dev/dri/card*; do batocera-drminfo "${GPU}" "current" 2>/dev/null | grep -E '^0.0:' | sed -e s+"^0.0:\([^ ]*\) .*$"+"\1"+; done | head -1)
+    effectiveDrmOutput=$(for GPU in /dev/dri/card*; do knulli-drminfo "${GPU}" "current" 2>/dev/null | grep -E '^0.0:' | sed -e s+"^0.0:\([^ ]*\) .*$"+"\1"+; done | head -1)
     mpv_video=
     video_rotation=$(knulli-settings-get-master "display.rotate.${effectiveDrmOutput}")
     if test -z "${video_rotation}"
@@ -163,7 +163,7 @@ do_videostart ()
 
     # set the sound again due to drm init causing some cards to default to 40% volume
     VOLUME=$(/usr/bin/knulli-settings-get audio.volume)
-    batocera-audio setSystemVolume "${VOLUME}"
+    knulli-audio setSystemVolume "${VOLUME}"
 
     if [ -n "$drm_connector" ] && [ -n "$card_path" ]; then
         start-stop-daemon -S -b -q -m -p /var/run/user-splash.pid --exec /usr/bin/mpv -- --really-quiet --no-config %PLAYER_OPTIONS% --drm-mode=$drm_mode --drm-connector=$drm_connector --drm-device=$card_path --log-file=/userdata/system/logs/mpv.log $mpv_audio $mpv_video "$video"

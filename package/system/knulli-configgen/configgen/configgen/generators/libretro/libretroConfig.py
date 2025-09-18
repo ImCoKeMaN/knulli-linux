@@ -141,15 +141,15 @@ def createLibretroConfig(generator: Generator, system: Emulator, controllers: Co
     # Set Vulkan
     if system.isOptSet("gfxbackend") and system.config["gfxbackend"] == "vulkan":
         try:
-            have_vulkan = subprocess.check_output(["/usr/bin/batocera-vulkan", "hasVulkan"], text=True).strip()
+            have_vulkan = subprocess.check_output(["/usr/bin/knulli-vulkan", "hasVulkan"], text=True).strip()
             if have_vulkan == "true":
                 eslog.debug("Vulkan driver is available on the system.")
                 try:
-                    have_discrete = subprocess.check_output(["/usr/bin/batocera-vulkan", "hasDiscrete"], text=True).strip()
+                    have_discrete = subprocess.check_output(["/usr/bin/knulli-vulkan", "hasDiscrete"], text=True).strip()
                     if have_discrete == "true":
                         eslog.debug("A discrete GPU is available on the system. We will use that for performance")
                         try:
-                            discrete_index = subprocess.check_output(["/usr/bin/batocera-vulkan", "discreteIndex"], text=True).strip()
+                            discrete_index = subprocess.check_output(["/usr/bin/knulli-vulkan", "discreteIndex"], text=True).strip()
                             if discrete_index != "":
                                 eslog.debug("Using Discrete GPU Index: {} for RetroArch".format(discrete_index))
                                 retroarchConfig["vulkan_gpu_index"] = '"' + discrete_index + '"'
@@ -162,7 +162,7 @@ def createLibretroConfig(generator: Generator, system: Emulator, controllers: Co
                 except subprocess.CalledProcessError:
                     eslog.debug("Error checking for discrete GPU.")
         except subprocess.CalledProcessError:
-            eslog.debug("Error executing batocera-vulkan script.")
+            eslog.debug("Error executing knulli-vulkan script.")
 
     retroarchConfig['audio_driver'] = '"pulse"'
     if (system.isOptSet("audio_driver")):
@@ -1089,7 +1089,7 @@ def createLibretroConfig(generator: Generator, system: Emulator, controllers: Co
         writeBezelConfig(generator, None, shaderBezel, retroarchConfig, rom, gameResolution, system, controllersConfig.gunsBordersSizeName(guns, system.config), controllersConfig.gunsBorderRatioType(guns, system.config))
         eslog.error(f"Error with bezel {bezel}: {e}", exc_info=e, stack_info=True)
 
-    # custom : allow the user to configure directly retroarch.cfg via batocera.conf via lines like : snes.retroarch.menu_driver=rgui
+    # custom : allow the user to configure directly retroarch.cfg via knulli.conf via lines like : snes.retroarch.menu_driver=rgui
     for user_config in systemConfig:
         if user_config[:10] == "retroarch.":
             retroarchConfig[user_config[10:]] = systemConfig[user_config]
@@ -1105,7 +1105,7 @@ def clearGunInputsForPlayer(n: int, retroarchConfig: dict[str, object]) -> None:
 
 def configureGunInputsForPlayer(n, gun, controllers, retroarchConfig, core, metadata, system):
 
-    # find a keyboard key to simulate the action of the player (always like button 2) ; search in batocera.conf, else default config
+    # find a keyboard key to simulate the action of the player (always like button 2) ; search in knulli.conf, else default config
     pedalsKeys = {1: "c", 2: "v", 3: "b", 4: "n"}
     pedalcname = "controllers.pedals{}".format(n)
     pedalkey = None
@@ -1132,7 +1132,7 @@ def configureGunInputsForPlayer(n, gun, controllers, retroarchConfig, core, meta
     retroarchConfig['input_player{}_gun_dpad_left_mbtn'     .format(n)] = 10
     retroarchConfig['input_player{}_gun_dpad_right_mbtn'    .format(n)] = 11
 
-    # custom mapping by core to match more with avaible gun batocera buttons
+    # custom mapping by core to match more with avaible gun knulli buttons
     # different mapping for ps1 which has only 3 buttons and maps on aux_a and aux_b not available on all guns
     if core == "pcsx_rearmed":
         if "gun_type" in metadata and metadata["gun_type"] == "justifier":

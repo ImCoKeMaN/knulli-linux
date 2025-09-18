@@ -180,7 +180,7 @@ class MugenGenerator(Generator):
                 "VK_LAYER_PATH": "/usr/share/vulkan/explicit_layer.d"
             })
 
-        commandArray = ["batocera-wine", "mugen", "play", str(rom_path)]
+        commandArray = ["knulli-wine", "mugen", "play", str(rom_path)]
         
         return Command.Command(
             array=commandArray,

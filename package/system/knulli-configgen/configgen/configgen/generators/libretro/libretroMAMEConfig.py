@@ -314,8 +314,8 @@ def generateMAMEConfigs(playersControllers: ControllerMapping, system: Emulator,
             autoRunDelay = 0
             mameIniDir = SAVES / "mame" / "mame" / "ini"
             mkdir_if_not_exists(mameIniDir)
-            if (mameIniDir / "batocera.ini").exists():
-                (mameIniDir / "batocera.ini").unlink()
+            if (mameIniDir / "knulli.ini").exists():
+                (mameIniDir / "knulli.ini").unlink()
             # bbc has different boots for floppy & cassette, no special boot for carts
             if system.name == "bbc":
                 if system.isOptSet("altromtype") or softList != "":
@@ -389,7 +389,7 @@ def generateMAMEConfigs(playersControllers: ControllerMapping, system: Emulator,
             if autoRunCmd != "":
                 if autoRunCmd.startswith("'"):
                     autoRunCmd.replace("'", "")
-                iniFile = (SAVES / 'mame' / 'mame' / 'ini' / 'batocera.ini').open("w")
+                iniFile = (SAVES / 'mame' / 'mame' / 'ini' / 'knulli.ini').open("w")
                 iniFile.write('autoboot_command          ' + autoRunCmd + "\n")
                 iniFile.write('autoboot_delay            ' + str(autoRunDelay))
                 iniFile.close()
@@ -589,7 +589,7 @@ def generateMAMEPadConfig(
             mappings.update({controlDef: controlDict[altButtons][controlDef]})
 
     xml_mameconfig = getRoot(config, "mameconfig")
-    xml_mameconfig.setAttribute("version", "10") # otherwise, config of pad won't work at first run (batocera v33)
+    xml_mameconfig.setAttribute("version", "10") # otherwise, config of pad won't work at first run (knulli v33)
     xml_system = getSection(config, xml_mameconfig, "system")
     xml_system.setAttribute("name", "default")
 

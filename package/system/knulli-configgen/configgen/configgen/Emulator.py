@@ -102,7 +102,7 @@ class Emulator():
         rom = os.path.basename(rom)
 
         # sanitize rule by EmulationStation
-        # see FileData::getConfigurationName() on batocera-emulationstation
+        # see FileData::getConfigurationName() on knulli-emulationstation
         rom = rom.replace('=','')
         rom = rom.replace('#','')
         eslog.info("game settings name: "+rom)
@@ -157,7 +157,7 @@ class Emulator():
         dict_all = Emulator.get_generic_config(system, defaultyml, defaultarchyml)
 
         # options are in the yaml, not in the system structure
-        # it is flat in the batocera.conf which is easier for the end user, but i prefer not flat in the yml files
+        # it is flat in the knulli.conf which is easier for the end user, but i prefer not flat in the yml files
         dict_result = {"emulator": dict_all["emulator"], "core": dict_all["core"]}
         if "options" in dict_all:
             Emulator.dict_merge(dict_result, dict_all["options"])

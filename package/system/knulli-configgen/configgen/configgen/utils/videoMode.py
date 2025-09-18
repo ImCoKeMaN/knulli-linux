@@ -24,7 +24,7 @@ _GLXINFO_BIN: Final = Path("/usr/bin/glxinfo")
 # Set a specific video mode
 def changeMode(videomode: str) -> None:
     if checkModeExists(videomode):
-        cmd = ["batocera-resolution", "setMode", videomode]
+        cmd = ["knulli-resolution", "setMode", videomode]
         eslog.debug(f"setVideoMode({videomode}): {cmd}")
         max_tries = 2  # maximum number of tries to set the mode
         for i in range(max_tries):
@@ -39,13 +39,13 @@ def changeMode(videomode: str) -> None:
                 time.sleep(1)
 
 def getCurrentMode() -> str | None:
-    proc = subprocess.Popen(["batocera-resolution currentMode"], stdout=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen(["knulli-resolution currentMode"], stdout=subprocess.PIPE, shell=True)
     (out, err) = proc.communicate()
     for val in out.decode().splitlines():
         return val # return the first line
 
 def getRefreshRate() -> str | None:
-    proc = subprocess.Popen(["batocera-resolution refreshRate"], stdout=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen(["knulli-resolution refreshRate"], stdout=subprocess.PIPE, shell=True)
     (out, err) = proc.communicate()
     for val in out.decode().splitlines():
         return val # return the first line
@@ -96,31 +96,31 @@ def getScreensInfos(config: Mapping[str, object]) -> list[ScreenInfo]:
     return res
 
 def getScreens() -> list[str]:
-    proc = subprocess.Popen(["batocera-resolution listOutputs"], stdout=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen(["knulli-resolution listOutputs"], stdout=subprocess.PIPE, shell=True)
     (out, err) = proc.communicate()
     return out.decode().splitlines()
 
 def minTomaxResolution() -> None:
-    proc = subprocess.Popen(["batocera-resolution minTomaxResolution"], stdout=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen(["knulli-resolution minTomaxResolution"], stdout=subprocess.PIPE, shell=True)
     (out, err) = proc.communicate()
 
 def getCurrentResolution(name: str | None = None) -> Resolution:
     if name is None:
-        proc = subprocess.Popen(["batocera-resolution currentResolution"], stdout=subprocess.PIPE, shell=True)
+        proc = subprocess.Popen(["knulli-resolution currentResolution"], stdout=subprocess.PIPE, shell=True)
     else:
-        proc = subprocess.Popen([f"batocera-resolution --screen {name} currentResolution"], stdout=subprocess.PIPE, shell=True)
+        proc = subprocess.Popen([f"knulli-resolution --screen {name} currentResolution"], stdout=subprocess.PIPE, shell=True)
 
     (out, err) = proc.communicate()
     vals = out.decode().split("x")
     return { "width": int(vals[0]), "height": int(vals[1]) }
 
 def getCurrentOutput() -> str:
-    proc = subprocess.Popen(["batocera-resolution currentOutput"], stdout=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen(["knulli-resolution currentOutput"], stdout=subprocess.PIPE, shell=True)
     (out, err) = proc.communicate()
     return out.decode().strip()
 
 def supportSystemRotation() -> bool:
-    proc = subprocess.Popen(["batocera-resolution supportSystemRotation"], stdout=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen(["knulli-resolution supportSystemRotation"], stdout=subprocess.PIPE, shell=True)
     (out, err) = proc.communicate()
     return proc.returncode == 0
 
@@ -135,7 +135,7 @@ def checkModeExists(videomode: str) -> bool:
             return True
 
     # specific resolution given
-    proc = subprocess.Popen(["batocera-resolution listModes"], stdout=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen(["knulli-resolution listModes"], stdout=subprocess.PIPE, shell=True)
     (out, err) = proc.communicate()
     for valmod in out.decode().splitlines():
         vals = valmod.split(":")
@@ -147,7 +147,7 @@ def checkModeExists(videomode: str) -> bool:
 
 def changeMouse(mode: bool) -> None:
     eslog.debug(f"changeMouseMode({mode})")
-    proc = subprocess.Popen([f"batocera-mouse {'show' if mode else 'hide'}"], stdout=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen([f"knulli-mouse {'show' if mode else 'hide'}"], stdout=subprocess.PIPE, shell=True)
     (out, err) = proc.communicate()
 
 def getGLVersion() -> float:

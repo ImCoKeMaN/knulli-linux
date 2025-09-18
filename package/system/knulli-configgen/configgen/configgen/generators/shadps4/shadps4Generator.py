@@ -41,19 +41,19 @@ class shadPS4Generator(Generator):
         # Check Vulkan first before doing anything
         discrete_index = 0
         try:
-            have_vulkan = subprocess.check_output(["/usr/bin/batocera-vulkan", "hasVulkan"], text=True).strip()
+            have_vulkan = subprocess.check_output(["/usr/bin/knulli-vulkan", "hasVulkan"], text=True).strip()
             if have_vulkan == "true":
                 eslog.debug("Vulkan driver is available on the system.")
                 try:
-                    vulkan_version = subprocess.check_output(["/usr/bin/batocera-vulkan", "vulkanVersion"], text=True).strip()
+                    vulkan_version = subprocess.check_output(["/usr/bin/knulli-vulkan", "vulkanVersion"], text=True).strip()
                     if vulkan_version > "1.3":
                         eslog.debug(f"Using Vulkan version: {vulkan_version}")
                         try:
-                            have_discrete = subprocess.check_output(["/usr/bin/batocera-vulkan", "hasDiscrete"], text=True).strip()
+                            have_discrete = subprocess.check_output(["/usr/bin/knulli-vulkan", "hasDiscrete"], text=True).strip()
                             if have_discrete == "true":
                                 eslog.debug("A discrete GPU is available on the system. We will use that for performance")
                                 try:
-                                    discrete_index = subprocess.check_output(["/usr/bin/batocera-vulkan", "discreteIndex"], text=True).strip()
+                                    discrete_index = subprocess.check_output(["/usr/bin/knulli-vulkan", "discreteIndex"], text=True).strip()
                                     if discrete_index != "":
                                         eslog.debug(f"Using Discrete GPU Index: {discrete_index} for shadPS4")
                                     else:
@@ -73,7 +73,7 @@ class shadPS4Generator(Generator):
                 eslog.debug("*** Vulkan driver required is not available on the system!!! ***")
                 sys.exit(1)
         except subprocess.CalledProcessError:
-            eslog.debug("Error executing batocera-vulkan script.")
+            eslog.debug("Error executing knulli-vulkan script.")
 
         # Adjust the config.toml file
         config = {}

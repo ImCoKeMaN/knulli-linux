@@ -14,7 +14,7 @@ from PIL import Image
 
 from ... import Command, controllersConfig
 from ...batoceraPaths import (
-    BATOCERA_SHARE_DIR,
+    KNULLI_SHARE_DIR,
     BIOS,
     CONFIGS,
     DEFAULTS_DIR,
@@ -126,7 +126,7 @@ class MameGenerator(Generator):
         commandArray += [ "-fontpath",     "/usr/bin/mame/" ]               # Fonts can be left on ROM filesystem
         commandArray += [ "-languagepath", "/usr/bin/mame/language/" ]      # Translations can be left on ROM filesystem
         commandArray += [ "-pluginspath", f"/usr/bin/mame/plugins/;{MAME_SAVES / 'plugins'}" ]
-        commandArray += [ "-samplepath",  MAME_BIOS / "samples" ] # Current batocera storage location for MAME samples
+        commandArray += [ "-samplepath",  MAME_BIOS / "samples" ] # Current knulli storage location for MAME samples
         commandArray += [ "-artpath",     f"/var/run/mame_artwork/;/usr/bin/mame/artwork/;{MAME_BIOS / 'artwork'};{USER_DECORATIONS}" ] # first for systems ; second for overlays
 
         # Enable cheats
@@ -708,9 +708,9 @@ class MameGenerator(Generator):
         if system.isOptSet('bezel.tattoo') and system.config['bezel.tattoo'] != "0":
             if system.config['bezel.tattoo'] == 'system':
                 try:
-                    tattoo_file = BATOCERA_SHARE_DIR / 'controller-overlays' / f'{system.name}.png'
+                    tattoo_file = KNULLI_SHARE_DIR / 'controller-overlays' / f'{system.name}.png'
                     if not tattoo_file.exists():
-                        tattoo_file = BATOCERA_SHARE_DIR / 'controller-overlays' / 'generic.png'
+                        tattoo_file = KNULLI_SHARE_DIR / 'controller-overlays' / 'generic.png'
                     tattoo = Image.open(tattoo_file)
                 except Exception as e:
                     eslog.error(f"Error opening controller overlay: {tattoo_file}")
@@ -722,7 +722,7 @@ class MameGenerator(Generator):
                     eslog.error("Error opening custom file: {}".format('tattoo_file'))
             else:
                 try:
-                    tattoo_file = BATOCERA_SHARE_DIR / 'controller-overlays' / 'generic.png'
+                    tattoo_file = KNULLI_SHARE_DIR / 'controller-overlays' / 'generic.png'
                     tattoo = Image.open(tattoo_file)
                 except:
                     eslog.error("Error opening custom file: {}".format('tattoo_file'))

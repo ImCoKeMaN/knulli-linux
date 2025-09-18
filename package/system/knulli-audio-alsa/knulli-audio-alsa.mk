@@ -20,7 +20,7 @@ define KNULLI_AUDIO_ALSA_INSTALL_TARGET_CMDS
 	mkdir -p $(TARGET_DIR)/usr/bin $(TARGET_DIR)/usr/share/sounds $(TARGET_DIR)/usr/share/knulli/alsa
 	# default alsa configurations
 	cp $(BR2_EXTERNAL_KNULLI_PATH)/package/system/knulli-audio-alsa/alsa/asoundrc-* \
-		$(TARGET_DIR)/usr/share/batocera/alsa/
+		$(TARGET_DIR)/usr/share/knulli/alsa/
 	# sample audio files
 	cp $(BR2_EXTERNAL_KNULLI_PATH)/package/system/knulli-audio-alsa/*.wav $(TARGET_DIR)/usr/share/sounds
 	# init script

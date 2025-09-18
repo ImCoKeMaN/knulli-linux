@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, TypedDict
 
 from PIL import Image, ImageOps
 
-from ..batoceraPaths import BATOCERA_SHARE_DIR, SYSTEM_DECORATIONS, USER_DECORATIONS
+from ..batoceraPaths import KNULLI_SHARE_DIR, SYSTEM_DECORATIONS, USER_DECORATIONS
 from .videoMode import getAltDecoration, getCurrentResolution
 
 if TYPE_CHECKING:
@@ -168,9 +168,9 @@ def padImage(input_png: str | Path, output_png: str | Path, screen_width: int, s
 def tatooImage(input_png: str | Path, output_png: str | Path, system: Emulator) -> None:
     if system.config['bezel.tattoo'] == 'system':
         try:
-            tattoo_file = BATOCERA_SHARE_DIR / 'controller-overlays' / f'{system.name}.png'
+            tattoo_file = KNULLI_SHARE_DIR / 'controller-overlays' / f'{system.name}.png'
             if not tattoo_file.exists():
-                tattoo_file = BATOCERA_SHARE_DIR / 'controller-overlays' / 'generic.png'
+                tattoo_file = KNULLI_SHARE_DIR / 'controller-overlays' / 'generic.png'
             tattoo = Image.open(tattoo_file)
         except:
             eslog.error(f"Error opening controller overlay: {tattoo_file}")
@@ -181,7 +181,7 @@ def tatooImage(input_png: str | Path, output_png: str | Path, system: Emulator) 
             eslog.error(f"Error opening custom file: {tattoo_file}")
     else:
         try:
-            tattoo_file = BATOCERA_SHARE_DIR / 'controller-overlays' / 'generic.png'
+            tattoo_file = KNULLI_SHARE_DIR / 'controller-overlays' / 'generic.png'
             tattoo = Image.open(tattoo_file)
         except:
             eslog.error(f"Error opening custom file: {tattoo_file}")

@@ -69,7 +69,7 @@ def generatePadsConfig(cfgPath: Path, playersControllers: ControllerMapping, sys
             mappings.update({controlDef: controlDict[altButtons][controlDef]})
 
     xml_mameconfig = getRoot(config, "mameconfig")
-    xml_mameconfig.setAttribute("version", "10") # otherwise, config of pad won't work at first run (batocera v33)
+    xml_mameconfig.setAttribute("version", "10") # otherwise, config of pad won't work at first run (knulli v33)
     xml_system     = getSection(config, xml_mameconfig, "system")
     xml_system.setAttribute("name", "default")
 
@@ -233,7 +233,7 @@ def generatePadsConfig(cfgPath: Path, playersControllers: ControllerMapping, sys
 
         addCommonPlayerPorts(config, xml_input, nplayer)
 
-        ### find a keyboard key to simulate the action of the player (always like button 2) ; search in batocera.conf, else default config
+        ### find a keyboard key to simulate the action of the player (always like button 2) ; search in knulli.conf, else default config
         pedalsKeys = {1: "c", 2: "v", 3: "b", 4: "n"}
         pedalkey: str | None = None
         pedalcname = "controllers.pedals{}".format(nplayer)
@@ -286,7 +286,7 @@ def generatePadsConfig(cfgPath: Path, playersControllers: ControllerMapping, sys
     # in case there are more guns than pads, configure them
     if useGuns and len(guns) > len(playersControllers):
         for gunnum in range(len(playersControllers)+1, len(guns)+1):
-            ### find a keyboard key to simulate the action of the player (always like button 2) ; search in batocera.conf, else default config
+            ### find a keyboard key to simulate the action of the player (always like button 2) ; search in knulli.conf, else default config
             pedalsKeys = {1: "c", 2: "v", 3: "b", 4: "n"}
             pedalkey = None
             pedalcname = "controllers.pedals{}".format(gunnum)

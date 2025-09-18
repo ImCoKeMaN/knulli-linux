@@ -622,6 +622,12 @@ menu "Knulli Packages"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/retroarch/retroarch/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/retroarch/knulli-bezels/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/retroarch/shaders/sharp-shimmerless-shader/Config.in"
+    menu "Shaders"
+      source "$BR2_EXTERNAL_KNULLI_PATH/package/retroarch/shaders/knulli-shaders/Config.in"
+      source "$BR2_EXTERNAL_KNULLI_PATH/package/retroarch/shaders/common-shaders/Config.in"
+      source "$BR2_EXTERNAL_KNULLI_PATH/package/retroarch/shaders/slang-shaders/Config.in"
+      source "$BR2_EXTERNAL_KNULLI_PATH/package/retroarch/shaders/glsl-shaders/Config.in"
+     endmenu
   endmenu
 
   menu "EmulationStation"
@@ -692,5 +698,6 @@ menu "Knulli Packages"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/system/knulli-bluetooth/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/system/knulli-audio/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/system/knulli-audio-alsa/Config.in"
+    source "$BR2_EXTERNAL_KNULLI_PATH/package/system/knulli-triggerhappy/Config.in"
   endmenu
 endmenu

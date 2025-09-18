@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CHANNEL="6"
-INTERFACE=$(batocera-wifi get_interface)
+INTERFACE=$(knulli-wifi get_interface)
 
 SSID=$(knulli-settings-get wifi.adhoc.ssid)
 PASSPHRASE=$(knulli-settings-get wifi.adhoc.key)

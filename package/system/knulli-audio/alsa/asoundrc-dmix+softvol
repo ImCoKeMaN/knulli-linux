@@ -1,4 +1,4 @@
-# batocera-audio alsa config
+# knulli-audio alsa config
 # dmix + softvol
 
 pcm.!default {

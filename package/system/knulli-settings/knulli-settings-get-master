@@ -4,7 +4,7 @@
 
 KEY=
 CONFFILE=
-SYSCONFFILE="/usr/share/batocera/sysconfigs/batocera.conf"
+SYSCONFFILE="/usr/share/knulli/sysconfigs/knulli.conf"
 
 while test $# -ne 0
 do

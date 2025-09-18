@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 eslog = logging.getLogger(__name__)
 
 _FPINBALL_CONFIG: Final = CONFIGS / "fpinball"
-_FPINBALL_CONFIG_REG: Final = _FPINBALL_CONFIG / "batocera.confg.reg"
+_FPINBALL_CONFIG_REG: Final = _FPINBALL_CONFIG / "knulli.confg.reg"
 
 class FpinballGenerator(Generator):
 

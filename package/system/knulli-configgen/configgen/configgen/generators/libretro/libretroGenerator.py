@@ -52,7 +52,7 @@ class LibretroGenerator(Generator):
         }
 
     def get_board_info(self):
-        file_path = "/boot/boot/batocera.board"
+        file_path = "/boot/boot/knulli.board"
         with open(file_path, 'r') as file:
             board = file.read().strip()
         return board
@@ -99,9 +99,9 @@ class LibretroGenerator(Generator):
             if "noBezel" in video_shader.name:
                 shaderBezel = True
 
-        # Settings batocera default config file if no user defined one
+        # Settings knulli default config file if no user defined one
         if not 'configfile' in system.config:
-            # Using batocera config file
+            # Using knulli config file
             system.config['configfile'] = str(RETROARCH_CUSTOM)
             # Create retroarchcustom.cfg if does not exists
             if not RETROARCH_CUSTOM.is_file():

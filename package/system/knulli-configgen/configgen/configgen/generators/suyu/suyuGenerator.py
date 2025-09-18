@@ -168,15 +168,15 @@ class SuyuGenerator(Generator):
             # Add vulkan logic
             if system.config["suyu_backend"] == "1":
                 try:
-                    have_vulkan = subprocess.check_output(["/usr/bin/batocera-vulkan", "hasVulkan"], text=True).strip()
+                    have_vulkan = subprocess.check_output(["/usr/bin/knulli-vulkan", "hasVulkan"], text=True).strip()
                     if have_vulkan == "true":
                         eslog.debug("Vulkan driver is available on the system.")
                         try:
-                            have_discrete = subprocess.check_output(["/usr/bin/batocera-vulkan", "hasDiscrete"], text=True).strip()
+                            have_discrete = subprocess.check_output(["/usr/bin/knulli-vulkan", "hasDiscrete"], text=True).strip()
                             if have_discrete == "true":
                                 eslog.debug("A discrete GPU is available on the system. We will use that for performance")
                                 try:
-                                    discrete_index = subprocess.check_output(["/usr/bin/batocera-vulkan", "discreteIndex"], text=True).strip()
+                                    discrete_index = subprocess.check_output(["/usr/bin/knulli-vulkan", "discreteIndex"], text=True).strip()
                                     if discrete_index != "":
                                         eslog.debug("Using Discrete GPU Index: {} for Suyu".format(discrete_index))
                                         suyuConfig.set("Renderer", "vulkan_device", discrete_index)
@@ -194,7 +194,7 @@ class SuyuGenerator(Generator):
                         except subprocess.CalledProcessError:
                             eslog.debug("Error checking for discrete GPU.")
                 except subprocess.CalledProcessError:
-                    eslog.debug("Error executing batocera-vulkan script.")
+                    eslog.debug("Error executing knulli-vulkan script.")
         else:
             suyuConfig.set("Renderer", "backend", "0")
         suyuConfig.set("Renderer", "backend\\default", "false")

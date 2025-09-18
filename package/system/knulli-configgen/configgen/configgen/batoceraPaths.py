@@ -9,8 +9,8 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
     from io import BufferedRandom, BufferedWriter, TextIOWrapper
 
-BATOCERA_SHARE_DIR: Final = Path('/usr/share/batocera')
-DATAINIT_DIR: Final = BATOCERA_SHARE_DIR / 'datainit'
+KNULLI_SHARE_DIR: Final = Path('/usr/share/knulli')
+DATAINIT_DIR: Final = KNULLI_SHARE_DIR / 'datainit'
 USERDATA: Final = Path('/userdata')
 
 HOME_INIT: Final = DATAINIT_DIR / 'system'
@@ -28,7 +28,7 @@ CACHE: Final = HOME / 'cache'
 ROMS: Final = USERDATA / 'roms'
 CHEATS: Final = USERDATA / 'cheats'
 LOGS: Final = HOME / 'logs'
-BATOCERA_CONF: Final = HOME / 'batocera.conf'
+BATOCERA_CONF: Final = HOME / 'knulli.conf'
 
 USER_ES_DIR: Final = CONFIGS / 'emulationstation'
 BATOCERA_ES_DIR: Final = Path('/usr/share/emulationstation')
@@ -40,10 +40,10 @@ ES_GUNS_METADATA: Final = _ES_RESOURCES_DIR / 'gungames.xml'
 ES_WHEELS_METADATA: Final = _ES_RESOURCES_DIR / 'wheelgames.xml'
 ES_GAMES_METADATA: Final = _ES_RESOURCES_DIR / 'gamesdb.xml'
 
-DEFAULTS_DIR: Final = BATOCERA_SHARE_DIR / 'configgen'
+DEFAULTS_DIR: Final = KNULLI_SHARE_DIR / 'configgen'
 
 USER_SHADERS: Final = USERDATA / 'shaders'
-BATOCERA_SHADERS: Final = BATOCERA_SHARE_DIR / 'shaders'
+BATOCERA_SHADERS: Final = KNULLI_SHARE_DIR / 'shaders'
 
 USER_DECORATIONS: Final = USERDATA / 'decorations'
 SYSTEM_DECORATIONS: Final = DATAINIT_DIR / 'decorations'

@@ -30,7 +30,7 @@ wheelMapping = {
     "upshift":    "pagedown"
 }
 
-# partial mapping between real pads buttons and batocera pads
+# partial mapping between real pads buttons and knulli pads
 emulatorMapping = {
     "dreamcast": {
         "lt":   "l2",
@@ -274,7 +274,7 @@ def reconfigureAngleRotation(dev: str, wheelAxis: int, rotationAngle: int, wante
         newmax -= newmz // 2
 
     pipeout, pipein = os.pipe()
-    cmd = ["batocera-wheel-calibrator", "-d", dev, "-a", str(wheelAxis), "-m", str(newmin), "-M", str(newmax), "-z", str(newdz), "-c", str(newmz)]
+    cmd = ["knulli-wheel-calibrator", "-d", dev, "-a", str(wheelAxis), "-m", str(newmin), "-M", str(newmax), "-z", str(newdz), "-c", str(newmz)]
     eslog.info(cmd)
     proc = subprocess.Popen(cmd, stdout=pipein, stderr=subprocess.PIPE)
     try:

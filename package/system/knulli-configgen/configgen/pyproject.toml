@@ -1,5 +1,5 @@
 [project]
-name = "batocera-configgen"
+name = "knulli-configgen"
 requires-python = ">= 3.11"
 dynamic = ["version"]
 dependencies = [

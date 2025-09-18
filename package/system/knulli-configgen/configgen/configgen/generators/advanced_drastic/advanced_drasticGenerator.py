@@ -33,11 +33,11 @@ class Advanced_DrasticGenerator(Generator):
         advanced_drastic_saves = "/userdata/saves/nds/advanced_drastic/saves"
         advanced_drastic_states = "/userdata/saves/nds/advanced_drastic/states"
 
-        board = os.popen("cat /boot/boot/batocera.board").read()
+        board = os.popen("cat /boot/boot/knulli.board").read()
         board=board.rstrip("\n\r ")
 
-        if os.path.isfile(advanced_drastic_root + "/batocera.board"):
-            board_installed = os.popen("cat " + advanced_drastic_root + "/batocera.board").read()
+        if os.path.isfile(advanced_drastic_root + "/knulli.board"):
+            board_installed = os.popen("cat " + advanced_drastic_root + "/knulli.board").read()
             board_installed = board_installed.rstrip("\n\r ")
         else:
             board_installed = ""
@@ -47,7 +47,7 @@ class Advanced_DrasticGenerator(Generator):
             os.system("cp -rv /usr/share/advanced_drastic/* /userdata/system/configs/advanced_drastic")
             if os.path.exists("/usr/share/advanced_drastic/devices/" + board ):
                 os.system("cp -rv /usr/share/advanced_drastic/devices/" + board + "/* /userdata/system/configs/advanced_drastic")
-            os.system("cp /boot/boot/batocera.board /userdata/system/configs/advanced_drastic")
+            os.system("cp /boot/boot/knulli.board /userdata/system/configs/advanced_drastic")
 
         # Bind mount saves and states locations
         saves_target = os.path.join(advanced_drastic_root, "backup")

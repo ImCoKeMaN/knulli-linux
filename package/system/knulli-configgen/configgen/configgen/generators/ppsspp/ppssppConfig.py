@@ -52,15 +52,15 @@ def createPPSSPPConfig(iniConfig, system):
     if system.isOptSet("gfxbackend") and system.config["gfxbackend"] == "3 (VULKAN)":
         # Check if we have a discrete GPU & if so, set the Name
         try:
-            have_vulkan = subprocess.check_output(["/usr/bin/batocera-vulkan", "hasVulkan"], text=True).strip()
+            have_vulkan = subprocess.check_output(["/usr/bin/knulli-vulkan", "hasVulkan"], text=True).strip()
             if have_vulkan == "true":
                 eslog.debug("Vulkan driver is available on the system.")
                 try:
-                    have_discrete = subprocess.check_output(["/usr/bin/batocera-vulkan", "hasDiscrete"], text=True).strip()
+                    have_discrete = subprocess.check_output(["/usr/bin/knulli-vulkan", "hasDiscrete"], text=True).strip()
                     if have_discrete == "true":
                         eslog.debug("A discrete GPU is available on the system. We will use that for performance")
                         try:
-                            discrete_name = subprocess.check_output(["/usr/bin/batocera-vulkan", "discreteName"], text=True).strip()
+                            discrete_name = subprocess.check_output(["/usr/bin/knulli-vulkan", "discreteName"], text=True).strip()
                             if discrete_name != "":
                                 eslog.debug("Using Discrete GPU Name: {} for PPSSPP".format(discrete_name))
                                 iniConfig.set("Graphics", "VulkanDevice", discrete_name)
@@ -76,7 +76,7 @@ def createPPSSPPConfig(iniConfig, system):
                 eslog.debug("Vulkan driver is not available on the system. Falling back to OpenGL")
                 iniConfig.set("Graphics", "GraphicsBackend", "0 (OPENGL)")
         except subprocess.CalledProcessError:
-            eslog.debug("Error executing batocera-vulkan script.")
+            eslog.debug("Error executing knulli-vulkan script.")
 
     # Display FPS
     if system.isOptSet('showFPS') and system.getOptBoolean('showFPS') == True:
@@ -220,7 +220,7 @@ def createPPSSPPConfig(iniConfig, system):
     else:
         iniConfig.set("Achievements", "AchievementsSoundEffects", "False")
 
-    # Custom : allow the user to configure directly PPSSPP via batocera.conf via lines like : ppsspp.section.option=value
+    # Custom : allow the user to configure directly PPSSPP via knulli.conf via lines like : ppsspp.section.option=value
     for user_config in system.config:
         if user_config[:7] == "ppsspp.":
             section_option = user_config[7:]

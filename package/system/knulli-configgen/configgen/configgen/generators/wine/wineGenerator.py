@@ -23,10 +23,10 @@ class WineGenerator(Generator):
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
         if system.name == "windows_installers":
-            commandArray = ["batocera-wine", "windows", "install", rom]
+            commandArray = ["knulli-wine", "windows", "install", rom]
             return Command.Command(array=commandArray)
         elif system.name == "windows":
-            commandArray = ["batocera-wine", "windows", "play", rom]
+            commandArray = ["knulli-wine", "windows", "play", rom]
 
             environment = {}
             #system.language

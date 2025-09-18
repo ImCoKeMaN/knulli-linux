@@ -7,7 +7,7 @@ class batoceraServices:
 
     @staticmethod
     def isServiceEnabled(name: str):
-        proc = subprocess.Popen(["batocera-services list"], stdout=subprocess.PIPE, shell=True)
+        proc = subprocess.Popen(["knulli-services list"], stdout=subprocess.PIPE, shell=True)
         (out, err) = proc.communicate()
         for valmod in out.decode().splitlines():
             vals = valmod.split(";")
@@ -19,7 +19,7 @@ class batoceraServices:
 
     @staticmethod
     def getServiceStatus(name: str):
-        proc = subprocess.Popen(["batocera-services status \"" + name + "\""], stdout=subprocess.PIPE, shell=True)
+        proc = subprocess.Popen(["knulli-services status \"" + name + "\""], stdout=subprocess.PIPE, shell=True)
         (out, err) = proc.communicate()
         val = out.decode().strip()
         eslog.debug(f"service {name} status : \"" + val + "\"") # strip any end of lines

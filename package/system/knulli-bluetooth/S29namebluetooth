@@ -7,8 +7,8 @@ case "$1" in
         # Get the current adapter name from the config file
         current_name=$(grep -Po '(?<=^Name = ).*' "$MAIN_CONF_FILE")
 
-        # Get the desired adapter name from batocera-info
-        info_output=$(batocera-info | grep "Model:" | awk -F": " '{print $2}' | head -n 1)
+        # Get the desired adapter name from knulli-info
+        info_output=$(knulli-info | grep "Model:" | awk -F": " '{print $2}' | head -n 1)
 
         if [ -n "$info_output" ]; then
             if [ "$current_name" == "$info_output" ]; then

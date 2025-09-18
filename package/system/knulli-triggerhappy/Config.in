@@ -1,0 +1,4 @@
+config BR2_PACKAGE_KNULLI_TRIGGERHAPPY
+	bool "knulli-triggerhappy"
+
+	select BR2_PACKAGE_TRIGGERHAPPY

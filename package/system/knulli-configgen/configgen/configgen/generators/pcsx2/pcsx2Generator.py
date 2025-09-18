@@ -321,7 +321,7 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
     # Renderer
     # Check Vulkan first to be sure
     try:
-        have_vulkan = subprocess.check_output(["/usr/bin/batocera-vulkan", "hasVulkan"], text=True).strip()
+        have_vulkan = subprocess.check_output(["/usr/bin/knulli-vulkan", "hasVulkan"], text=True).strip()
         if have_vulkan == "true":
             eslog.debug("Vulkan driver is available on the system.")
             renderer = "12"  # Default to OpenGL
@@ -334,11 +334,11 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
                     eslog.debug("User selected Vulkan")
                     renderer = "14"
                     try:
-                        have_discrete = subprocess.check_output(["/usr/bin/batocera-vulkan", "hasDiscrete"], text=True).strip()
+                        have_discrete = subprocess.check_output(["/usr/bin/knulli-vulkan", "hasDiscrete"], text=True).strip()
                         if have_discrete == "true":
                             eslog.debug("A discrete GPU is available on the system. We will use that for performance")
                             try:
-                                discrete_name = subprocess.check_output(["/usr/bin/batocera-vulkan", "discreteName"], text=True).strip()
+                                discrete_name = subprocess.check_output(["/usr/bin/knulli-vulkan", "discreteName"], text=True).strip()
                                 if discrete_name:
                                     eslog.debug("Using Discrete GPU Name: {} for PCSX2".format(discrete_name))
                                     pcsx2INIConfig.set("EmuCore/GS", "Adapter", discrete_name)
@@ -545,7 +545,7 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
                         pcsx2INIConfig.set("USB1", "guncon2_Start", "SDL-{}/{}".format(pad.index, "Start"))
                 nc = nc + 1
 
-            ### find a keyboard key to simulate the action of the player (always like button 2) ; search in batocera.conf, else default config
+            ### find a keyboard key to simulate the action of the player (always like button 2) ; search in knulli.conf, else default config
             if "controllers.pedals1" in system.config:
                 pedalkey = system.config["controllers.pedals1"]
             else:
@@ -562,7 +562,7 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
                     if "start" in pad.inputs:
                         pcsx2INIConfig.set("USB2", "guncon2_Start", "SDL-{}/{}".format(pad.index, "Start"))
                 nc = nc + 1
-            ### find a keyboard key to simulate the action of the player (always like button 2) ; search in batocera.conf, else default config
+            ### find a keyboard key to simulate the action of the player (always like button 2) ; search in knulli.conf, else default config
             if "controllers.pedals2" in system.config:
                 pedalkey = system.config["controllers.pedals2"]
             else:
