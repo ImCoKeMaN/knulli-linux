@@ -7,7 +7,7 @@
 # BINARIES_DIR = images dir
 # TARGET_DIR = target dir
 
-KNULLI_TARGET=$(grep -E "^BR2_PACKAGE_KNULLI_TARGET_[A-Z_0-9]*=y$" "${BR2_CONFIG}" | sed -e s+'^BR2_PACKAGE_KNULLI_TARGET_\([A-Z_0-9]*\)=y$'+'\1'+)
+KNULLI_TARGET=$(grep -E "^BR2_PACKAGE_BATOCERA_TARGET_[A-Z_0-9]*=y$" "${BR2_CONFIG}" | sed -e s+'^BR2_PACKAGE_BATOCERA_TARGET_\([A-Z_0-9]*\)=y$'+'\1'+)
 
 # For the root user:
 # 1. Use Bash instead of Dash for interactive use.

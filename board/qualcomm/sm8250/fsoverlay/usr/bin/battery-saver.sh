@@ -8,7 +8,7 @@ flock -n 200 || exit 1
 trap 'cleanup' SIGTERM
 
 STATE="active"
-BRIGHTNESS="$(batocera-brightness)"
+BRIGHTNESS="$(knulli-brightness)"
 LOOP_COUNT=0 # This should always be 0
 JS_DEVICES=()
 
@@ -27,7 +27,7 @@ fi
 # Called with SIGTERM so brightness is restored before saving to knulli.conf when shutting down and display is dimmed
 cleanup() {
     if [ "$STATE" = "inactive" ]; then
-        batocera-brightness "$BRIGHTNESS"
+        knulli-brightness "$BRIGHTNESS"
     fi
 
     local pids
@@ -56,11 +56,11 @@ do_inactivity() {
     STATE="inactive"
     case "$MODE" in
         dim)
-            BRIGHTNESS="$(batocera-brightness)"
+            BRIGHTNESS="$(knulli-brightness)"
             if [ "$BRIGHTNESS" -gt 6 ]; then
-                batocera-brightness 6
+                knulli-brightness 6
             fi
-            batocera-audio setSystemVolume mute
+            knulli-audio setSystemVolume mute
         ;;
         suspend)
             pm-is-supported --suspend && pm-suspend
@@ -72,7 +72,7 @@ do_inactivity() {
             echo lcd0 > /sys/kernel/debug/dispdbg/name
             echo 1 > /sys/kernel/debug/dispdbg/start
             amixer set Master mute
-            batocera-es-swissknife --emukill
+            knulli-es-swissknife --emukill
             /usr/bin/poweroff.sh
         ;;
     esac
@@ -81,8 +81,8 @@ do_inactivity() {
 do_activity() {
     if [ "$MODE" = "dim" ]; then
         STATE="active"
-        batocera-brightness $BRIGHTNESS
-        batocera-audio setSystemVolume unmute
+        knulli-brightness $BRIGHTNESS
+        knulli-audio setSystemVolume unmute
     fi
 }
 

@@ -5,7 +5,7 @@
 # @evoflash and @lbrpdx on Batocera Forums and Discord
 #
 # Usage:
-# knulli-es-thebezelproject 'list', 'install or remove <system>'
+# batocera-es-thebezelproject 'list', 'install or remove <system>'
 #
 # 20190801 Initial release
 # 20191120 Rewite all script for incremential runtime
@@ -28,8 +28,8 @@ readonly ROMS_DIR="/userdata/roms"
 readonly BEZELPROJECT_DIR="thebezelproject"
 readonly BEZELPROJECT_GAMES_DIR="$BEZELPROJECT_DIR/games"
 readonly BEZELPROJECT_SYSTEMS_DIR="$BEZELPROJECT_DIR/systems"
-readonly DEFAULT_BEZEL_URL="https://updates.knulli.org/thebezelproject"
-readonly SYSTEMS_LIST="https://updates.knulli.org/tbp_systems.txt"
+readonly DEFAULT_BEZEL_URL="https://updates.batocera.org/thebezelproject"
+readonly SYSTEMS_LIST="https://updates.batocera.org/tbp_systems.txt"
 readonly LOCAL_SYSTEMS_LIST="/userdata/system/tbp_systems.txt"
 readonly INDEX_LIST="https://updates.batocera.org/thebezelproject/tbp_"
 readonly LOCAL_INDEX_LIST="/userdata/system/thebezelproject/tbp_"

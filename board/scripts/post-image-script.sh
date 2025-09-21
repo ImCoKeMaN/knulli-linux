@@ -18,7 +18,7 @@ UPDATES_DIR="${BASE_DIR}/updates"
 ################################
 
 ##### find images to build #####
-KNULLI_TARGET=$(grep -E "^BR2_PACKAGE_KNULLI_TARGET_[A-Z_0-9]*=y$" "${BR2_CONFIG}" | grep -vE "_ANY=" | grep -vE "_GLES[0-9]*=" | sed -e s+'^BR2_PACKAGE_KNULLI_TARGET_\([A-Z_0-9]*\)=y$'+'\1'+)
+KNULLI_TARGET=$(grep -E "^BR2_PACKAGE_BATOCERA_TARGET_[A-Z_0-9]*=y$" "${BR2_CONFIG}" | grep -vE "_ANY=" | grep -vE "_GLES[0-9]*=" | sed -e s+'^BR2_PACKAGE_BATOCERA_TARGET_\([A-Z_0-9]*\)=y$'+'\1'+)
 KNULLI_LOWER_TARGET=$(echo "${KNULLI_TARGET}" | tr '[:upper:]' '[:lower:]')
 KNULLI_IMAGES_TARGETS=$(grep -E "^BR2_TARGET_KNULLI_IMAGES[ ]*=[ ]*\".*\"[ ]*$" "${BR2_CONFIG}" | sed -e s+"^BR2_TARGET_KNULLI_IMAGES[ ]*=[ ]*\"\(.*\)\"[ ]*$"+"\1"+)
 if test -z "${KNULLI_IMAGES_TARGETS}"

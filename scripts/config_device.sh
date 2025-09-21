@@ -68,7 +68,7 @@ fi
 
 # Update package/batocera/core/batocera-system/Config.in
 if [ -f "$CONFIG_IN_FILE" ]; then
-    update_line_if_needed "$CONFIG_IN_FILE" 'default "allwinner/h700/' "default \"allwinner/h700/$REPLACEMENT\" if BR2_PACKAGE_KNULLI_TARGET_H700"
+    update_line_if_needed "$CONFIG_IN_FILE" 'default "allwinner/h700/' "default \"allwinner/h700/$REPLACEMENT\" if BR2_PACKAGE_BATOCERA_TARGET_H700"
 else
     echo "File $CONFIG_IN_FILE not found!"
     exit 1

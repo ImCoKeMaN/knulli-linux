@@ -11,7 +11,7 @@ KNULLI_AUDIO_SOURCE=
 # this one is important because the package erase the default pipewire config files, so it must be built after it
 KNULLI_AUDIO_DEPENDENCIES = pipewire wireplumber
 
-ifeq ($(BR2_PACKAGE_KNULLI_TARGET_RK3326),y)
+ifeq ($(BR2_PACKAGE_BATOCERA_TARGET_RK3326),y)
 ALSA_SUFFIX = "-rk3326"
 else
 ALSA_SUFFIX =
@@ -89,7 +89,7 @@ define KNULLI_AUDIO_STEAM_DECK_OLED
 	    $(TARGET_DIR)/usr/share/alsa/ucm2/
 endef
 
-ifeq ($(BR2_PACKAGE_KNULLI_TARGET_X86_ANY),y)
+ifeq ($(BR2_PACKAGE_BATOCERA_TARGET_X86_ANY),y)
     KNULLI_AUDIO_POST_INSTALL_TARGET_HOOKS += KNULLI_AUDIO_X86_INTEL_DSP
     KNULLI_AUDIO_POST_INSTALL_TARGET_HOOKS += KNULLI_AUDIO_STEAM_DECK_OLED
 endif

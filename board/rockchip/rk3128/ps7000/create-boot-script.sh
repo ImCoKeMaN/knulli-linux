@@ -5,28 +5,28 @@
 # BUILD_DIR = base dir/build
 # BINARIES_DIR = images dir
 # TARGET_DIR = target dir
-# BATOCERA_BINARIES_DIR = batocera binaries sub directory
+# KNULLI_BINARIES_DIR =  binaries sub directory
 
 HOST_DIR=$1
 BOARD_DIR=$2
 BUILD_DIR=$3
 BINARIES_DIR=$4
 TARGET_DIR=$5
-BATOCERA_BINARIES_DIR=$6
+KNULLI_BINARIES_DIR=$6
 
-mkdir -p "${BATOCERA_BINARIES_DIR}/boot/boot"     || exit 1
-mkdir -p "${BATOCERA_BINARIES_DIR}/boot/extlinux" || exit 1
+mkdir -p "${KNULLI_BINARIES_DIR}/boot/boot"     || exit 1
+mkdir -p "${KNULLI_BINARIES_DIR}/boot/extlinux" || exit 1
 
-cp "${BINARIES_DIR}/zImage"             "${BATOCERA_BINARIES_DIR}/boot/boot/linux"           || exit 1
-#cp "${BINARIES_DIR}/initrd.lz4"          "${BATOCERA_BINARIES_DIR}/boot/boot/"                || exit 1
-cp "${BINARIES_DIR}/rootfs.squashfs"    "${BATOCERA_BINARIES_DIR}/boot/boot/knulli.update" || exit 1
+cp "${BINARIES_DIR}/zImage"             "${KNULLI_BINARIES_DIR}/boot/boot/linux"           || exit 1
+#cp "${BINARIES_DIR}/initrd.lz4"          "${KNULLI_BINARIES_DIR}/boot/boot/"                || exit 1
+cp "${BINARIES_DIR}/rootfs.squashfs"    "${KNULLI_BINARIES_DIR}/boot/boot/knulli.update" || exit 1
 
-cp "${BINARIES_DIR}/rk3128-ps7000.dtb"     "${BATOCERA_BINARIES_DIR}/boot/boot/"     || exit 1
-cp "${BOARD_DIR}/boot/extlinux.conf"    "${BATOCERA_BINARIES_DIR}/boot/extlinux/" || exit 1
+cp "${BINARIES_DIR}/rk3128-ps7000.dtb"     "${KNULLI_BINARIES_DIR}/boot/boot/"     || exit 1
+cp "${BOARD_DIR}/boot/extlinux.conf"    "${KNULLI_BINARIES_DIR}/boot/extlinux/" || exit 1
 
 # Create empty swap partition
-truncate -s 1024M "${BATOCERA_BINARIES_DIR}/swap.img"
-chmod 0600 "${BATOCERA_BINARIES_DIR}/swap.img"
-mkswap "${BATOCERA_BINARIES_DIR}/swap.img"
+truncate -s 1024M "${KNULLI_BINARIES_DIR}/swap.img"
+chmod 0600 "${KNULLI_BINARIES_DIR}/swap.img"
+mkswap "${KNULLI_BINARIES_DIR}/swap.img"
 
 exit 0

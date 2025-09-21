@@ -5,7 +5,7 @@
 
 start() {
 	echo "Starting RTW88 network services..."
-	info_output=$(batocera-info)
+	info_output=$(-info)
 	if [[ $info_output == *"Model: RG353V"*]]; then
 		echo 5 > /sys/class/gpio/export
 		echo out > /sys/class/gpio/gpio5/direction
@@ -15,7 +15,7 @@ start() {
 
 stop() {
 	echo "Shutting down RTW88 network services..."
-	info_output=$(batocera-info)
+	info_output=$(-info)
 	if [[ $info_output == *"Model: RG353V"*]]; then
 	    echo 0 > /sys/class/gpio/gpio5/value
 	fi

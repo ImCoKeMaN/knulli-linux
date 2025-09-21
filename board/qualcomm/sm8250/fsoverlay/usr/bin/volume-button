@@ -12,7 +12,7 @@ do_lock() {
 
 case "$1" in
     volup)
-        batocera-audio setSystemVolume +5
+        knulli-audio setSystemVolume +5
 
         for ((i = 0; i < 5; i++)); do
             if [ "$(cat "$VOLUME_BUTTON_STATE")" = "0" ]; then
@@ -24,12 +24,12 @@ case "$1" in
         do_lock
 
         while [ "$(cat "$VOLUME_BUTTON_STATE")" = "1" ]; do
-            batocera-audio setSystemVolume +5
+            knulli-audio setSystemVolume +5
             sleep 0.1
         done
         ;;
     voldown)
-        batocera-audio setSystemVolume -5
+        knulli-audio setSystemVolume -5
 
         for ((i = 0; i < 5; i++)); do
             if [ "$(cat "$VOLUME_BUTTON_STATE")" = "0" ]; then
@@ -41,12 +41,12 @@ case "$1" in
         do_lock
 
         while [ "$(cat "$VOLUME_BUTTON_STATE")" = "1" ]; do
-            batocera-audio setSystemVolume -5
+            knulli-audio setSystemVolume -5
             sleep 0.1
         done
         ;;
     briup)
-        batocera-brightness + 5
+        knulli-brightness + 5
 
         for ((i = 0; i < 5; i++)); do
             if [ "$(cat "$VOLUME_BUTTON_STATE")" = "0" ]; then
@@ -58,12 +58,12 @@ case "$1" in
         do_lock
 
         while [ "$(cat "$VOLUME_BUTTON_STATE")" = "1" ]; do
-            batocera-brightness + 5
+            knulli-brightness + 5
             sleep 0.1
         done
         ;;
     bridown)
-        batocera-brightness - 5
+        knulli-brightness - 5
 
         for ((i = 0; i < 5; i++)); do
             if [ "$(cat "$VOLUME_BUTTON_STATE")" = "0" ]; then
@@ -75,7 +75,7 @@ case "$1" in
         do_lock
 
         while [ "$(cat "$VOLUME_BUTTON_STATE")" = "1" ]; do
-            batocera-brightness - 5
+            knulli-brightness - 5
             sleep 0.1
         done
         ;;

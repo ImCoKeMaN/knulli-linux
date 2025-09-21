@@ -6,6 +6,15 @@ fi
 
 # Check if display.rotate is already set
 current_rotate=$(knulli-settings-get display.rotate)
+BOARD_FILE="/boot/boot/knulli.board"
+
+# Get board
+BOARD=$(cat "$BOARD_FILE" 2>/dev/null)
+
+if [ "$BOARD" = "magicx-zero-40" ]; then
+    echo "No need to rotate this vertical display"
+    exit 0
+fi
 
 # If display.rotate is not set, determine it based on display resolution
 if [ -z "$current_rotate" ]; then
