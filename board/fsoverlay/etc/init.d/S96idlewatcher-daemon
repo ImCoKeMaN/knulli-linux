@@ -1,0 +1,108 @@
+#!/bin/bash
+
+DAEMON="/usr/bin/idlewatcher"
+PIDFILE="/var/run/idlewatcher.pid"
+CONF_FILE="/etc/idlewatcher/idlewatcher.conf"
+DAEMON_NAME=$(basename "$DAEMON")
+
+do_initialize() {
+  BATTSAVER_DIR="/var/run/battery-saver/"
+  mkdir -p "$BATTSAVER_DIR"
+
+  TIMER="$(/usr/bin/knulli-settings-get system.idlewatcher.timer)"
+  if [[ -z "$TIMER" || ! "$TIMER" =~ ^[0-9]+$ || "$TIMER" -lt 60 ]]; then
+      TIMER="300" # default in seconds
+      /usr/bin/knulli-settings-set system.idlewatcher.timer "$TIMER"
+  fi
+
+  EXTENDED_TIMER="$(/usr/bin/knulli-settings-get system.idlewatcher.extendedtimer)"
+  if [[ -z "$EXTENDED_TIMER" || ! "$EXTENDED_TIMER" =~ ^[0-9]+$ || "$EXTENDED_TIMER" -lt 60 ]]; then
+      EXTENDED_TIMER="900" # default in seconds
+      /usr/bin/knulli-settings-set system.idlewatcher.extendedtimer "$EXTENDED_TIMER"
+  fi
+
+  MODE="$(/usr/bin/knulli-settings-get system.batterysaver.mode)"
+  if [[ -z "$MODE" || ! "$MODE" =~ ^(dim|dispoff|suspend|shutdown|none)$ ]]; then
+    MODE="dim" # default can be dim|suspend|shutdown|none
+    /usr/bin/knulli-settings-set system.batterysaver.mode "$MODE"
+  fi
+
+  EXTENDED_MODE="$(/usr/bin/knulli-settings-get system.batterysaver.extendedmode)"
+  if [[ -z "$EXTENDED_MODE" || ! "$EXTENDED_MODE" =~ ^(suspend|shutdown|none)$ ]]; then
+    EXTENDED_MODE="suspend" # default can be suspend|shutdown|none
+    /usr/bin/knulli-settings-set system.batterysaver.extendedmode "$EXTENDED_MODE"
+  fi
+
+  AGGRESSIVE="$(/usr/bin/knulli-settings-get system.batterysaver.aggressive)"
+  if [[ -z "$AGGRESSIVE" || ! "$AGGRESSIVE" =~ ^(1|0)$ ]]; then
+    AGGRESSIVE="0" # default
+    /usr/bin/knulli-settings-set system.batterysaver.aggressive "$AGGRESSIVE"
+  fi
+}
+
+# Ensure config exists with defaults if empty
+ensure_conf() {
+  if [ ! -f "$CONF_FILE" ]; then
+    mkdir -p "$(dirname "$CONF_FILE")"
+    cat >"$CONF_FILE" <<'EOF'
+[Config]
+idle=300
+extended=900
+deadzone=25
+hooks_mirror=
+EOF
+  fi
+}
+
+# Sets the value determined by ES to the config file
+set_conf_value() {
+  key="$1"; val="$2"
+  if grep -Eq "^[[:space:]]*$key[[:space:]]*=" "$CONF_FILE"; then
+    sed -i "s|^[[:space:]]*$key[[:space:]]*=.*|$key=$val|" "$CONF_FILE"
+  else
+    printf '%s=%s\n' "$key" "$val" >> "$CONF_FILE"
+  fi
+}
+
+start_daemon() {
+    do_initialize
+    ensure_conf
+    set_conf_value idle     "$TIMER"
+    set_conf_value extended "$EXTENDED_TIMER"
+
+    echo "Starting $DAEMON_NAME."
+    if [ -f "$PIDFILE" ] && start-stop-daemon --status --pidfile "$PIDFILE" > /dev/null 2>&1; then
+        echo "$DAEMON_NAME is already running."
+        exit 0
+    fi
+
+    start-stop-daemon --start --quiet --background --make-pidfile --pidfile "$PIDFILE" --exec "$DAEMON" \
+        && echo "$DAEMON_NAME started OK" || { echo "$DAEMON_NAME failed to start"; exit 1; }
+}
+
+stop_daemon() {
+    echo "Stopping $DAEMON_NAME."
+    start-stop-daemon --stop --quiet --pidfile "$PIDFILE" \
+        && { echo "$DAEMON_NAME stopped"; rm -f "$PIDFILE"; } || { echo "$DAEMON_NAME is not running."; exit 1; }
+}
+
+# Sanity check
+test -x "$DAEMON" || exit 0
+
+case "$1" in
+    start)
+        start_daemon
+        ;;
+    stop)
+        stop_daemon
+        ;;
+    restart)
+        stop_daemon
+        sleep 0.5
+        start_daemon
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}" >&2
+        exit 1
+        ;;
+esac

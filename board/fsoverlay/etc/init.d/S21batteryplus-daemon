@@ -1,11 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
-DAEMON=/usr/bin/battery-saver.sh
-BATTSAVER_DIR="/var/run/battery-saver/"
-PIDFILE=/var/run/battery-saver/battery-saver.pid
+DAEMON="/usr/bin/batteryplus"
+PIDFILE="/var/run/batteryplus.pid"
 DAEMON_NAME=$(basename "$DAEMON")
-
-mkdir -p "$BATTSAVER_DIR"
 
 start_daemon() {
     echo "Starting $DAEMON_NAME."
@@ -25,7 +22,7 @@ stop_daemon() {
 }
 
 # Sanity check
-test -x $DAEMON || exit 0
+test -x "$DAEMON" || exit 0
 
 case "$1" in
     start)
@@ -36,7 +33,7 @@ case "$1" in
         ;;
     restart)
         stop_daemon
-        sleep 1
+        sleep 0.5
         start_daemon
         ;;
     *)
