@@ -6,7 +6,7 @@ index 85fc266..10ed803 100644
        if (!resources)
          continue;
  
-+      // batocera
++      // knulli
 +      int drmConn = 0;
 +      {
 +	FILE* fdDrmConn;
@@ -32,7 +32,7 @@ index 85fc266..10ed803 100644
  
    m_connectors.clear();
 +
-+  // batocera
++  // knulli
 +  int drmConn = 0;
 +  {
 +    FILE* fdDrmConn;

@@ -26,7 +26,7 @@ touch "${REBOOT_FLAG}" || exit 1
 # environment
 export HOME=/userdata/system
 
-#batocera-switch-screen-checker --init
+#knulli-switch-screen-checker --init
 
 # Start PVR 
 /usr/local/bin/pvrsrvctl --start --no-module

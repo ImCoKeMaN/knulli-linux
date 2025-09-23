@@ -12,10 +12,10 @@ si4::sysinit:/bin/mount -a
 si5::sysinit:/bin/hostname -F /etc/hostname
 si6::sysinit:/etc/init.d/rcS
 
-S0::respawn:/sbin/getty -n -L -l /usr/bin/batocera-autologin console 115200 vt100 # GENERIC_SERIAL
+S0::respawn:/sbin/getty -n -L -l /usr/bin/knulli-autologin console 115200 vt100 # GENERIC_SERIAL
 # 2:3:respawn:/sbin/getty 38400 tty2
 # 3:3:respawn:/sbin/getty 38400 tty3
-4:3:respawn:/sbin/getty 38400 tty4 -n -l /usr/bin/batocera-mixer
+4:3:respawn:/sbin/getty 38400 tty4 -n -l /usr/bin/knulli-mixer
 5:3:respawn:/sbin/getty 38400 tty5
 
 # Stuff to do for the 3-finger salute

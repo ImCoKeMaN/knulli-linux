@@ -79,8 +79,8 @@ if grep -qE '^[ ]*autoresize[ ]*=[ ]*true[ ]*$' "${BOOTCONF}"; then
     # --- BEGIN RESIZE ---
     
     # Get /userdata partition details
-    PART=$(batocera-part "share_internal")
-    PARTNUM=$(batocera-part "share_internal_num")
+    PART=$(knulli-part "share_internal")
+    PARTNUM=$(knulli-part "share_internal_num")
     echo "Partition name: $PART & number: $PARTNUM" >> "$LOG"
     
     # Check the initial partition size
@@ -97,7 +97,7 @@ if grep -qE '^[ ]*autoresize[ ]*=[ ]*true[ ]*$' "${BOOTCONF}"; then
     fi
     
     # boot disk
-    DISK=$(batocera-part prefix "${PART}")
+    DISK=$(knulli-part prefix "${PART}")
     echo "Disk = $DISK" >> "$LOG"
 
     TABLETYPE=$(parted -s ${DISK} print | grep 'Partition Table' | awk '{print $3}')
@@ -173,7 +173,7 @@ else
             "Formatting /userdata.........." "Pending"
             "Removing trigger.............." "Pending"
         )
-        PART=$(batocera-part "share_internal")
+        PART=$(knulli-part "share_internal")
 
 	# remove the trigger
 	mount -o remount,rw /boot && sed -i -e s+'^[ ]*format-internal'+'#format-internal'+ "${BOOTCONF}" && mount -o remount,ro /boot

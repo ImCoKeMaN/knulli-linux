@@ -47,7 +47,7 @@ class KnulliUpgrader:
     def get_arch_name(self):
         """Get architecture name from system"""
         try:
-            with open('/usr/share/batocera/knulli.arch', 'r') as f:
+            with open('/usr/share/knulli/knulli.arch', 'r') as f:
                 return f.read().strip()
         except FileNotFoundError:
             print("ERROR: Cannot determine architecture")
@@ -138,7 +138,7 @@ class KnulliUpgrader:
         if not rootfs_md5:
             # Calculate MD5 of existing rootfs for older installations
             print("Calculating MD5 of existing rootfs...")
-            rootfs_md5 = self.calculate_md5("/boot/boot/batocera")
+            rootfs_md5 = self.calculate_md5("/boot/boot/knulli")
         
         # Get partition information
         partitions = {}
@@ -505,7 +505,7 @@ def main():
             print("ERROR: Invalid channel. Use: stable, dev, or alpha")
             return 1
     else:
-        # Get default channel from batocera settings
+        # Get default channel from knulli settings
         try:
             result = subprocess.run(
                 ["knulli-settings-get", "updates.type"],
@@ -516,10 +516,10 @@ def main():
             if result.returncode == 0:
                 channel = result.stdout.strip()
                 if channel not in ["stable", "dev", "alpha"]:
-                    print(f"WARNING: Invalid channel '{channel}' from batocera settings, using 'stable'")
+                    print(f"WARNING: Invalid channel '{channel}' from knulli settings, using 'stable'")
                     channel = "stable"
             else:
-                print("WARNING: Failed to get channel from batocera settings, using 'stable'")
+                print("WARNING: Failed to get channel from knulli settings, using 'stable'")
                 channel = "stable"
         except (subprocess.TimeoutExpired, FileNotFoundError):
             print("WARNING: knulli-settings-get not available, using 'stable'")
