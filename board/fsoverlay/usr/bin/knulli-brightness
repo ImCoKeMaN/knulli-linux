@@ -1,0 +1,225 @@
+#!/bin/sh
+
+CYCLESTEP=20 # % additional brightness at each step
+XMIN=3
+VALPATH=/var/run/$(basename "$0") # Stored brightness value when the display is turned off.
+LOCK=/var/run/$(basename "$0").lock
+
+exec 9>"$LOCK"
+flock -n 9 || exit 0
+trap 'flock -u 9; exec 9>&-' EXIT INT TERM
+
+BACKLIGHT_DIR=
+for d in /sys/class/backlight/*; do
+  [ -d "$d" ] && { BACKLIGHT_DIR="$d"; break; }
+done
+
+if [ -n "$BACKLIGHT_DIR" ] && [ -r "$BACKLIGHT_DIR/brightness" ] && [ -r "$BACKLIGHT_DIR/max_brightness" ]; then
+  if [ -r "$BACKLIGHT_DIR/max_brightness" ]; then
+  read -r XMAX < "$BACKLIGHT_DIR/max_brightness"
+  else
+    XMAX=
+  fi
+  [ -z "$XMAX" ] && XMAX=255
+  bl_get() { read -r v < "$BACKLIGHT_DIR/brightness"; printf '%s\n' "$v"; }
+  bl_set() { printf '%s' "$1" > "$BACKLIGHT_DIR/brightness"; }
+else
+  XMAX=255
+  bl_get() { brightness get; }
+  bl_set() { brightness set "$1"; }
+fi
+
+FB_BLANK=/sys/class/graphics/fb0/blank
+
+animate_brightness() {
+    current=$1
+    target=$2
+    duration=250   # total ms
+    min_steps=3
+    max_steps=6
+
+    distance=$(( target - current ))
+    abs_distance=$(( distance < 0 ? -distance : distance ))
+
+    steps=$abs_distance
+    [ "$steps" -lt "$min_steps" ] && steps=$min_steps
+    [ "$steps" -gt "$max_steps" ] && steps=$max_steps
+    [ "$steps" -eq 0 ] && steps=$min_steps
+
+    step=$(( distance / steps ))
+    [ "$step" -eq 0 ] && step=$(( distance > 0 ? 1 : -1 ))
+    remainder=$(( distance - step*steps ))
+
+    # fractional seconds per step
+    sleep_s=$(awk -v d="$duration" -v s="$steps" 'BEGIN{printf("%.4f", d/(s*1000.0))}')
+
+    i=0
+    while [ "$i" -lt "$steps" ]; do
+        extra=0
+        if [ "$remainder" -ne 0 ]; then
+            if [ "$remainder" -gt 0 ]; then extra=1; else extra=-1; fi
+            remainder=$(( remainder - extra ))
+        fi
+
+        current=$(( current + step + extra ))
+
+        # clamp overshoot
+        if [ "$step" -gt 0 ] && [ "$current" -gt "$target" ]; then current=$target; fi
+        if [ "$step" -lt 0 ] && [ "$current" -lt "$target" ]; then current=$target; fi
+
+        bl_set "$current"
+        sleep "$sleep_s"
+
+        i=$(( i + 1 ))
+    done
+}
+
+get_percent() {
+    VAL=$1
+    printf '%d\n' $(( (VAL * 100 + XMAX / 2) / XMAX ))
+}
+
+percent_to_abs() {
+    PCT=$1
+    if [ "$PCT" -le 0 ]; then
+        printf '0\n'
+    elif [ "$PCT" -eq 1 ]; then
+        printf '%s\n' "$XMIN"
+    else
+        printf '%d\n' $(( (PCT * XMAX + 50) / 100 ))
+    fi
+}
+
+setValue() {
+    NEWVAL=$1
+
+    test "${NEWVAL}" -lt 0         && NEWVAL=0
+    test "${NEWVAL}" -gt "${XMAX}" && NEWVAL="${XMAX}"
+
+    bl_set "${NEWVAL}"
+}
+
+cycle() {
+    X=$(bl_get)
+    FVALUE=$(get_percent "$X")
+    NEWVAL=$(( FVALUE + CYCLESTEP ))
+    [ "$NEWVAL" -gt 100 ] && NEWVAL=0
+    echo "Brightness cycling to ${NEWVAL}%"
+    NEWVAL=$(( NEWVAL * XMAX / 100 ))
+    setValue "$NEWVAL"
+    exit 0
+}
+
+display_off() {
+    ABS=$(bl_get)
+    PERCENT=$(get_percent "$ABS")
+
+    if [ ! -e "${VALPATH}" ]; then
+        echo "${PERCENT}" > "${VALPATH}"
+    fi
+    setValue 0
+
+    if [ -z "$BACKLIGHT_DIR" ] && [ -w "$FB_BLANK" ]; then
+        echo 4 > "$FB_BLANK"
+    fi
+
+    exit 0
+}
+
+display_on() {
+    if [ -e "${VALPATH}" ]; then
+        read -r PERCENT_SAVED < "$VALPATH"
+        RESTORE_ABS=$(percent_to_abs "$PERCENT_SAVED")
+        setValue "$RESTORE_ABS"
+        rm -f "${VALPATH}"
+    fi
+
+    if [ -z "$BACKLIGHT_DIR" ] && [ -w "$FB_BLANK" ]; then
+        echo 0 > "$FB_BLANK"
+    fi
+    exit 0
+}
+
+# get
+if test $# = 0
+then
+    X=$(bl_get)
+    get_percent "$X"
+    exit 0
+fi
+
+# set
+if test $# = 1
+then
+    if [ "${1}" = "cycle" ]; then
+        cycle
+    elif [ "${1}" = "dispoff" ]; then
+        display_off
+    elif [ "${1}" = "dispon" ]; then
+        display_on
+    elif [ "${1}" = "dim" ]; then
+        ABS=$(bl_get)
+        PERCENT=$(get_percent "$ABS")
+
+        if [ -e "${VALPATH}" ]; then
+            # RESTORE (always restore when we have a saved value)
+            read -r PERCENT_SAVED < "$VALPATH"
+            RESTORE_ABS=$(percent_to_abs "$PERCENT_SAVED")
+            animate_brightness "$ABS" "$RESTORE_ABS"
+            rm -f "${VALPATH}"
+        else
+            # DIM (only save/animate if we’re above 1%)
+            if [ "$PERCENT" -gt 1 ]; then
+                echo "${PERCENT}" > "${VALPATH}"
+                animate_brightness "$ABS" "$XMIN"
+            fi
+        fi
+        exit 0
+    else
+        if [ "$1" -eq 1 ]; then
+            NEWVAL=$XMIN
+        else
+            NEWVAL=$(( $1 * XMAX / 100 ))
+        fi
+       setValue "${NEWVAL}"
+       exit 0
+    fi
+fi
+
+# set +/-
+if test $# = 2
+then
+    X=$(bl_get)
+    DELTA=$(( $2 * XMAX / 100 ))
+
+    if [ "${1}" = "+" ]; then
+
+        if [ "${X}" -eq 0 ]; then
+            NEWVAL=${XMIN}
+        else
+            NEWVAL=$(( X + DELTA ))
+        fi
+
+    elif [ "${1}" = "-" ]; then
+
+        NEWVAL=$(( X - DELTA ))
+
+        if [ "${NEWVAL}" -lt "${XMIN}" ] && [ "${X}" -ne "${XMIN}" ] && [ "${X}" -ne 0 ]; then
+            NEWVAL=${XMIN}
+        fi
+    fi
+
+    [ "$NEWVAL" -eq "$X" ] && exit 0
+    setValue "${NEWVAL}"
+    exit 0
+fi
+
+# help
+echo "${0}"      >&2
+echo "${0} + 10" >&2
+echo "${0} - 20" >&2
+echo "${0} cycle" >&2
+echo "${0} dispoff" >&2
+echo "${0} dispon" >&2
+echo "${0} dim" >&2
+exit 1
