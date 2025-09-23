@@ -1,0 +1,70 @@
+#!/bin/sh
+BOOTCONF="/boot/knulli-boot.conf"
+
+. /etc/profile.d/xdg.sh
+. /etc/profile.d/dbus.sh
+
+find_swaysock() {
+  SWAYSOCK="$(ls -1 /run/user/0/sway-ipc.*.sock 2>/dev/null | head -n1)"
+}
+
+kill_es() {
+  curl -s --connect-timeout 2 "http://localhost:1234/quit" > /dev/null
+
+  # Wait up to 10s, then force kill
+  timeout=40
+  while pidof emulationstation >/dev/null 2>&1; do
+    sleep 0.25
+    timeout=$((timeout - 1))
+    [ "$timeout" -le 0 ] && { pkill -9 -f "^emulationstation($| )"; break; }
+  done
+}
+
+case "$1" in
+    start)
+        enabled="$(/usr/bin/knulli-settings-get system.es.atstartup)"
+        if [ "$enabled" != "0" ]; then
+            if pidof emulationstation > /dev/null; then
+                echo "Emulationstation is already running..."
+                exit 0
+            fi
+            if pidof sway >/dev/null 2>&1; then
+              if [ -S "${SWAYSOCK:-}" ]; then
+                swaymsg -s "$SWAYSOCK" exec '/usr/bin/emulationstation-standalone' >/dev/null 2>&1
+              fi
+            else
+                sway-launch &
+            fi
+        fi
+        ;;
+
+    stop)
+        emulationstation-standalone --stop-rebooting 2>/dev/null
+        kill_es
+        #killall openbox   2>/dev/null  # for xorg
+        #killall sway    2>/dev/null  # sway does not like being killed
+        killall touchegg 2>/dev/null
+        ;;
+
+    suspend)
+        PGID=$(ps -o pgid= -p "$(pidof emulationstation | awk '{print $1}')" | tr -d ' ')
+        [ -n "$PGID" ] && kill -STOP -"$PGID"
+        ;;
+
+    resume)
+        PGID=$(ps -o pgid= -p "$(pidof emulationstation | awk '{print $1}')" | tr -d ' ')
+        [ -n "$PGID" ] && kill -CONT -"$PGID"
+        sm8250-audio-resync # resync audio
+        ;;
+
+    restart|reload)
+        "$0" stop
+        "$0" start
+        ;;
+
+    *)
+        echo "Usage: $0 {start|stop|suspend|resume|restart}"
+        exit 1
+esac
+
+exit $?
