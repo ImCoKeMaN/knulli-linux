@@ -1,0 +1,141 @@
+#!/bin/sh
+
+LOCK_FILE="/var/run/knulli-suspend.lock"
+
+exec 9>"${LOCK_FILE}"
+if ! flock -n 9; then
+    exit 0
+fi
+
+trap 'flock -u 9;' EXIT
+
+# debounce file controllerd by pm-utils suspend/wake hooks
+DEBOUNCE_FILE="/var/run/suspend.debounce"
+
+[ -e "$DEBOUNCE_FILE" ] && exit 0
+
+WAKE_TIME="/var/run/rtc-wake.epoch"
+
+usage() {
+  echo "Usage: $0 [TIMER_SECONDS [ -s|--shutdown ]]" >&2
+  exit 1
+}
+
+is_int() {
+    case "$1" in
+        ''|*[!0-9]*) return 1 ;;
+        *) return 0 ;;
+    esac
+}
+
+save_time() {
+  TIMER="$1"
+
+  now=$(date +%s)
+  target=$(( now + TIMER ))
+  echo "$target" > "$WAKE_TIME"
+}
+
+check_auto_shutdown() {
+  [ -r "$WAKE_TIME" ] || return 0
+  read -r recorded < "$WAKE_TIME" 2>/dev/null || recorded=""
+  rm -f "$WAKE_TIME"
+  [ -n "$recorded" ] || return 0
+
+  now=$(date +%s)
+  # 10s grace period to protect against shift
+  diff=$(( now - recorded ))
+  [ "$diff" -lt 0 ] && diff=$(( -diff ))
+  if [ "$diff" -le 10 ]; then
+    knulli-shutdown -s
+  fi
+}
+
+clear_rtcs() {
+  for r in /sys/class/rtc/rtc*; do
+    [ -w "$r/wakealarm" ] && echo 0 > "$r/wakealarm" 2>/dev/null
+  done
+}
+
+arm_rtcs() {
+  secs="$1"
+  armed=0
+  for r in /sys/class/rtc/rtc*; do
+    [ -d "$r" ] || continue
+    dev="${r##*/}"
+
+    # Allow as wake source if supported
+    [ -w "$r/device/power/wakeup" ] && echo enabled > "$r/device/power/wakeup" 2>/dev/null
+
+    # Program alarm only; don't suspend here
+    if rtcwake -d "$dev" -m no -s "$secs" >/dev/null 2>&1; then
+      armed=1
+      continue
+    fi
+
+  done
+  [ "$armed" -eq 1 ]  # returns 0 if at least one armed, 1 otherwise
+}
+
+TIMER=""
+AUTO_SD=0
+
+# 0 args: normal suspend
+# 1 arg : must be positive integer timer
+# 2 args: timer + (-s|--shutdown)
+case "$#" in
+  0)
+    ;;
+  1|2)
+    # validate first arg as timer once
+    if is_int "$1" && [ "$1" -gt 0 ]; then
+      TIMER="$1"
+      shift
+    else
+      echo "Error: TIMER must be a positive integer." >&2
+      usage
+    fi
+
+    # if there’s a second arg, it must be the shutdown flag
+    if [ "$#" -eq 1 ]; then
+      case "$1" in
+        -s|--shutdown)
+          AUTO_SD=1
+          ;;
+        *)
+          echo "Error: second arg must be -s or --shutdown." >&2;
+          usage
+          ;;
+      esac
+      shift
+    fi
+    ;;
+  *)
+    usage
+    ;;
+esac
+
+# Arm only if timer is valid and > 0
+if [ -n "$TIMER" ] && [ "$TIMER" -gt 0 ]; then
+  clear_rtcs
+  if arm_rtcs "$TIMER"; then
+    [ "$AUTO_SD" -eq 1 ] && save_time "$TIMER"
+  else
+    # No RTC armed: no auto-shutdown on manual wake
+    AUTO_SD=0
+    rm -f "$WAKE_TIME" 2>/dev/null
+  fi
+else
+  rm -f "$WAKE_TIME" 2>/dev/null
+  AUTO_SD=0
+fi
+
+pm-is-supported --suspend >/dev/null 2>&1 && pm-suspend
+
+if [ "$AUTO_SD" -eq 1 ]; then
+  check_auto_shutdown
+else
+  rm -f "$WAKE_TIME" 2>/dev/null
+fi
+
+exit 0
