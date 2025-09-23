@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# Run when battery hits 0%.  Shutdown if still discharging after TIMEOUT seconds
+
+TIMEOUT=60   # seconds
+COUNT=0
+
+while [ $COUNT -lt $TIMEOUT ]; do
+    status=$(knulli-battery-check status)
+
+    [ "$status" = "Charging" ] && exit 0
+
+    sleep 1
+    COUNT=$((COUNT+1))
+done
+
+# Timed out with battery still discharging so shutdown
+knulli-shutdown -s
+
+exit 0

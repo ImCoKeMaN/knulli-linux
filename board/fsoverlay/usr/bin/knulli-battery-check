@@ -1,0 +1,65 @@
+#!/bin/bash
+
+BATT_PCT="/tmp/battery.percent"
+BATT_STATUS="/tmp/battery.status"
+
+# Get battery percentage
+get_battery() {
+    local batt
+    if [[ -f $BATT_PCT ]]; then
+        batt=$(<"$BATT_PCT")
+    else
+        batt=$(grep -m1 "^POWER_SUPPLY_CAPACITY=" /sys/class/power_supply/*{BAT,bat}*/uevent 2>/dev/null | cut -d= -f2)
+        if [[ -z $batt ]]; then
+            local now max
+            now=$(grep -m1 "^POWER_SUPPLY_CHARGE_NOW="  /sys/class/power_supply/*{FUEL,fuel}*/uevent 2>/dev/null | cut -d= -f2)
+            max=$(grep -m1 "^POWER_SUPPLY_CHARGE_FULL=" /sys/class/power_supply/*{FUEL,fuel}*/uevent 2>/dev/null | cut -d= -f2)
+            if [[ -n $now && -n $max && $max -ne 0 ]]; then
+                batt=$(( (200 * now / max % 2) + (100 * now / max) ))
+            fi
+        fi
+    fi
+
+    echo "$batt"
+}
+
+# Get charging/discharging/full status
+get_charge_status() {
+    local status
+    if [[ -f $BATT_STATUS ]]; then
+        status=$(<"$BATT_STATUS")
+    else
+        status=$(cat /sys/class/power_supply/*{BAT,bat,FUEL,fuel}*/status 2>/dev/null | head -1)
+    fi
+
+    echo "$status"
+}
+
+change_status() {
+    local status
+    status=$(cat /sys/class/power_supply/*{BAT,bat,FUEL,fuel}*/status 2>/dev/null | head -1)
+    [[ -n $status ]] && echo "$status" > "$BATT_STATUS"
+}
+
+case "$1" in
+    charge)
+        get_battery
+        ;;
+    status)
+        get_charge_status
+        ;;
+    change)
+        change_status
+        ;;
+    report|"")
+        echo "Battery Status Report:"
+        echo "  Charge:     $(get_battery)%"
+        echo "  Status:     $(get_charge_status)"
+        ;;
+    *)
+        echo "Usage: $0 {charge|status|report}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

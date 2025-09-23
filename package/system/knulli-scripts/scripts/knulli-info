@@ -19,17 +19,7 @@ getCpu() {
 }
 
 # Detect battery
-BATTERY_DIR=$(ls -d /sys/class/power_supply/*{BAT,bat}* 2>/dev/null | head -1)
-BATT=$(cat ${BATTERY_DIR}/uevent 2>/dev/null | grep -E "^POWER_SUPPLY_CAPACITY=" | sed -e s+'^POWER_SUPPLY_CAPACITY='++ | sort -rn | head -1)
-
-if [ -z "${BATT}" ]; then
-    BATTERY_DIR=$(ls -d /sys/class/power_supply/*{FUEL,fuel}* 2>/dev/null | head -1)
-    NOW=$(cat ${BATTERY_DIR}/uevent 2>/dev/null | grep -E "^POWER_SUPPLY_CHARGE_NOW=" | sed -e s+'^POWER_SUPPLY_CHARGE_NOW='++ | sort -rn | head -1)
-    MAX=$(cat ${BATTERY_DIR}/uevent 2>/dev/null | grep -E "^POWER_SUPPLY_CHARGE_FULL=" | sed -e s+'^POWER_SUPPLY_CHARGE_FULL='++ | sort -rn | head -1)
-    if [ -n "$NOW" ] && [ -n "$MAX" ] && [ "$MAX" -ne 0 ]; then
-        BATT=$((200 * $NOW / $MAX % 2 + 100 * $NOW / $MAX))
-    fi
-fi
+BATT=$(knulli-battery-check charge)
 
 if [ -n "${BATTERY_DIR}" ]; then
     BATTREMAINING=""
@@ -53,7 +43,7 @@ if [ -n "${BATTERY_DIR}" ]; then
             fi
         fi
     fi
-fi	
+fi
 
 ### short version (for osd)
 if test "$1" = "--short"; then
