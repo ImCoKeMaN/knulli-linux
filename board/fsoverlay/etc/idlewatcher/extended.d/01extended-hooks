@@ -1,0 +1,42 @@
+#!/bin/bash
+
+BATTSAVER_DIR="/var/run/battery-saver/"
+mkdir -p "$BATTSAVER_DIR"
+
+EXTENDED_MODE="$(/usr/bin/knulli-settings-get system.batterysaver.extendedmode)"
+
+check_pause() {
+  # return 0 if any *.pause exists, else 1
+  compgen -G "$BATTSAVER_DIR"/*.pause > /dev/null && return 0
+  return 1
+}
+
+do_extended() {
+    case "$EXTENDED_MODE" in
+        suspend)
+            knulli-suspend
+        ;;
+        shutdown)
+            knulli-shutdown -s
+        ;;
+    esac
+}
+
+case "$1" in
+  idle)
+
+    ;;
+  extended)
+    if ! check_pause; then
+      do_extended
+    fi
+    ;;
+  active)
+
+    ;;
+  *)
+
+    ;;
+esac
+
+exit 0

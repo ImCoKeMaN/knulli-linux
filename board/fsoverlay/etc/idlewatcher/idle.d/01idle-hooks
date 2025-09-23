@@ -1,0 +1,87 @@
+#!/bin/bash
+
+BATTSAVER_DIR="/var/run/battery-saver/"
+mkdir -p "$BATTSAVER_DIR"
+
+GOVERNOR_SAVED="/var/run/battery-saver/governor.saved"
+GOVERNOR=""
+
+MODE="$(/usr/bin/knulli-settings-get system.batterysaver.mode)"
+
+EXTENDED_MODE="$(/usr/bin/knulli-settings-get system.batterysaver.extendedmode)"
+
+EXTENDED_TIMER="$(/usr/bin/knulli-settings-get system.idlewatcher.extendedtimer)"
+
+AGGRESSIVE="$(/usr/bin/knulli-settings-get system.batterysaver.aggressive)"
+
+check_pause() {
+  # return 0 if any *.pause exists, else 1
+  compgen -G "$BATTSAVER_DIR"/*.pause > /dev/null && return 0
+  return 1
+}
+
+do_aggressive() {
+  # Pause emulator processes (we set to -4 niceness so this is easy to target)
+  for pid in $(ps -eo pid,ni | awk '$2==-4 {print $1}'); do
+    kill -STOP "$pid"
+  done
+  # Pause ES
+  /etc/init.d/S31emulationstation suspend
+
+  # Save current governor and set to powersave
+  if [[ -r /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ]]; then
+    read -r GOVERNOR < /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || GOVERNOR=""
+    if [[ -n "$GOVERNOR" && "$GOVERNOR" != "powersave" ]]; then
+      echo "$GOVERNOR" > "$GOVERNOR_SAVED"
+      for g in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+        echo powersave > "$g" 2>/dev/null || true
+      done
+    fi
+  fi
+}
+
+do_idle() {
+    case "$MODE" in
+        dim)
+            knulli-brightness dim
+            knulli-audio setSystemVolume mute
+
+            [[ "$AGGRESSIVE" == "1" ]] && do_aggressive
+        ;;
+        dispoff)
+            knulli-audio setSystemVolume mute
+            knulli-brightness dispoff
+
+            [[ "$AGGRESSIVE" == "1" ]] && do_aggressive
+        ;;
+        suspend)
+            if [[ "$EXTENDED_MODE" == "shutdown" ]] && [[ -n "$EXTENDED_TIMER" ]]; then
+              knulli-suspend "$EXTENDED_TIMER" -s # for rtc wakeup then auto shutdown
+            else
+              knulli-suspend
+            fi
+        ;;
+        shutdown)
+            knulli-shutdown -s
+        ;;
+    esac
+}
+
+case "$1" in
+  idle)
+    if ! check_pause; then
+      do_idle
+    fi
+    ;;
+  extended)
+
+    ;;
+  active)
+
+    ;;
+  *)
+
+    ;;
+esac
+
+exit 0

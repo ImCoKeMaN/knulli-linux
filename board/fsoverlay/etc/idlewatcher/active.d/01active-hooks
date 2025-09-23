@@ -1,0 +1,64 @@
+#!/bin/bash
+
+BATTSAVER_DIR="/var/run/battery-saver/"
+mkdir -p "$BATTSAVER_DIR"
+
+GOVERNOR_SAVED="/var/run/battery-saver/governor.saved"
+GOVERNOR=""
+
+MODE="$(/usr/bin/knulli-settings-get system.batterysaver.mode)"
+
+AGGRESSIVE="$(/usr/bin/knulli-settings-get system.batterysaver.aggressive)"
+
+undo_aggressive() {
+  # Pause emulator processes (we set to -4 niceness so this is easy to target)
+  for pid in $(ps -eo pid,ni | awk '$2==-4 {print $1}'); do
+    kill -CONT "$pid"
+  done
+
+  # Resume ES
+  /etc/init.d/S31emulationstation resume
+
+  # Restore governor if we saved one
+  if [ -r "$GOVERNOR_SAVED" ]; then
+    read -r PREV < "$GOVERNOR_SAVED" 2>/dev/null || PREV=""
+    [ -n "$PREV" ] && for g in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+      echo "$PREV" > "$g" 2>/dev/null || true
+    done
+    rm -f "$GOVERNOR_SAVED"
+  fi
+}
+
+do_active() {
+    case "$MODE" in
+        dim)
+            [[ "${AGGRESSIVE:-0}" == "1" ]] && undo_aggressive
+
+            knulli-audio setSystemVolume unmute
+            knulli-brightness dim
+        ;;
+        dispoff)
+            [[ "${AGGRESSIVE:-0}" == "1" ]] && undo_aggressive
+
+            knulli-brightness dispon
+            knulli-audio setSystemVolume unmute
+        ;;
+    esac
+}
+
+case "$1" in
+  idle)
+
+    ;;
+  extended)
+
+    ;;
+  active)
+    do_active
+    ;;
+  *)
+
+    ;;
+esac
+
+exit 0
