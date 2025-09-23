@@ -44,12 +44,12 @@ do_idle() {
     case "$MODE" in
         dim)
             knulli-brightness dim
-            knulli-audio setSystemVolume mute
+            pactl set-sink-mute @DEFAULT_SINK@ true
 
             [[ "$AGGRESSIVE" == "1" ]] && do_aggressive
         ;;
         dispoff)
-            knulli-audio setSystemVolume mute
+            pactl set-sink-mute @DEFAULT_SINK@ true
             knulli-brightness dispoff
 
             [[ "$AGGRESSIVE" == "1" ]] && do_aggressive
