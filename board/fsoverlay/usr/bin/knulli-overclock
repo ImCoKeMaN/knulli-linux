@@ -1,0 +1,206 @@
+#!/bin/sh
+
+# === constants ===
+ARCH="$(tr -d ' \t\r\n' </usr/share/knulli/knulli.arch 2>/dev/null)"
+CPU_PATH="/sys/devices/system/cpu"
+UNLOCK_FILE="/userdata/system/.unlockcpu"
+POLICY_GLOB="/sys/devices/system/cpu/cpufreq/policy*"
+
+# === usage / flags ===
+f_usage() {
+    echo "$0 list" >&2
+    echo "$0 set <KHz>" >&2
+}
+
+is_unlocked() { [ -e "$UNLOCK_FILE" ]; }
+
+# === policy helpers ===
+list_policies() {
+    for d in /sys/devices/system/cpu/cpufreq/policy*; do
+        [ -d "$d" ] && printf "%s\n" "$d"
+    done
+}
+
+policy_avail() { [ -r "$1/scaling_available_frequencies" ] || return 1; cat "$1/scaling_available_frequencies"; }
+
+policy_max() {
+     if [ -r "$1/cpuinfo_max_freq" ]; then
+         cat "$1/cpuinfo_max_freq"
+     else
+         awk '{print $NF}' "$1/scaling_available_frequencies" 2>/dev/null
+     fi
+}
+
+policy_gated_max() { # $1=policy dir -> highest allowed under gate
+    n="$(get_gate_count)"; [ "${n:-0}" -le 0 ] && { policy_max "$1"; return; }
+    awk -v n="$n" '{len=NF; idx=len-n; if (idx<1) idx=1; print $(idx)}' \
+        "$1/scaling_available_frequencies" 2>/dev/null
+}
+
+select_anchor_policy() {
+    local best="" bestmax=0 m
+    for p in $(list_policies); do
+        m="$(policy_max "$p" 2>/dev/null)" || continue
+        [ -z "$m" ] && continue
+        if [ "$m" -gt "$bestmax" ]; then bestmax="$m"; best="$p"; fi
+    done
+    [ -n "$best" ] && { echo "$best"; return; }
+    echo "/sys/devices/system/cpu/cpufreq/policy0"
+}
+
+clamp_for_policy() {
+    awk -v T="$2" '{
+        for (i=1;i<=NF;i++) if ($i<=T) last=$i;
+        if (!last) last=$1;
+    } END { if (last) print last }' "$1/scaling_available_frequencies" 2>/dev/null
+}
+
+# === frequency helpers ===
+get_available_freqs() {
+    # Use the fastest policy table for listing (helps with big/little cores)
+    local p="${ANCHOR:-$(select_anchor_policy)}"
+    local f="$p/scaling_available_frequencies"
+    [ -r "$f" ] || return 1
+    cat "$f"
+}
+
+# Exit 0 if $1 is found in list
+freq_in_list() { grep -qxF "$1"; }
+
+list_all_freqs() {
+    freqs="$(get_available_freqs)"
+    [ -z "$freqs" ] && return 0
+    printf "%s\n" $freqs
+}
+
+get_max_freq() {
+    list_all_freqs | tail -n 1
+}
+
+# === gating for list ===
+get_gate_count() {
+    case "$ARCH" in
+        h700)
+            echo 2
+            ;;
+        *)
+            echo 0
+            ;;
+    esac
+}
+
+# Apply gating when locked (remove top-N)
+list_allowed_freqs() {
+    if is_unlocked; then
+        list_all_freqs
+        return
+    fi
+    gate_n="$(get_gate_count)"
+    if [ "${gate_n:-0}" -le 0 ]; then
+        list_all_freqs
+        return
+    fi
+    list_all_freqs | awk -v n="$gate_n" '{ a[NR]=$0 } END { m=NR-n; if (m<0) m=0; for (i=1;i<=m;i++) print a[i] }'
+}
+
+# === defaults ===
+get_default_freq() {
+    case "$ARCH" in
+        h700)
+            echo 1416000
+            ;;
+        a133)
+            echo 1416000
+            ;;
+        *)
+            get_max_freq
+            ;;
+    esac
+}
+
+# === commands ===
+do_list() {
+    ANCHOR="$(select_anchor_policy)"
+    DEFAULT="$(get_default_freq)"
+    allowed="$(list_allowed_freqs)"
+    [ -z "$allowed" ] && return
+
+    echo "$allowed" | while read -r freq; do
+        [ -z "$freq" ] && continue
+        mhz=$((freq / 1000))
+        if [ -n "$DEFAULT" ] && [ "$freq" = "$DEFAULT" ]; then
+            # value (kHz) then a space, then the full label
+            printf "%s %s MHz (DEFAULT)\n" "$freq" "$mhz"
+        else
+            printf "%s %s MHz\n" "$freq" "$mhz"
+        fi
+    done
+    # Add a synthetic entry so ES shows a "default" option but sends 'none'
+    printf "none default\n"
+}
+
+do_set() {
+    FREQ="$1"
+    [ -z "$FREQ" ] && { f_usage; exit 1; }
+    ANCHOR="$(select_anchor_policy)"
+    POLS="$(list_policies)"
+
+        if [ "$FREQ" = "none" ] || [ "$FREQ" = "default" ]; then
+        DEF="$(get_default_freq)"
+        if [ -n "$DEF" ]; then
+            for p in $POLS; do
+                d="$(clamp_for_policy "$p" "$DEF")"
+                cur=""; IFS= read -r cur < "$p/scaling_max_freq" 2>/dev/null || true
+                [ -n "$d" ] && [ "$d" != "$cur" ] && echo "$d" > "$p/scaling_max_freq" 2>/dev/null
+            done
+        else
+            for p in $POLS; do
+                if is_unlocked; then
+                    d="$(policy_max "$p" 2>/dev/null)" || continue
+                else
+                    d="$(policy_gated_max "$p" 2>/dev/null)" || continue
+                fi
+                cur=""; IFS= read -r cur < "$p/scaling_max_freq" 2>/dev/null || true
+                [ -n "$d" ] && [ "$d" != "$cur" ] && echo "$d" > "$p/scaling_max_freq" 2>/dev/null
+            done
+        fi
+        knulli-settings-set system.cpu.maxfreq ""
+        exit 0
+    fi
+
+    case "$FREQ" in ''|*[!0-9]*)
+        echo "Unsupported: $FREQ" >&2; exit 1;;
+    esac
+
+    CF_ANCHOR="$(clamp_for_policy "$ANCHOR" "$FREQ")"
+    [ -z "$CF_ANCHOR" ] && { echo "Unsupported: $FREQ" >&2; exit 1; }
+    [ "$CF_ANCHOR" != "$FREQ" ] && { echo "Unsupported: $FREQ" >&2; exit 1; }
+    # If locked, enforce gating using the exact requested value
+    if ! is_unlocked; then
+        list_allowed_freqs | freq_in_list "$FREQ" || { echo "Gated: $FREQ" >&2; exit 1; }
+    fi
+
+    for p in $POLS; do
+        cf="$(clamp_for_policy "$p" "$FREQ")"
+        cur=""; IFS= read -r cur < "$p/scaling_max_freq" 2>/dev/null || true
+        [ -n "$cf" ] && [ "$cf" != "$cur" ] && echo "$cf" > "$p/scaling_max_freq" 2>/dev/null
+    done
+    knulli-settings-set system.cpu.maxfreq "$FREQ"
+    exit 0
+}
+
+case "$1" in
+    list)
+        do_list
+        ;;
+    set)
+        shift;
+        do_set "$@"
+        ;;
+    *)
+    f_usage;
+    exit 1
+    ;;
+esac
+
+exit 0

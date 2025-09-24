@@ -1,0 +1,51 @@
+#!/bin/sh
+
+OC="/usr/bin/knulli-overclock"
+
+apply_freq() {
+    # Wait until at least one populated policy exists (max 5s)
+    i=0
+    while [ $i -lt 25 ]; do
+        if ls -d /sys/devices/system/cpu/cpufreq/policy* >/dev/null 2>&1; then
+            ready=0
+            for p in /sys/devices/system/cpu/cpufreq/policy*; do
+                # table present and non-empty?
+                [ -s "$p/scaling_available_frequencies" ] && { ready=1; break; }
+            done
+            [ $ready -eq 1 ] && break
+        fi
+        sleep 0.2
+        i=$((i+1))
+    done
+
+    freq="$(/usr/bin/knulli-settings-get system.cpu.maxfreq 2>/dev/null | tr -d ' \t\r\n')"
+
+    # Attempts to apply freq a few times and falls back to default
+    if [ -n "$freq" ] && [ "$freq" -eq "$freq" ] 2>/dev/null; then
+        attempts=0
+        while [ $attempts -lt 3 ]; do
+            if "$OC" set "$freq"; then
+                exit 0
+            fi
+            sleep 0.5
+            attempts=$((attempts+1))
+        done
+        "$OC" set default
+    else
+        "$OC" set default
+    fi
+}
+
+case "$1" in
+    start)
+        apply_freq
+        ;;
+    stop)
+        ;;
+    *)
+        echo "Usage: $0 {start}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0
