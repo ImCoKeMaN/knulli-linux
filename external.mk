@@ -16,6 +16,7 @@ $(BR2_EXTERNAL_KNULLI_PATH)/package/emulators/*/*.mk \
 $(BR2_EXTERNAL_KNULLI_PATH)/package/emulators/*/*/*.mk \
 $(BR2_EXTERNAL_KNULLI_PATH)/package/firmwares/*/*.mk \
 $(BR2_EXTERNAL_KNULLI_PATH)/package/gpu/*/*.mk \
+$(BR2_EXTERNAL_KNULLI_PATH)/package/kernels/*/*.mk \
 $(BR2_EXTERNAL_KNULLI_PATH)/package/knulli-notice/*/*.mk \
 $(BR2_EXTERNAL_KNULLI_PATH)/package/libraries/*/*.mk \
 $(BR2_EXTERNAL_KNULLI_PATH)/package/modules/*/*.mk \

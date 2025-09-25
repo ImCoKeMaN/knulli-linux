@@ -1,0 +1,4 @@
+config BR2_PACKAGE_KERNEL_RK3566_BSP
+    bool "kernel-rk3566-bsp"
+    help
+      BSP kernel RK3566 based devices

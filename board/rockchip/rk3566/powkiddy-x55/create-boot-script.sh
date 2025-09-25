@@ -17,7 +17,7 @@ KNULLI_BINARIES_DIR=$6
 mkdir -p "${KNULLI_BINARIES_DIR}/boot/boot"       || exit 1
 mkdir -p "${KNULLI_BINARIES_DIR}/boot/extlinux"   || exit 1
 
-cp "${BINARIES_DIR}/Image"                          "${KNULLI_BINARIES_DIR}/boot/boot/linux"              || exit 1
+cp "${BINARIES_DIR}/kernel-powkiddy-x55/Image"      "${KNULLI_BINARIES_DIR}/boot/boot/linux"              || exit 1
 cp "${BINARIES_DIR}/initrd.lz4"                     "${KNULLI_BINARIES_DIR}/boot/boot/initrd.lz4"         || exit 1
 cp "${BINARIES_DIR}/rootfs.squashfs"                "${KNULLI_BINARIES_DIR}/boot/boot/knulli.update"    || exit 1
 

@@ -1,0 +1,2 @@
+config BR2_PACKAGE_KNULLI_USERDATAINIT
+	bool "knulli-userdatainit"

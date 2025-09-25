@@ -1,0 +1,4 @@
+config BR2_PACKAGE_KERNEL_POWKIDDY_X55
+    bool "kernel-powkiddy-x55"
+    help
+      BSP kernel for the Powkiddy X55
