@@ -23,35 +23,33 @@ ln -sf "/usr/share/emulationstation/themes"         "${TARGET_DIR}/etc/emulation
 mkdir -p "${TARGET_DIR}/usr/share/knulli/datainit/cheats" || exit 1
 ln -sf "/userdata/cheats" "${TARGET_DIR}/usr/share/knulli/datainit/cheats/custom" || exit 1
 
-# we don't want the kodi startup script
+# Remove base batocera init scripts we don't need
 rm -f "${TARGET_DIR}/etc/init.d/S50kodi" || exit 1
 
-# we don't want the irqbalance startup script
 rm -f "${TARGET_DIR}/etc/init.d/S13irqbalance" || exit 1
 
-# we don't want the virtualevents startup script
 rm -f "${TARGET_DIR}/etc/init.d/S15virtualevents" || exit 1
 
-# we don't want the lircd startup script
 rm -f "${TARGET_DIR}/etc/init.d/S25lircd" || exit 1
 
-# we don't want the rpcbind startup script
 rm -f "${TARGET_DIR}/etc/init.d/S30rpcbind" || exit 1
 
-# we don't want the iptables startup script
 rm -f "${TARGET_DIR}/etc/init.d/S35iptables" || exit 1
 
-# we don't want the hotkeygen startup script
 rm -f "${TARGET_DIR}/etc/init.d/S90hotkeygen" || exit 1
 
-# we don't want the samba startup script (it's now a service)
 rm -f "${TARGET_DIR}/etc/init.d/S91smb" || exit 1
 
-# we don't want the wsdd startup script (it's now part of the samba service)
 rm -f "${TARGET_DIR}/etc/init.d/S93wsdd" || exit 1
 
-# we have custom urandom scripts
 rm -f "${TARGET_DIR}/etc/init.d/S20urandom" || exit 1
+
+rm -f "${TARGET_DIR}/etc/init.d/S51led-handheld" || exit 1
+
+rm -f "${TARGET_DIR}/etc/init.d/S30splashscreencontrol" || exit 1
+
+rm -f "${TARGET_DIR}/etc/init.d/S28splash" || exit 1
+# ========== End ==========
 
 # use /userdata/system/iptables.conf for S35iptables
 rm -f "${TARGET_DIR}/etc/iptables.conf" || exit 1
