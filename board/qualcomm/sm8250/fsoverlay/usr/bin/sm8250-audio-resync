@@ -1,10 +1,7 @@
 #!/bin/sh
-# Detects and suspends then resumes active sinks. Fixes audio desyncing qurik for sm8250
+# Force pipewire to resync. Fixes audio desyncing quirk for sm8250
 
-for s in $(LANG=C pactl list short sink-inputs | awk '{print $2}' | sort -u); do
-  LANG=C pactl suspend-sink "$s" 1
-  sleep 0.1
-  LANG=C pactl suspend-sink "$s" 0
-done
+pw-metadata -n settings 0 clock.force-quantum 1023
+pw-metadata -n settings 0 clock.force-quantum 1024
 
 exit 0
