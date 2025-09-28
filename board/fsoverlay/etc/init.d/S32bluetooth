@@ -1,0 +1,117 @@
+#!/bin/sh
+#
+# Auto connect bluetooth controllers
+#
+
+read -r BOARD < /boot/boot/knulli.board
+read -r ARCH < /usr/share/knulli/knulli.arch
+
+case "$1" in
+    start)
+        # Restores old settings saved in userdata
+        knulli-bluetooth restore
+        enabled="$(/usr/bin/knulli-settings-get controllers.bluetooth.enabled)"
+        [ "$enabled" = "1" ] || exit 0
+
+        ps3_enabled="$(/usr/bin/knulli-settings-get controllers.ps3.enabled)"
+        if [ "$ps3_enabled" = "1" ]; then
+            /usr/bin/knulli-settings-set -f /etc/bluetooth/input.conf ClassicBondedOnly false
+        else
+            /usr/bin/knulli-settings-set -f /etc/bluetooth/input.conf ClassicBondedOnly true
+        fi
+
+        # Reset radio
+        echo 0 > /sys/class/rfkill/rfkill0/state
+        sleep 0.3
+        echo 1 > /sys/class/rfkill/rfkill0/state
+
+        rfkill unblock bluetooth
+
+        is_hci0=0
+        # Set based on arch
+        case "$ARCH" in
+            h700)
+                /usr/bin/rtk_hciattach -n -s 115200 ttyS1 rtk_h5 &
+                is_hci0=1
+                ;;
+            a133)
+                /usr/bin/rtk_hciattach -n -s 115200 ttyS1 xradio &
+                is_hci0=1
+                ;;
+            *)
+                ;;
+        esac
+
+        if [ "$is_hci0" -eq 1 ]; then
+        # Wait for hci0 to appear
+            for i in 1 2 3 4 5 6 7 8 9 10; do
+                [ -e /sys/class/bluetooth/hci0 ] && break;
+                sleep 0.5
+            done
+        fi
+
+        settings_version="$(/usr/bin/knulli-settings-get controllers.ps3.driver)"
+        if [ "$settings_version" != "bluez" ]; then
+            BLUETOOTHD_ARGS="--noplugin=sixaxis"
+        else
+            BLUETOOTHD_ARGS="--noplugin=sixaxispair"
+        fi
+
+        debug="$(/usr/bin/knulli-settings-get controllers.bluetooth.debug)"
+        if [ "${debug}" = 1 ]; then
+            start-stop-daemon -S -q -m -p /var/run/bluetoothd.pid --exec /usr/libexec/bluetooth/bluetoothd -- -n -d $BLUETOOTHD_ARGS 2>/var/log/bluetooth-daemon.log &
+        else
+            start-stop-daemon -S -q -m -p /var/run/bluetoothd.pid --exec /usr/libexec/bluetooth/bluetoothd -- $BLUETOOTHD_ARGS &
+        fi
+
+        btaddr="$(/usr/bin/knulli-settings-get bluetooth.adapter)"
+        if [ -n "${btaddr}" ]; then
+            start-stop-daemon -S -q -m -p /var/run/bluetooth-agent.pid --exec /usr/bin/knulli-bluetooth-agent -- --device "${btaddr}" &
+        else
+            start-stop-daemon -S -q -m -p /var/run/bluetooth-agent.pid --exec /usr/bin/knulli-bluetooth-agent &
+        fi
+
+        # Make sure pairable is on (needed for some devices, otherwise it's harmless)
+        for i in 1 2 3 4 5 6 7 8 9 10; do
+            pairable="$(bluetoothctl show | awk '/Pairable:/ {print $2}')"
+            if [ "$pairable" = "yes" ]; then
+                break
+            fi
+            bluetoothctl pairable on >/dev/null 2>/dev/null
+            sleep 0.5
+        done
+    ;;
+
+    stop)
+        start-stop-daemon -K -q -p /var/run/bluetooth-agent.pid
+
+        if [ "$ARCH" != "a133" ] && [ "$ARCH" != "h700" ]; then # Some devices don't like bluetoothd being stopped(audio switches to dummy sometimes)
+            start-stop-daemon -K -q -p /var/run/bluetoothd.pid
+        fi
+
+        # If pidfile remains but no procoss, clean it up
+        if [ -e /var/run/bluetoothd.pid ] && ! kill -0 "$(cat /var/run/bluetoothd.pid 2>/dev/null)" 2>/dev/null; then
+            rm -f /var/run/bluetoothd.pid
+        fi
+        if [ -e /var/run/bluetooth-agent.pid ] && ! kill -0 "$(cat /var/run/bluetooth-agent.pid 2>/dev/null)" 2>/dev/null; then
+            rm -f /var/run/bluetooth-agent.pid
+        fi
+
+        killall hciattach >/dev/null 2>&1
+        killall hciattach_opi >/dev/null 2>&1
+        killall rtk_hciattach >/dev/null 2>&1
+
+        knulli-bluetooth save
+    ;;
+
+    restart|reload)
+        "$0" stop
+        "$0" start
+    ;;
+
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+
+exit $?

@@ -1,0 +1,39 @@
+#!/bin/bash
+
+MAIN_CONF_FILE="/etc/bluetooth/main.conf"
+
+case "$1" in
+    start)
+        # Get the current adapter name from the config file
+        current_name=$(grep -Po '(?<=^Name = ).*' "$MAIN_CONF_FILE")
+
+        # Get the desired adapter name from knulli-info
+        info_output=$(knulli-info | grep "Model:" | awk -F": " '{print $2}' | head -n 1)
+
+        if [ -n "$info_output" ]; then
+            if [ "$current_name" == "$info_output" ]; then
+                echo "Bluetooth adapter name is already set to $info_output. Exiting..."
+                exit 0
+            fi
+
+            # Replace Name= inside [General]; if missing, insert once after [General]
+            sed -i '/^\[General\]/,/^\[/{s/^Name = .*/Name = '"$info_output"'/}' "$MAIN_CONF_FILE"
+            grep -q '^Name = ' "$MAIN_CONF_FILE" || sed -i '/^\[General\]/a Name = '"$info_output" "$MAIN_CONF_FILE"
+
+            echo "Bluetooth adapter name has been set to: $info_output"
+        else
+            # fallback to a default naming scheme if no model is found
+            if [ "$current_name" == "%h-%d" ]; then
+                echo "Bluetooth adapter name is already set to the fallback scheme. Exiting..."
+                exit 0
+            fi
+
+            # Replace Name= inside [General]; if missing, insert once after [General]
+            sed -i '/^\[General\]/,/^\[/{s/^Name = .*/Name = %h-%d/}' "$MAIN_CONF_FILE"
+            grep -q '^Name = ' "$MAIN_CONF_FILE" || sed -i '/^\[General\]/a Name = %h-%d' "$MAIN_CONF_FILE"
+            echo "Falling back to hostname & adapter"
+        fi
+        ;;
+esac
+
+exit 0
