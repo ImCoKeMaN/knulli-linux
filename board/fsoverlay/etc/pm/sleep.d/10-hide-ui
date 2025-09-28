@@ -1,0 +1,14 @@
+#!/bin/sh
+
+case "$1" in
+    suspend)
+        knulli-brightness dispoff
+        pactl set-sink-mute @DEFAULT_SINK@ true
+        ;;
+    resume|thaw)
+        knulli-brightness dispon
+        pactl set-sink-mute @DEFAULT_SINK@ false
+        ;;
+esac
+
+exit 0
