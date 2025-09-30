@@ -251,9 +251,12 @@ class Controller:
         return None
 
 
-def generate_sdl_game_controller_config(controllers: ControllerMapping, /) -> str:
-    # Auto-detect Xbox layout via flag file for ports
-    xbox_layout = Path("/var/run/ports_xbox_layout.flag").exists()
+def generate_sdl_game_controller_config(
+    controllers: "ControllerMapping", /, xbox_layout: Optional[bool] = None
+) -> str:
+    # Bool(true) determines if Xbox sdl layout, else falls back to flag file
+    if xbox_layout is None:
+        xbox_layout = Path("/var/run/ports_xbox_layout.flag").exists()
     sdl_mapping = _XBOX_SDL_MAPPING if xbox_layout else _DEFAULT_SDL_MAPPING
     return "\n".join(controller.generate_sdl_game_db_line(sdl_mapping) for controller in controllers.values())
 

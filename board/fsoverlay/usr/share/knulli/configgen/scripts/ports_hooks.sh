@@ -38,6 +38,9 @@ case "$1" in
     gameStart)
         do_gamestart "$SYSTEM_NAME" "$GAME_NAME"
         ;;
+    gameStop)
+        rm -f "$XBOX_LAYOUT_FLAG"
+        ;;
     *)
         echo "Usage: $0 {gameStart}"
         ;;
