@@ -49,6 +49,8 @@ rm -f "${TARGET_DIR}/etc/init.d/S51led-handheld" || exit 1
 rm -f "${TARGET_DIR}/etc/init.d/S30splashscreencontrol" || exit 1
 
 rm -f "${TARGET_DIR}/etc/init.d/S28splash" || exit 1
+
+rm -f "${TARGET_DIR}/etc/init.d/S47fake-hwclock" || exit 1
 # ========== End ==========
 
 # use /userdata/system/iptables.conf for S35iptables
