@@ -1,35 +1,35 @@
 #!/bin/sh
 
-has_rtc() {
-    [ -e /dev/rtc0 ] || [ -e /sys/class/rtc/rtc0 ]
-}
+ADJ_DATA="/boot/boot/adjtime.data"
+
+[ -e /dev/rtc0 ] || [ -e /sys/class/rtc/rtc0 ] || exit 0
 
 ensure_adjtime_utc() {
     # Ensure hwclock treats RTC as UTC (atomic write)
-    if [ ! -f /etc/adjtime ] || ! tail -n1 /etc/adjtime 2>/dev/null | grep -qx UTC; then
-        tmp="/etc/adjtime.$$"
-        { printf '0.0 0 0.0\n0\nUTC\n' > "$tmp" && mv -f "$tmp" /etc/adjtime; } 2>/dev/null || true
+    if [ ! -f "$ADJ_DATA" ]; then
+        tmp="$ADJ_DATA.$$"
+        printf '0.0 0 0.0\n0\nUTC\n' > "$tmp" && mv -f "$tmp" "$ADJ_DATA" 2>/dev/null
     fi
 }
 
 start() {
-    ensure_adjtime_utc
-    if has_rtc; then
-        hwclock --hctosys --utc 2>/dev/null
-        echo "Loaded system time from RTC (UTC)"
+    if [ -f "$ADJ_DATA" ]; then
+        hwclock --hctosys --utc --adjfile "$ADJ_DATA" 2>/dev/null
+        echo "Loaded system time from RTC (UTC, adjfile)"
     else
-        echo "No RTC found, skipped"
+        hwclock --hctosys --utc --noadjfile 2>/dev/null
+        echo "Loaded system time from RTC (UTC, noadjfile)"
     fi
 }
 
 stop() {
+    mount -o remount,rw /boot >/dev/null 2>&1
+
     ensure_adjtime_utc
-    if has_rtc; then
-        hwclock --systohc --utc 2>/dev/null
-        echo "Saved system time to RTC (UTC)"
-    else
-        echo "No RTC found, skipped"
-    fi
+    hwclock --systohc --utc --adjfile "$ADJ_DATA" 2>/dev/null
+    echo "Saved system time to RTC (UTC, adjfile)"
+
+    mount -o remount,ro /boot >/dev/null 2>&1
 }
 
 case "$1" in
