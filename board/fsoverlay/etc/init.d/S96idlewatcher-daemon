@@ -87,7 +87,7 @@ stop_daemon() {
 }
 
 # Sanity check
-test -x "$DAEMON" || exit 0
+[ -e "$DAEMON" ] || exit 0
 
 case "$1" in
     start)
