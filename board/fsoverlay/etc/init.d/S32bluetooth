@@ -30,7 +30,7 @@ case "$1" in
         is_hci0=0
         # Set based on arch
         case "$ARCH" in
-            h700)
+            h700|rk3568)
                 /usr/bin/rtk_hciattach -n -s 115200 ttyS1 rtk_h5 &
                 is_hci0=1
                 ;;
