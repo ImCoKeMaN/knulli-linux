@@ -426,6 +426,8 @@ def createLibretroConfig(generator: Generator, system: Emulator, controllers: Co
         "05000000c82d00000151000000010000",
         # Retrobit bt saturn
         "0500000049190000020400001b010000",
+        # rg-arc-s
+        "190000004b4800000111000000010000",
         ]
 
         valid_megadrive_controller_names = [
@@ -434,6 +436,7 @@ def createLibretroConfig(generator: Generator, system: Emulator, controllers: Co
         "8BitDo M30 Modkit",
         "8Bitdo  8BitDo M30 Modkit",
         "Retro Bit Bluetooth Controller",
+        "Anbernic RG-ARC-S Controller",
         ]
 
         def update_megadrive_controller_config(controller_number):
