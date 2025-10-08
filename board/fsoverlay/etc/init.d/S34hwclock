@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ADJ_DATA="/boot/boot/adjtime.data"
+ADJ_DATA="/boot/adjtime.data"
 
 [ -e /dev/rtc0 ] || [ -e /sys/class/rtc/rtc0 ] || exit 0
 
