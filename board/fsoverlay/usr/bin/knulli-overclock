@@ -21,10 +21,10 @@ list_policies() {
     done
 }
 
-policy_avail() { [ -r "$1/scaling_available_frequencies" ] || return 1; cat "$1/scaling_available_frequencies"; }
+policy_avail() { [ -f "$1/scaling_available_frequencies" ] || return 1; cat "$1/scaling_available_frequencies"; }
 
 policy_max() {
-     if [ -r "$1/cpuinfo_max_freq" ]; then
+     if [ -f "$1/cpuinfo_max_freq" ]; then
          cat "$1/cpuinfo_max_freq"
      else
          awk '{print $NF}' "$1/scaling_available_frequencies" 2>/dev/null
@@ -60,7 +60,7 @@ get_available_freqs() {
     # Use the fastest policy table for listing (helps with big/little cores)
     local p="${ANCHOR:-$(select_anchor_policy)}"
     local f="$p/scaling_available_frequencies"
-    [ -r "$f" ] || return 1
+    [ -f "$f" ] || return 1
     cat "$f"
 }
 

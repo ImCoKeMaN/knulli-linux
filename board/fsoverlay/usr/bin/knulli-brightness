@@ -2,8 +2,8 @@
 
 CYCLESTEP=20 # % additional brightness at each step
 XMIN=3
-VALPATH=/var/run/$(basename "$0") # Stored brightness value when the display is turned off.
-LOCK=/var/run/$(basename "$0").lock
+VALPATH=/var/run/$(basename "$0") # Stored brightness value when the display is turned off
+LOCK=/var/run/$(basename "$0").lock # Mainly needed because of the dim animation
 
 exec 9>"$LOCK"
 flock -n 9 || exit 0
@@ -14,8 +14,8 @@ for d in /sys/class/backlight/*; do
   [ -d "$d" ] && { BACKLIGHT_DIR="$d"; break; }
 done
 
-if [ -n "$BACKLIGHT_DIR" ] && [ -r "$BACKLIGHT_DIR/brightness" ] && [ -r "$BACKLIGHT_DIR/max_brightness" ]; then
-  if [ -r "$BACKLIGHT_DIR/max_brightness" ]; then
+if [ -n "$BACKLIGHT_DIR" ] && [ -f "$BACKLIGHT_DIR/brightness" ] && [ -f "$BACKLIGHT_DIR/max_brightness" ]; then
+  if [ -f "$BACKLIGHT_DIR/max_brightness" ]; then
   read -r XMAX < "$BACKLIGHT_DIR/max_brightness"
   else
     XMAX=
@@ -190,13 +190,19 @@ fi
 if test $# = 2
 then
     X=$(bl_get)
-    DELTA=$(( $2 * XMAX / 100 ))
+    PCT=$(get_percent "$X")
+    STEP="$2"
+    DELTA=$(( STEP * XMAX / 100 ))
 
     if [ "${1}" = "+" ]; then
 
         if [ "${X}" -eq 0 ]; then
             NEWVAL=${XMIN}
         else
+            # If currently at the 1% floor, deduct it from the requested next step up
+            if [ "$PCT" -eq 1 ] && [ "$STEP" -gt 0 ]; then
+                DELTA=$(( (STEP - 1) * XMAX / 100 ))
+            fi
             NEWVAL=$(( X + DELTA ))
         fi
 
