@@ -46,7 +46,7 @@ else
     # Shutdown if timeout is reached (long press)
     if [ "$(cat "$POWER_BUTTON_STATE")" = "1" ]; then
         if [ -f /usr/bin/knulli-rumble ]; then
-            knulli-rumble 0.1
+            knulli-rumble 0.2
         fi
         shutdown_system
     fi
