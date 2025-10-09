@@ -1,0 +1,4 @@
+config BR2_PACKAGE_KERNEL_GAMMAOS
+    bool "kernel-gammaos"
+    help
+      BSP kernel for the Miyoo Flip V2

@@ -24,4 +24,6 @@ cp "${BINARIES_DIR}/rootfs.squashfs" "${KNULLI_BINARIES_DIR}/boot/boot/knulli.up
 cp "${BOARD_DIR}/boot/boot.ini"                     "${KNULLI_BINARIES_DIR}/boot/"                                    || exit 1
 cp "${BOARD_DIR}/boot/rk3326s-gkd-pixel2.dtb"       "${KNULLI_BINARIES_DIR}/boot/boot/rk3326s-gkd-pixel2.dtb"     || exit 1
 
+cp -r "${BOARD_DIR}/partitions"         "${KNULLI_BINARIES_DIR}/boot/"                         || exit 1
+
 exit 0

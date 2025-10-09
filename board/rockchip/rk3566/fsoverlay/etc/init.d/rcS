@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo 1 > /sys/devices/platform/leds/leds/work/brightness
+
 # Start the progress bar
 /usr/bin/progressbar &
 

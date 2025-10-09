@@ -6,8 +6,15 @@
 # HOST_DIR = base dir/host
 # BINARIES_DIR = images dir
 # TARGET_DIR = target dir
+echo "PWD = $PWD"
+echo "BASE_DIR = $BASE_DIR"
+echo "BUILD_DIR = $BUILD_DIR"
+echo "HOST_DIR = $HOST_DIR"
+echo "BINARIES_DIR = $BINARIES_DIR"
+echo "TARGET_DIR = $TARGET_DIR"
 
-KNULLI_TARGET=$(grep -E "^BR2_PACKAGE_BATOCERA_TARGET_[A-Z_0-9]*=y$" "${BR2_CONFIG}" | sed -e s+'^BR2_PACKAGE_BATOCERA_TARGET_\([A-Z_0-9]*\)=y$'+'\1'+)
+KNULLI_TARGET=$(grep -E "^BR2_PACKAGE_BATOCERA_TARGET_[A-Z_0-9]*=y$" "${BR2_CONFIG}" | grep -vE "_(GLES|GLES2|GLES3|VULKAN|OPENGL)=y$" | sed -e s+'^BR2_PACKAGE_BATOCERA_TARGET_\([A-Z_0-9]*\)=y$'+'\1'+)
+echo "KNULLI_TARGET = $KNULLI_TARGET"
 
 # For the root user:
 # 1. Use Bash instead of Dash for interactive use.
@@ -103,6 +110,28 @@ then
     mv "${TARGET_DIR}/etc/init.d/S21rngd"    "${TARGET_DIR}/etc/init.d/S33rngd"    || exit 1 # move because it takes several seconds (on odroidgoa for example)
     sed -i "s/start-stop-daemon -S -q /start-stop-daemon -S -q -N 10 /g" "${TARGET_DIR}/etc/init.d/S33rngd"  || exit 1 # set rngd niceness to 10 (to decrease slowdown of other processes)
 fi
+
+echo "###########################"
+echo "###########################"
+echo "###########################"
+echo "###########################"
+
+# Begin 32bit package install
+if [ "${KNULLI_TARGET}" = "RK3326" ]; then
+    echo ""
+    echo "========================================"
+    echo "Installing 32-bit ARM libraries..."
+    echo "========================================"
+    
+    LIBS32_SCRIPT="${BR2_EXTERNAL_KNULLI_PATH}/board/scripts/install-32bit-libs.sh"
+    
+    if [ -f "${LIBS32_SCRIPT}" ]; then
+        bash "${LIBS32_SCRIPT}" "${TARGET_DIR}" "${BASE_DIR}"
+    else
+        echo "WARNING: 32-bit libs install script not found at: ${LIBS32_SCRIPT}"
+    fi
+fi
+# -- end 32bit package install
 
 # remove kodi default joystick configuration files
 # while as a minimum, the file joystick.Sony.PLAYSTATION(R)3.Controller.xml makes references to PS4 controllers with axes which doesn't exist (making kodi crashing)

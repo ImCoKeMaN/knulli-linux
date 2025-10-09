@@ -1,0 +1,8 @@
+# MagicX Mini M default values
+
+# default rotation
+display.rotate=0
+
+# Default eideo driver
+global.retroarch.video_driver=sdl2
+

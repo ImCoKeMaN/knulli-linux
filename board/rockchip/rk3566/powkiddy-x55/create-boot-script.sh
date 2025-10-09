@@ -21,7 +21,8 @@ cp "${BINARIES_DIR}/kernel-powkiddy-x55/Image"      "${KNULLI_BINARIES_DIR}/boot
 cp "${BINARIES_DIR}/initrd.lz4"                     "${KNULLI_BINARIES_DIR}/boot/boot/initrd.lz4"         || exit 1
 cp "${BINARIES_DIR}/rootfs.squashfs"                "${KNULLI_BINARIES_DIR}/boot/boot/knulli.update"    || exit 1
 
-cp "${BOARD_DIR}/rk3566-powkiddy-x55.dtb"           "${KNULLI_BINARIES_DIR}/boot/boot/"                   || exit 1
+#cp "${BOARD_DIR}/rk3566-powkiddy-x55.dtb"           "${KNULLI_BINARIES_DIR}/boot/boot/"                   || exit 1
+cp "${BINARIES_DIR}/kernel-powkiddy-x55/rk3566-evb2-lp4x-v10-linux.dtb"           "${KNULLI_BINARIES_DIR}/boot/boot/"                   || exit 1
 
 cp "${BOARD_DIR}/boot/extlinux.conf"                "${KNULLI_BINARIES_DIR}/boot/extlinux/"               || exit 1
 

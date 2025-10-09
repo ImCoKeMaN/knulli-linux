@@ -1,0 +1,10 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3566-rg-arc-linux.dts	2025-10-04 03:46:35.614624210 +0000
++++ b/arch/arm64/boot/dts/rockchip/rk3566-rg-arc-linux.dts	2025-10-04 03:46:50.626612916 +0000
+@@ -2476,6 +2476,7 @@
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <0x88>;
+ 			phandle = <0x17a>;
++			rotation = <90>;
+ 
+ 			display-timings {
+ 				native-mode = <0x89>;

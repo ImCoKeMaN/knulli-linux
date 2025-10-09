@@ -22,6 +22,7 @@ cp "${BINARIES_DIR}/uInitrd"         "${KNULLI_BINARIES_DIR}/boot/boot/uInitrd" 
 cp "${BINARIES_DIR}/rootfs.squashfs" "${KNULLI_BINARIES_DIR}/boot/boot/knulli.update" || exit 1
 
 cp "${BOARD_DIR}/boot/boot.ini"                     "${KNULLI_BINARIES_DIR}/boot/"                                || exit 1
+cp "${BOARD_DIR}/boot/rk3326-odroidgo2-linux.dtb"       "${KNULLI_BINARIES_DIR}/boot/rk3326-odroidgo2-linux.dtb" || exit 1
 cp "${BOARD_DIR}/boot/rk3326-magicx-mini-m.dtb"       "${KNULLI_BINARIES_DIR}/boot/boot/rk3326-magicx-mini-m.dtb" || exit 1
 
 exit 0

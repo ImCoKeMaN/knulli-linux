@@ -128,6 +128,10 @@ ifeq ($(BR2_PACKAGE_BATOCERA_TARGET_RK3326),y)
      RETROARCH_CONF_OPTS += --enable-odroidgo2
 endif
 
+ifeq ($(BR2_PACKAGE_BATOCERA_TARGET_RK3568),y)
+     RETROARCH_CONF_OPTS += --enable-odroidgo2
+endif
+
 ifeq ($(BR2_PACKAGE_HAS_LIBGL),y)
   ifneq ($(BR2_PACKAGE_XWAYLAND),y)
     RETROARCH_CONF_OPTS += --enable-opengl --disable-opengles --disable-opengles3

@@ -67,6 +67,8 @@ case "${ACTION}" in
 	    PROFILE_NAME=$(echo "${MODE}" | cut -d @ -f 1)
 	    CARD_NAME=$(echo "${MODE}" | cut -d @ -f 2)
 	    LANG=C pactl set-card-profile "${CARD_NAME}" "${PROFILE_NAME}" || exit 1
+	else
+		LANG=C pactl set-card-profile alsa_card._sys_devices_platform_rk817-sound_sound_card0 pro-audio || exit 1
 	fi
 	;;
 

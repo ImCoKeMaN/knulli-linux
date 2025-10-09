@@ -10,12 +10,12 @@ KERNEL_RK3566_BSP_SITE_METHOD = git
 KERNEL_RK3566_BSP_GIT_SUBMODULES = NO
 
 KERNEL_RK3566_BSP_LICENSE = GPL-2.0
-KERNEL_RK3566_BSP_DEPENDENCIES = host-python3
+KERNEL_RK3566_BSP_DEPENDENCIES = host-python3 extra-firmwares
 KERNEL_RK3566_BSP_SUPPORTS_IN_SOURCE_BUILD = NO
 
 # rk3566 is arm64
 KERNEL_RK3566_BSP_ARCH = arm64
-KERNEL_RK3566_BSP_DEFCONFIG = rk3566_linux_defconfig
+KERNEL_RK3566_BSP_DEFCONFIG = linux-rk3566-defconfig.config
 KERNEL_RK3566_BSP_TARGET_DIR = kernel-rk3566-bsp
 
 KERNEL_RK3566_BSP_DTBS = \
@@ -32,14 +32,16 @@ KERNEL_RK3566_BSP_DTBS = \
 
 define KERNEL_RK3566_BSP_CONFIGURE_CMDS
     $(MAKE1) -C $(@D) mrproper
+    # Copy our custom defconfig to the kernel build directory
+    cp $(KERNEL_RK3566_BSP_PKGDIR)/$(KERNEL_RK3566_BSP_DEFCONFIG) $(@D)/.config
+    # Run oldconfig to handle any missing/new config options
     $(MAKE1) -C $(@D) ARCH=$(KERNEL_RK3566_BSP_ARCH) CROSS_COMPILE=$(TARGET_CROSS) \
-        $(KERNEL_RK3566_BSP_DEFCONFIG)
+        oldconfig
 endef
 
 define KERNEL_RK3566_BSP_BUILD_CMDS
     $(MAKE) -C $(@D) ARCH=$(KERNEL_RK3566_BSP_ARCH) CROSS_COMPILE=$(TARGET_CROSS) \
-        $(if $(BR2_LINUX_KERNEL_NEEDS_MODULES),modules) \
-        Image $(addprefix rockchip/,$(KERNEL_RK3566_BSP_DTBS))
+        Image $(addprefix rockchip/,$(KERNEL_RK3566_BSP_DTBS)) modules
 endef
 
 define KERNEL_RK3566_BSP_INSTALL_TARGET_CMDS
@@ -51,6 +53,24 @@ define KERNEL_RK3566_BSP_INSTALL_TARGET_CMDS
     $(foreach dtb,$(KERNEL_RK3566_BSP_DTBS), \
         $(INSTALL) -D -m 0644 $(@D)/arch/$(KERNEL_RK3566_BSP_ARCH)/boot/dts/rockchip/$(dtb) \
             $(BINARIES_DIR)/$(KERNEL_RK3566_BSP_TARGET_DIR)/$(dtb);)
+
+    # Extract kernel version from Makefile variables
+    kernel_version=$$(grep '^VERSION' $(@D)/Makefile | head -1 | cut -d' ' -f3).$$(grep '^PATCHLEVEL' $(@D)/Makefile | head -1 | cut -d' ' -f3).$$(grep '^SUBLEVEL' $(@D)/Makefile | head -1 | cut -d' ' -f3); \
+    echo "Installing modules for kernel version: $$kernel_version"; \
+    $(MAKE) -C $(@D) ARCH=$(KERNEL_RK3566_BSP_ARCH) CROSS_COMPILE=$(TARGET_CROSS) \
+        INSTALL_MOD_PATH=$(TARGET_DIR) \
+        INSTALL_MOD_STRIP=1 \
+        DEPMOD=/bin/true \
+        modules_install; \
+    rm -f $(TARGET_DIR)/lib/modules/$$kernel_version/build; \
+    rm -f $(TARGET_DIR)/lib/modules/$$kernel_version/source; \
+    if [ -f $(@D)/System.map ]; then \
+        $(HOST_DIR)/sbin/depmod -ae -F $(@D)/System.map \
+            -b $(TARGET_DIR) $$kernel_version; \
+    else \
+        echo "Warning: System.map not found, running depmod without it"; \
+        $(HOST_DIR)/sbin/depmod -ae -b $(TARGET_DIR) $$kernel_version; \
+    fi
 endef
 
 $(eval $(generic-package))
