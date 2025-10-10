@@ -30,6 +30,7 @@ ln -sf "/usr/share/emulationstation/themes"         "${TARGET_DIR}/etc/emulation
 mkdir -p "${TARGET_DIR}/usr/share/knulli/datainit/cheats" || exit 1
 ln -sf "/userdata/cheats" "${TARGET_DIR}/usr/share/knulli/datainit/cheats/custom" || exit 1
 
+## === REMOVE ===
 # Remove base batocera init scripts we don't need
 rm -f "${TARGET_DIR}/etc/init.d/S50kodi" || exit 1
 
@@ -58,7 +59,24 @@ rm -f "${TARGET_DIR}/etc/init.d/S30splashscreencontrol" || exit 1
 rm -f "${TARGET_DIR}/etc/init.d/S28splash" || exit 1
 
 rm -f "${TARGET_DIR}/etc/init.d/S47fake-hwclock" || exit 1
-# ========== End ==========
+
+# Remove base batocera udev rules we don't need
+rm -f "${TARGET_DIR}/etc/udev/rules.d/99-wol.rules" || exit 1
+
+rm -f "${TARGET_DIR}/etc/udev/rules.d/99-wheels.rules" || exit 1
+
+rm -f "${TARGET_DIR}/etc/udev/rules.d/99-umtool.rules" || exit 1
+
+rm -f "${TARGET_DIR}/etc/udev/rules.d/99-steam-controller.rules" || exit 1
+
+rm -f "${TARGET_DIR}/etc/udev/rules.d/99-stadia-controller.rules" || exit 1
+
+rm -f "${TARGET_DIR}/etc/udev/rules.d/99-pedals.rules" || exit 1
+
+rm -f "${TARGET_DIR}/etc/udev/rules.d/99-legiongo.rules" || exit 1
+
+rm -f "${TARGET_DIR}/etc/udev/rules.d/99-ledspicer.rules" || exit 1
+## === REMOVE END ===
 
 # use /userdata/system/iptables.conf for S35iptables
 rm -f "${TARGET_DIR}/etc/iptables.conf" || exit 1
