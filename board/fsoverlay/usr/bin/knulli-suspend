@@ -9,11 +9,6 @@ fi
 
 trap 'flock -u 9;' EXIT
 
-# debounce file controllerd by pm-utils suspend/wake hooks
-DEBOUNCE_FILE="/var/run/suspend.debounce"
-
-[ -e "$DEBOUNCE_FILE" ] && exit 0
-
 WAKE_TIME="/var/run/rtc-wake.epoch"
 
 usage() {
@@ -136,6 +131,7 @@ if [ "$AUTO_SD" -eq 1 ]; then
   check_auto_shutdown
 else
   rm -f "$WAKE_TIME" 2>/dev/null
+  sleep 0.5 # For a small debounce
 fi
 
 exit 0

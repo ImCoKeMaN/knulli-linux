@@ -76,6 +76,8 @@ rm -f "${TARGET_DIR}/etc/udev/rules.d/99-pedals.rules" || exit 1
 rm -f "${TARGET_DIR}/etc/udev/rules.d/99-legiongo.rules" || exit 1
 
 rm -f "${TARGET_DIR}/etc/udev/rules.d/99-ledspicer.rules" || exit 1
+
+rm -f "${TARGET_DIR}/etc/udev/rules.d/99-anbernic-gpio-pad.rules" || exit 1
 ## === REMOVE END ===
 
 # use /userdata/system/iptables.conf for S35iptables

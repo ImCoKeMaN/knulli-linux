@@ -30,8 +30,7 @@ display_off() {
 }
 
 suspend_system() {
-    pm-is-supported --suspend && pm-suspend
-    sleep 1
+    knulli-suspend
 }
 
 shutdown_system() {
