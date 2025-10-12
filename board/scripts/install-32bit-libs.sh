@@ -15,98 +15,101 @@ if [ -z "$BASE_DIR" ]; then
     exit 1
 fi
 
-# BASE_DIR is relative (e.g., "/rk3326"), TARGET_DIR is absolute
-# Extract the full output directory from TARGET_DIR
-# TARGET_DIR is typically: /path/to/output/rk3326/target
-# We want: /path/to/output/rk3326_armhf_libs/target
-
-# Get the parent of TARGET_DIR (removes /target)
-BUILD_OUTPUT_DIR="$(dirname ${TARGET_DIR})"
-
-# Get the grandparent (removes /rk3326)
-OUTPUT_ROOT_DIR="../$(dirname ${BUILD_OUTPUT_DIR})"
-
-# Now construct the 32-bit libs path
-# Extract just the build name from BASE_DIR (e.g., "rk3326")
-BUILD_NAME="$(basename ${BASE_DIR})"
-
-LIBS32_BUILD_DIR="${OUTPUT_ROOT_DIR}/${BUILD_NAME}_armhf_libs/target"
-
 echo "================================================"
 echo "Installing 32-bit libraries to 64-bit rootfs"
 echo "================================================"
 echo "TARGET_DIR: $TARGET_DIR"
 echo "BASE_DIR: $BASE_DIR"
-echo "BUILD_OUTPUT_DIR: $BUILD_OUTPUT_DIR"
-echo "OUTPUT_ROOT_DIR: $OUTPUT_ROOT_DIR"
-echo "BUILD_NAME: $BUILD_NAME"
-echo "LIBS32_BUILD_DIR: $LIBS32_BUILD_DIR"
+echo ""
+
+# Construct the path to the 32-bit libs build
+# BASE_DIR could be:
+#   - output/rk3566/ (for 64-bit build)
+#   - output/rk3566_armhf_libs/ (if someone passes the 32-bit dir directly)
+#   - /rk3566 (absolute path)
+
+# Remove trailing slash if present
+BASE_DIR="${BASE_DIR%/}"
+
+# Get the base build name (e.g., "rk3566" from "output/rk3566" or "output/rk3566_armhf_libs")
+BUILD_NAME=$(basename "$BASE_DIR")
+
+# If BUILD_NAME already ends with _armhf_libs, use it directly
+if [[ "$BUILD_NAME" == *_armhf_libs ]]; then
+    # BASE_DIR is already pointing to the 32-bit build
+    LIBS32_TARGET_DIR="${BASE_DIR}/target"
+else
+    # BASE_DIR is pointing to the 64-bit build, construct 32-bit path
+    PARENT_DIR=$(dirname "$BASE_DIR")
+    if [ "$PARENT_DIR" = "/" ]; then
+        LIBS32_TARGET_DIR="output/${BUILD_NAME}_armhf_libs/target"
+    else
+        LIBS32_TARGET_DIR="${PARENT_DIR}/${BUILD_NAME}_armhf_libs/target"
+    fi
+fi
+
+echo "Build name: $BUILD_NAME"
+echo "32-bit libs source: $LIBS32_TARGET_DIR"
 echo ""
 
 # Check if 32-bit libs build exists
-if [ ! -d "$LIBS32_BUILD_DIR" ]; then
-    echo "WARNING: 32-bit libraries build not found at: $LIBS32_BUILD_DIR"
+if [ ! -d "$LIBS32_TARGET_DIR" ]; then
+    echo "WARNING: 32-bit libraries build not found at: $LIBS32_TARGET_DIR"
     echo "Skipping 32-bit library installation."
     echo ""
+    # Extract the base board name without _armhf_libs suffix
+    BASE_BOARD_NAME="${BUILD_NAME%_armhf_libs}"
     echo "To build 32-bit libraries first, run:"
-    echo "  make rk3326_armhf_libs-build"
+    echo "  make ${BASE_BOARD_NAME}_armhf_libs-build"
     echo ""
-    exit 0  # Don't fail the build, just warn
+    exit 0
 fi
 
-# Create lib32 directories
+# Create lib32 directories in the 64-bit target
 echo "Creating lib32 directory structure..."
 mkdir -p "${TARGET_DIR}/lib32"
 mkdir -p "${TARGET_DIR}/usr/lib32"
 
-# Copy the dynamic linker (ld-linux-armhf.so.3)
+# Copy the 32-bit dynamic linker to /lib (NOT /lib32)
+echo ""
 echo "Copying 32-bit dynamic linker..."
-if [ -f "${LIBS32_BUILD_DIR}/lib/ld-linux-armhf.so.3" ]; then
-    cp -av "${LIBS32_BUILD_DIR}/lib/ld-linux-armhf.so.3" "${TARGET_DIR}/lib/"
-    echo "  ✓ Copied ld-linux-armhf.so.3"
+if [ -f "${LIBS32_TARGET_DIR}/lib/ld-linux-armhf.so.3" ]; then
+    cp -av "${LIBS32_TARGET_DIR}/lib/ld-linux-armhf.so.3" "${TARGET_DIR}/lib/"
+    echo "  ✓ Copied ld-linux-armhf.so.3 to /lib"
 else
     echo "  ✗ WARNING: ld-linux-armhf.so.3 not found!"
 fi
 
-# Copy all 32-bit libraries from /lib
+# Copy everything from /lib to /lib32 (preserving symlinks)
 echo ""
-echo "Copying libraries from /lib to /lib32..."
-if [ -d "${LIBS32_BUILD_DIR}/lib" ]; then
-    # Copy all .so* files (regular files)
-    find "${LIBS32_BUILD_DIR}/lib" -maxdepth 1 -name "*.so*" -type f -exec cp -av {} "${TARGET_DIR}/lib32/" \;
-    # Copy symbolic links
-    find "${LIBS32_BUILD_DIR}/lib" -maxdepth 1 -name "*.so*" -type l -exec cp -av {} "${TARGET_DIR}/lib32/" \;
-    echo "  ✓ Copied /lib libraries"
+echo "Copying /lib to /lib32..."
+if [ -d "${LIBS32_TARGET_DIR}/lib" ]; then
+    rsync -av --exclude='ld-linux-armhf.so.3' "${LIBS32_TARGET_DIR}/lib/" "${TARGET_DIR}/lib32/"
+    echo "  ✓ Copied /lib contents to /lib32"
 else
-    echo "  ✗ WARNING: ${LIBS32_BUILD_DIR}/lib not found!"
+    echo "  ✗ WARNING: ${LIBS32_TARGET_DIR}/lib not found!"
 fi
 
-# Copy all 32-bit libraries from /usr/lib
+# Copy everything from /usr/lib to /usr/lib32 (preserving symlinks and subdirectories)
 echo ""
-echo "Copying libraries from /usr/lib to /usr/lib32..."
-if [ -d "${LIBS32_BUILD_DIR}/usr/lib" ]; then
-    # Copy all .so* files (regular files)
-    find "${LIBS32_BUILD_DIR}/usr/lib" -maxdepth 1 -name "*.so*" -type f -exec cp -av {} "${TARGET_DIR}/usr/lib32/" \;
-    # Copy symbolic links
-    find "${LIBS32_BUILD_DIR}/usr/lib" -maxdepth 1 -name "*.so*" -type l -exec cp -av {} "${TARGET_DIR}/usr/lib32/" \;
-    echo "  ✓ Copied /usr/lib libraries"
+echo "Copying /usr/lib to /usr/lib32..."
+if [ -d "${LIBS32_TARGET_DIR}/usr/lib" ]; then
+    rsync -av "${LIBS32_TARGET_DIR}/usr/lib/" "${TARGET_DIR}/usr/lib32/"
+    echo "  ✓ Copied /usr/lib contents to /usr/lib32"
 else
-    echo "  ✗ WARNING: ${LIBS32_BUILD_DIR}/usr/lib not found!"
+    echo "  ✗ WARNING: ${LIBS32_TARGET_DIR}/usr/lib not found!"
 fi
 
 # Create or append to ld.so.conf with lib32 paths
 echo ""
 echo "Configuring dynamic linker..."
 
-# Check if ld.so.conf already exists
 if [ -f "${TARGET_DIR}/etc/ld.so.conf" ]; then
-    # Append lib32 paths if not already present
     grep -q "^/lib32$" "${TARGET_DIR}/etc/ld.so.conf" || echo "/lib32" >> "${TARGET_DIR}/etc/ld.so.conf"
     grep -q "^/usr/lib32$" "${TARGET_DIR}/etc/ld.so.conf" || echo "/usr/lib32" >> "${TARGET_DIR}/etc/ld.so.conf"
     grep -q "^/usr/local/lib32$" "${TARGET_DIR}/etc/ld.so.conf" || echo "/usr/local/lib32" >> "${TARGET_DIR}/etc/ld.so.conf"
     echo "  ✓ Updated existing /etc/ld.so.conf"
 else
-    # Create new ld.so.conf
     cat > "${TARGET_DIR}/etc/ld.so.conf" << 'EOF'
 # Dynamic linker configuration for 64-bit with 32-bit compatibility
 /lib
@@ -123,37 +126,51 @@ fi
 echo ""
 echo "Generating ld.so.cache..."
 if command -v ldconfig >/dev/null 2>&1; then
-    # Use host ldconfig with -r option
-    ldconfig -r "${TARGET_DIR}" 2>&1 | head -n 20 || true
-    echo "  ✓ Generated ld.so.cache using host ldconfig"
+    ldconfig -r "${TARGET_DIR}" -v 2>&1 | head -n 20 || true
+    echo "  ✓ Generated /etc/ld.so.cache"
 else
-    echo "  ⚠ WARNING: ldconfig not found, cache not generated"
+    echo "  ⚠ WARNING: ldconfig not found on host"
     echo "    Cache will be generated on first boot"
 fi
 
 # Create a marker file to indicate 32-bit libs are installed
 echo "armhf" > "${TARGET_DIR}/etc/multiarch"
-echo "  ✓ Created multiarch marker"
+echo "  ✓ Created /etc/multiarch marker"
 
 # Print summary
 echo ""
 echo "================================================"
 echo "32-bit library installation summary:"
 echo "================================================"
-LIB32_COUNT=$(find "${TARGET_DIR}/lib32" -name "*.so*" 2>/dev/null | wc -l)
-USRLIB32_COUNT=$(find "${TARGET_DIR}/usr/lib32" -name "*.so*" 2>/dev/null | wc -l)
-echo "  Libraries in /lib32:     $LIB32_COUNT"
-echo "  Libraries in /usr/lib32: $USRLIB32_COUNT"
-echo "  Total 32-bit libraries:  $((LIB32_COUNT + USRLIB32_COUNT))"
 
-# Show some key libraries
+LIB32_COUNT=$(find "${TARGET_DIR}/lib32" -type f 2>/dev/null | wc -l)
+USRLIB32_COUNT=$(find "${TARGET_DIR}/usr/lib32" -type f 2>/dev/null | wc -l)
+ALSA_PLUGINS=$(find "${TARGET_DIR}/usr/lib32/alsa-lib" -name "*.so" 2>/dev/null | wc -l)
+PIPEWIRE_PLUGINS=$(find "${TARGET_DIR}/usr/lib32/pipewire-0.3" -name "*.so" 2>/dev/null | wc -l)
+
+echo "  Files in /lib32:           $LIB32_COUNT"
+echo "  Files in /usr/lib32:       $USRLIB32_COUNT"
+echo "  ALSA plugins:              $ALSA_PLUGINS"
+echo "  PipeWire plugins:          $PIPEWIRE_PLUGINS"
+echo "  Total 32-bit files:        $((LIB32_COUNT + USRLIB32_COUNT))"
+
 echo ""
-echo "Key 32-bit libraries installed:"
-for lib in libc.so.6 libm.so.6 libpthread.so.0 libdl.so.2 libGL.so.1 libEGL.so.1; do
+echo "Key 32-bit libraries:"
+for lib in libc.so.6 libm.so.6 libpthread.so.0 libdl.so.2 libGL.so.1 libEGL.so.1 libGLESv2.so.2 libasound.so.2; do
     if [ -e "${TARGET_DIR}/lib32/${lib}" ] || [ -e "${TARGET_DIR}/usr/lib32/${lib}" ]; then
         echo "  ✓ ${lib}"
     fi
 done
+
+echo ""
+echo "Dynamic linker:"
+[ -e "${TARGET_DIR}/lib/ld-linux-armhf.so.3" ] && echo "  ✓ /lib/ld-linux-armhf.so.3"
+
+echo ""
+echo "Configuration files:"
+[ -f "${TARGET_DIR}/etc/ld.so.conf" ] && echo "  ✓ /etc/ld.so.conf"
+[ -f "${TARGET_DIR}/etc/ld.so.cache" ] && echo "  ✓ /etc/ld.so.cache"
+[ -f "${TARGET_DIR}/etc/multiarch" ] && echo "  ✓ /etc/multiarch"
 
 echo "================================================"
 echo ""
