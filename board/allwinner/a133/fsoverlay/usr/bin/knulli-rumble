@@ -1,6 +1,4 @@
-#!/bin/bash
-
-RUMBLE_FILE="/sys/class/gpio/gpio227/value"
+#!/bin/sh
 
 # We only want to run the script if the board has rumble capability
 if ! knulli-board-capability "rumble"; then
@@ -8,19 +6,59 @@ if ! knulli-board-capability "rumble"; then
 fi
 
 # Ensure correct number of arguments
-if [ $# -lt 1 ] || [ $(echo "$1 <= 0" | bc) -ne 0 ]; then
+if [ $# -lt 1 ] || ! printf '%s\n' "$1" | grep -Eq '^[0-9]*\.?[0-9]+$' || \
+   ! awk "BEGIN{exit !($1 > 0)}" >/dev/null 2>&1; then
   echo "Usage: $0 <duration>"
-  echo "Duration must be a positive integer or floating point number larger than 0."
+  echo "Duration must be a positive integer or floating point number greater than 0."
   exit 1
 fi
 
-# Enable A133 rumble function if necessary
-if [ ! -d /sys/class/gpio/gpio227 ]; then
-  echo 227 > /sys/class/gpio/export
-  echo -n out > /sys/class/gpio/gpio227/direction
-fi
+RUMBLE_FILE=""
+DURATION="$1"
 
+BOARD_FILE="/boot/boot/knulli.board"
+read -r BOARD < "$BOARD_FILE" 2>/dev/null
 
-echo -n 1 > "$RUMBLE_FILE" && sleep $1 && echo -n 0 > "$RUMBLE_FILE"
+find_event_by_name() {
+  # $1 = exact Name string from /proc/bus/input/devices
+  awk -v RS= -v name="$1" '
+    $0 ~ "N: Name=\""name"\"" && $0 ~ /FF=/ {
+      if (match($0, /H: Handlers=.*(event[0-9]+)/, m)) {
+        print m[1]; exit
+      }
+    }
+  ' /proc/bus/input/devices
+}
+
+case "$BOARD" in
+  trimui-smart-pro|trimui-brick)
+    RUMBLE_FILE="/sys/class/gpio/gpio227/value"
+    # Enable A133 rumble function if necessary
+    if [ ! -d /sys/class/gpio/gpio227 ]; then
+      echo 227 > /sys/class/gpio/export
+      echo -n out > /sys/class/gpio/gpio227/direction
+    fi
+
+    echo -n 1 > "$RUMBLE_FILE" && sleep "$DURATION" && echo -n 0 > "$RUMBLE_FILE"
+    ;;
+
+  powkiddy-v90s|powkiddy-v20)
+    RUMBLE_FILE="/usr/bin/ff-rumble"
+
+    case "$BOARD" in
+      powkiddy-v90s) DEVICE_NAME="Powkiddy V90s Controller" ;;
+      powkiddy-v20)  DEVICE_NAME="Powkiddy V20 Controller" ;;
+    esac
+
+    MAG=60
+
+    # Find the matching /dev/input/eventX node
+    EVENT_NODE="$(find_event_by_name "$DEVICE_NAME")"
+
+    [ -n "$EVENT_NODE" ] || { echo "No rumble device found for $DEVICE_NAME" >&2; exit 1; }
+
+    exec "$RUMBLE_FILE" "$EVENT_NODE" "$DURATION" "$MAG"
+    ;;
+esac
 
 exit 0
