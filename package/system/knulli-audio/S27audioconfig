@@ -44,7 +44,9 @@ apply_audioconfig() {
     # but in case set ou set-profile fails, always set volume
     # because in case the audio card doesn't exist,
     # it is nice to have the volume applied on the default output
-    knulli-audio setSystemVolume "${VOLUME}"  || return 1
+    if [ "$EXITCODE" -eq 0 ] && [ -n "$VOLUME" ]; then
+        knulli-audio setSystemVolume "$VOLUME" || EXITCODE=1
+    fi
     return ${EXITCODE}
 }
 
@@ -57,8 +59,9 @@ try_apply_audioconfig() {
     while test "${N}" -gt 0
     do
 	echo "retry applying audio (${N})" >&2
-	if apply_audioconfig "${DEVICE}" "${PROFILE}" "${VOLUME}"
+	if apply_audioconfig "${DEVICE}" "${PROFILE}"
 	then
+	    [ -n "$VOLUME" ] && knulli-audio setSystemVolume "$VOLUME"
 	    return 0
 	fi
 	sleep 2
