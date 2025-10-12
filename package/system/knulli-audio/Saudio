@@ -8,19 +8,28 @@
 
 start_pipewire() {
     printf "Starting pipewire: "
-    start-stop-daemon -S -b -q -m -p /var/run/pipewire.pid --exec /usr/bin/pipewire
-    echo "OK"
+    if start-stop-daemon -S -b -q -m -p /var/run/pipewire.pid --exec /usr/bin/pipewire; then
+        echo "OK"
+    else
+        echo "Failed to start pipewire"
+        return 1
+    fi
 
-    PULSE_SOCK=/var/run/pulse/native
+    PULSE_SOCK=${PULSE_SOCK:-/var/run/pulse/native}
 
     printf "Waiting for pulse sink: "
-    N=0
-    until pactl -s "unix:$PULSE_SOCK" list sinks short 2>/dev/null | grep -q .; do
-    sleep 0.1
-    N=$((N+1))
-    [ $N -gt 50 ] && { echo "KO"; break; }
+    ok=0
+    i=1
+    while [ "$i" -le 50 ]; do
+        if pactl -s "unix:$PULSE_SOCK" info >/dev/null 2>&1 && \
+           pactl -s "unix:$PULSE_SOCK" list sinks-raw 2>/dev/null | grep -q '^sink='
+        then
+            ok=1; break
+        fi
+        i=$((i + 1))
+        sleep 0.1
     done
-    echo "OK"
+    [ "$ok" -eq 1 ] && echo "OK" || { echo "Failed to find any audio sink"; return 1; }
 }
 
 stop_pipewire() {

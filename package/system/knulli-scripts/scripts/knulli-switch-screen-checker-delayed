@@ -1,4 +1,15 @@
 #!/bin/bash
 
-# at the time of the event, outputs are not always completly initialized ;-( add a 2 seconds delay before querying the switch
-(sleep 2 && /usr/bin/knulli-switch-screen-checker) >/dev/null 2>/dev/null &
+# We only want to run the script if the board has hdmi capability
+if ! knulli-board-capability "hdmi"; then
+    exit 1
+fi
+
+# at the time of the event, outputs are not always completly initialized ;-( add a 1 second delay before querying the switch
+sleep 1
+/usr/bin/knulli-switch-screen-checker >/dev/null 2>&1
+
+sleep 1
+knulli-audio set auto
+
+exit 0

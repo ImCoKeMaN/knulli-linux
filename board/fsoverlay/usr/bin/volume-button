@@ -1,9 +1,9 @@
 #!/bin/bash
 
-LOCKFILE="/var/run/volume-button-script.lock"
-VOLUME_BUTTON_STATE="/var/run/volume-button-state.flag"
+LOCKFILE="/var/run/volume-button.lock"
+VOLUME_BUTTON_STATE="/var/run/volume-button.held"
 
-echo "1" > "$VOLUME_BUTTON_STATE"
+: > "$VOLUME_BUTTON_STATE"
 
 do_lock() {
     exec 200>"$LOCKFILE"
@@ -12,10 +12,10 @@ do_lock() {
 
 case "$1" in
     volup)
-        knulli-audio setSystemVolume +5
+        batocera-audio setSystemVolume +5
 
         for ((i = 0; i < 5; i++)); do
-            if [ "$(cat "$VOLUME_BUTTON_STATE")" = "0" ]; then
+            if [ ! -f "$VOLUME_BUTTON_STATE" ]; then
                 exit 0
             fi
             sleep 0.1
@@ -23,16 +23,16 @@ case "$1" in
 
         do_lock
 
-        while [ "$(cat "$VOLUME_BUTTON_STATE")" = "1" ]; do
-            knulli-audio setSystemVolume +5
+        while [ -f "$VOLUME_BUTTON_STATE" ]; do
+            batocera-audio setSystemVolume +5
             sleep 0.1
         done
         ;;
     voldown)
-        knulli-audio setSystemVolume -5
+        batocera-audio setSystemVolume -5
 
         for ((i = 0; i < 5; i++)); do
-            if [ "$(cat "$VOLUME_BUTTON_STATE")" = "0" ]; then
+            if [ ! -f "$VOLUME_BUTTON_STATE" ]; then
                 exit 0
             fi
             sleep 0.1
@@ -40,16 +40,16 @@ case "$1" in
 
         do_lock
 
-        while [ "$(cat "$VOLUME_BUTTON_STATE")" = "1" ]; do
-            knulli-audio setSystemVolume -5
+        while [ -f "$VOLUME_BUTTON_STATE" ]; do
+            batocera-audio setSystemVolume -5
             sleep 0.1
         done
         ;;
     briup)
-        knulli-brightness + 5
+        batocera-brightness + 5
 
         for ((i = 0; i < 5; i++)); do
-            if [ "$(cat "$VOLUME_BUTTON_STATE")" = "0" ]; then
+            if [ ! -f "$VOLUME_BUTTON_STATE" ]; then
                 exit 0
             fi
             sleep 0.1
@@ -57,16 +57,16 @@ case "$1" in
 
         do_lock
 
-        while [ "$(cat "$VOLUME_BUTTON_STATE")" = "1" ]; do
-            knulli-brightness + 5
+        while [ -f "$VOLUME_BUTTON_STATE" ]; do
+            batocera-brightness + 5
             sleep 0.1
         done
         ;;
     bridown)
-        knulli-brightness - 5
+        batocera-brightness - 5
 
         for ((i = 0; i < 5; i++)); do
-            if [ "$(cat "$VOLUME_BUTTON_STATE")" = "0" ]; then
+            if [ ! -f "$VOLUME_BUTTON_STATE" ]; then
                 exit 0
             fi
             sleep 0.1
@@ -74,8 +74,8 @@ case "$1" in
 
         do_lock
 
-        while [ "$(cat "$VOLUME_BUTTON_STATE")" = "1" ]; do
-            knulli-brightness - 5
+        while [ -f "$VOLUME_BUTTON_STATE" ]; do
+            batocera-brightness - 5
             sleep 0.1
         done
         ;;

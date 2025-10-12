@@ -9,13 +9,13 @@ fi
 
 trap 'flock -u 200;' EXIT
 
-POWER_BUTTON_STATE="/var/run/power-button-state.flag"
+POWER_BUTTON_STATE="/var/run/power-button.held"
 
 # Threshold for long press to shutdown (in seconds) (some boards cut power when power button is held too long)
 LONG_PRESS_THRESHOLD=2
 
 suspend_system() {
-    knulli-suspend
+    knulli-suspend &
 }
 
 shutdown_system() {
@@ -23,17 +23,17 @@ shutdown_system() {
 }
 
 # Set starting state
-echo "1" > "$POWER_BUTTON_STATE"
+: > "$POWER_BUTTON_STATE"
 
-# Wait for modification of flag file
-if inotifywait -qq -t "$LONG_PRESS_THRESHOLD" -e close_write "$POWER_BUTTON_STATE"; then
+# Wait for deletion of state file
+if inotifywait -qq -t "$LONG_PRESS_THRESHOLD" -e delete_self "$POWER_BUTTON_STATE"; then
     # Power button state changed within timeout (short press)
-    if [ "$(cat "$POWER_BUTTON_STATE")" = "0" ]; then
+    if [ ! -f "$POWER_BUTTON_STATE" ]; then
         suspend_system
     fi
 else
     # Shutdown if timeout is reached (long press)
-    if [ "$(cat "$POWER_BUTTON_STATE")" = "1" ]; then
+    if [ -f "$POWER_BUTTON_STATE" ]; then
         if [ -f /usr/bin/knulli-rumble ]; then
             knulli-rumble 0.2
         fi
