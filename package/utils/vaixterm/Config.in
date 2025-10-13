@@ -1,0 +1,12 @@
+config BR2_PACKAGE_VAIXTERM
+    bool "vaixterm"
+    depends on BR2_PACKAGE_SDL2
+    depends on BR2_TOOLCHAIN_HAS_THREADS
+    depends on !BR2_STATIC_LIBS
+    help
+      VaixTerm is a simple terminal emulator based on SDL2.
+      
+      https://github.com/Stanley00/vaixterm
+
+comment "vaixterm needs SDL2, toolchain w/ threads, dynamic library"
+    depends on !BR2_PACKAGE_SDL2 || !BR2_TOOLCHAIN_HAS_THREADS || BR2_STATIC_LIBS

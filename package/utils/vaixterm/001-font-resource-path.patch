@@ -1,0 +1,11 @@
+--- a/src/app_lifecycle.c      2025-10-13 03:35:07.928518687 +0000
++++ b/src/app_lifecycle.c   2025-10-13 03:36:29.737120228 +0000
+@@ -121,7 +121,7 @@ bool app_init_sdl(SDL_Window** win, SDL_
+         ERROR_LOG("Failed to load font! SDL_ttf Error: %s", TTF_GetError());
+         // Try fallback font
+         DEBUG_LOG("Trying fallback font...");
+-        *font = TTF_OpenFont("/System/Library/Fonts/Menlo.ttc", config->font_size);
++        *font = TTF_OpenFont("/usr/share/vaixterm/res/Menlo.ttc", config->font_size);
+         if (!*font) {
+             ERROR_LOG("Failed to load fallback font! SDL_ttf Error: %s", TTF_GetError());
+             SDL_DestroyRenderer(*renderer);
