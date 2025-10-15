@@ -19,7 +19,7 @@ getCpu() {
 }
 
 # Detect battery
-BATT=$(knulli-battery-check charge)
+BATT=$(knulli-battery-check capacity)
 
 if [ -n "${BATTERY_DIR}" ]; then
     BATTREMAINING=""

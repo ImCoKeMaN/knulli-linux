@@ -24,7 +24,7 @@ get_battery() {
 }
 
 # Get charging/discharging/full status
-get_charge_status() {
+get_status() {
     local status
     if [[ -f $BATT_STATUS ]]; then
         status=$(<"$BATT_STATUS")
@@ -42,22 +42,22 @@ change_status() {
 }
 
 case "$1" in
-    charge)
+    capacity)
         get_battery
         ;;
     status)
-        get_charge_status
+        get_status
         ;;
     change)
         change_status
         ;;
     report|"")
         echo "Battery Status Report:"
-        echo "  Charge:     $(get_battery)%"
-        echo "  Status:     $(get_charge_status)"
+        echo "  Capacity:     $(get_battery)%"
+        echo "  Status:     $(get_status)"
         ;;
     *)
-        echo "Usage: $0 {charge|status|report}" >&2
+        echo "Usage: $0 {capacity|status|report}" >&2
         exit 1
         ;;
 esac

@@ -1,20 +1,31 @@
 #!/bin/sh
 
-# Run when battery hits 0%.  Shutdown if still discharging after TIMEOUT seconds
-
-TIMEOUT=60   # seconds
+TIMEOUT=60 # seconds
 COUNT=0
 
+is_discharging() {
+    [ "$(knulli-battery-check status 2>/dev/null)" = "Discharging" ]
+}
+
+# Only run while discharging
+if ! is_discharging; then
+    exit 0
+fi
+
+# Start critical led blinking
+if [ -f /usr/bin/knulli-power-led ]; then
+    /usr/bin/knulli-power-led critical &
+fi
+
+# Countdown while discharging
 while [ $COUNT -lt $TIMEOUT ]; do
-    status=$(knulli-battery-check status)
-
-    [ "$status" = "Charging" ] && exit 0
-
+    if ! is_discharging; then
+        exit 0
+    fi
     sleep 1
     COUNT=$((COUNT+1))
 done
 
-# Timed out with battery still discharging so shutdown
+# If timer reached graceful shutdown
 knulli-shutdown -s
-
 exit 0
