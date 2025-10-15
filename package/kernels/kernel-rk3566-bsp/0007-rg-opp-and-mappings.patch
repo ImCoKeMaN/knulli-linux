@@ -1,0 +1,85 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3566-rg-arc-linux.dts	2025-10-10 12:30:23.290396254 +0000
++++ b/arch/arm64/boot/dts/rockchip/rk3566-rg-arc-linux.dts	2025-10-10 12:30:48.978339626 +0000
+@@ -431,44 +431,50 @@
+ 
+ 		opp-408000000 {
+ 			opp-hz = <0x00 0x18519600>;
+-			opp-microvolt = <0xc96a8 0xc96a8 0x118c30>;
++			opp-microvolt = <0x0C3500 0x0C3500 0x118c30>;
+ 			clock-latency-ns = <0x9c40>;
+ 		};
+ 
+ 		opp-600000000 {
+ 			opp-hz = <0x00 0x23c34600>;
+-			opp-microvolt = <0xc96a8 0xc96a8 0x118c30>;
++			opp-microvolt = <0x0C3500 0x0C3500 0x118c30>;
+ 			clock-latency-ns = <0x9c40>;
+ 		};
+ 
+ 		opp-816000000 {
+ 			opp-hz = <0x00 0x30a32c00>;
+-			opp-microvolt = <0xc96a8 0xc96a8 0x118c30>;
++			opp-microvolt = <0x0C3500 0x0C3500 0x118c30>;
+ 			clock-latency-ns = <0x9c40>;
+ 			opp-suspend;
+ 		};
+ 
+ 		opp-1104000000 {
+ 			opp-hz = <0x00 0x41cdb400>;
+-			opp-microvolt = <0xc96a8 0xc96a8 0x118c30>;
++			opp-microvolt = <0x0C3500 0x0C3500 0x118c30>;
+ 			clock-latency-ns = <0x9c40>;
+ 		};
+ 
+ 		opp-1416000000 {
+ 			opp-hz = <0x00 0x54667200>;
+-			opp-microvolt = <0xdbba0 0xdbba0 0x118c30>;
++			opp-microvolt = <0x0D5D80 0x0D5D80 0x118c30>;
+ 			clock-latency-ns = <0x9c40>;
+ 		};
+ 
+ 		opp-1608000000 {
+ 			opp-hz = <0x00 0x5fd82200>;
+-			opp-microvolt = <0xee098 0xee098 0x118c30>;
++			opp-microvolt = <0x0E7EF0 0x0E7EF0 0x118c30>;
+ 			clock-latency-ns = <0x9c40>;
+ 		};
+ 
+ 		opp-1800000000 {
+ 			opp-hz = <0x00 0x6b49d200>;
+-			opp-microvolt = <0x100590 0x100590 0x118c30>;
++			opp-microvolt = <0x0fa3e8 0x0fa3e8 0x118c30>;
++			clock-latency-ns = <0x9c40>;
++		};
++
++		opp-1992000000 {
++			opp-hz = <0x0 0x76bb8200>;
++			opp-microvolt = <0x10c8e0 0x10c8e0 0x118c30>;
+ 			clock-latency-ns = <0x9c40>;
+ 		};
+ 	};
+@@ -5383,7 +5389,7 @@
+ 	singleadc-joypad {
+ 		compatible = "singleadc-joypad";
+ 		hw_info = <0x05>;
+-		joypad-name = "retrogame_joypad";
++		joypad-name = "Anbernic RG-ARC-S Controller";
+ 		joypad-product = <0x1101>;
+ 		joypad-revision = <0x100>;
+ 		status = "okay";
+@@ -5503,13 +5509,13 @@
+ 		sw16 {
+ 			gpios = <0x11d 0x01 0x01>;
+ 			label = "GPIO BTN_Z";
+-			linux,code = <0x13d>;
++			linux,code = <0x136>;
+ 		};
+ 
+ 		sw17 {
+ 			gpios = <0x11d 0x02 0x01>;
+ 			label = "GPIO BTN_C";
+-			linux,code = <0x13e>;
++			linux,code = <0x137>;
+ 		};
+ 	};
+ 

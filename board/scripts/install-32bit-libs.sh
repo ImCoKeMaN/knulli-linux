@@ -2,67 +2,48 @@
 
 set -e
 
-TARGET_DIR=$1
-BASE_DIR=$2
+ARCH=$1
 
-if [ -z "$TARGET_DIR" ]; then
-    echo "ERROR: TARGET_DIR not provided"
-    exit 1
-fi
-
-if [ -z "$BASE_DIR" ]; then
-    echo "ERROR: BASE_DIR not provided"
+if [ -z "$ARCH" ]; then
+    echo "ERROR: Architecture not provided"
+    echo "Usage: $0 <architecture>"
+    echo "Example: $0 rk3566"
     exit 1
 fi
 
 echo "================================================"
 echo "Installing 32-bit libraries to 64-bit rootfs"
 echo "================================================"
-echo "TARGET_DIR: $TARGET_DIR"
-echo "BASE_DIR: $BASE_DIR"
+echo "Architecture: $ARCH"
 echo ""
 
-# Construct the path to the 32-bit libs build
-# BASE_DIR could be:
-#   - output/rk3566/ (for 64-bit build)
-#   - output/rk3566_armhf_libs/ (if someone passes the 32-bit dir directly)
-#   - /rk3566 (absolute path)
+# Construct paths based on architecture
+LIBS32_SOURCE_DIR="output/${ARCH}_armhf_libs/target"
+TARGET_DIR="output/${ARCH}/target"
 
-# Remove trailing slash if present
-BASE_DIR="${BASE_DIR%/}"
-
-# Get the base build name (e.g., "rk3566" from "output/rk3566" or "output/rk3566_armhf_libs")
-BUILD_NAME=$(basename "$BASE_DIR")
-
-# If BUILD_NAME already ends with _armhf_libs, use it directly
-if [[ "$BUILD_NAME" == *_armhf_libs ]]; then
-    # BASE_DIR is already pointing to the 32-bit build
-    LIBS32_TARGET_DIR="${BASE_DIR}/target"
-else
-    # BASE_DIR is pointing to the 64-bit build, construct 32-bit path
-    PARENT_DIR=$(dirname "$BASE_DIR")
-    if [ "$PARENT_DIR" = "/" ]; then
-        LIBS32_TARGET_DIR="output/${BUILD_NAME}_armhf_libs/target"
-    else
-        LIBS32_TARGET_DIR="${PARENT_DIR}/${BUILD_NAME}_armhf_libs/target"
-    fi
-fi
-
-echo "Build name: $BUILD_NAME"
-echo "32-bit libs source: $LIBS32_TARGET_DIR"
+echo "32-bit source: $LIBS32_SOURCE_DIR"
+echo "64-bit target: $TARGET_DIR"
 echo ""
 
 # Check if 32-bit libs build exists
-if [ ! -d "$LIBS32_TARGET_DIR" ]; then
-    echo "WARNING: 32-bit libraries build not found at: $LIBS32_TARGET_DIR"
+if [ ! -d "$LIBS32_SOURCE_DIR" ]; then
+    echo "WARNING: 32-bit libraries build not found at: $LIBS32_SOURCE_DIR"
     echo "Skipping 32-bit library installation."
     echo ""
-    # Extract the base board name without _armhf_libs suffix
-    BASE_BOARD_NAME="${BUILD_NAME%_armhf_libs}"
     echo "To build 32-bit libraries first, run:"
-    echo "  make ${BASE_BOARD_NAME}_armhf_libs-build"
+    echo "  make ${ARCH}_armhf_libs-build"
     echo ""
     exit 0
+fi
+
+# Check if 64-bit target exists
+if [ ! -d "$TARGET_DIR" ]; then
+    echo "ERROR: 64-bit target directory not found at: $TARGET_DIR"
+    echo ""
+    echo "To build the main target first, run:"
+    echo "  make ${ARCH}-build"
+    echo ""
+    exit 1
 fi
 
 # Create lib32 directories in the 64-bit target
@@ -73,8 +54,8 @@ mkdir -p "${TARGET_DIR}/usr/lib32"
 # Copy the 32-bit dynamic linker to /lib (NOT /lib32)
 echo ""
 echo "Copying 32-bit dynamic linker..."
-if [ -f "${LIBS32_TARGET_DIR}/lib/ld-linux-armhf.so.3" ]; then
-    cp -av "${LIBS32_TARGET_DIR}/lib/ld-linux-armhf.so.3" "${TARGET_DIR}/lib/"
+if [ -f "${LIBS32_SOURCE_DIR}/lib/ld-linux-armhf.so.3" ]; then
+    cp -av "${LIBS32_SOURCE_DIR}/lib/ld-linux-armhf.so.3" "${TARGET_DIR}/lib/"
     echo "  ✓ Copied ld-linux-armhf.so.3 to /lib"
 else
     echo "  ✗ WARNING: ld-linux-armhf.so.3 not found!"
@@ -83,21 +64,21 @@ fi
 # Copy everything from /lib to /lib32 (preserving symlinks)
 echo ""
 echo "Copying /lib to /lib32..."
-if [ -d "${LIBS32_TARGET_DIR}/lib" ]; then
-    rsync -av --exclude='ld-linux-armhf.so.3' "${LIBS32_TARGET_DIR}/lib/" "${TARGET_DIR}/lib32/"
+if [ -d "${LIBS32_SOURCE_DIR}/lib" ]; then
+    rsync -av --exclude='ld-linux-armhf.so.3' "${LIBS32_SOURCE_DIR}/lib/" "${TARGET_DIR}/lib32/"
     echo "  ✓ Copied /lib contents to /lib32"
 else
-    echo "  ✗ WARNING: ${LIBS32_TARGET_DIR}/lib not found!"
+    echo "  ✗ WARNING: ${LIBS32_SOURCE_DIR}/lib not found!"
 fi
 
 # Copy everything from /usr/lib to /usr/lib32 (preserving symlinks and subdirectories)
 echo ""
 echo "Copying /usr/lib to /usr/lib32..."
-if [ -d "${LIBS32_TARGET_DIR}/usr/lib" ]; then
-    rsync -av "${LIBS32_TARGET_DIR}/usr/lib/" "${TARGET_DIR}/usr/lib32/"
+if [ -d "${LIBS32_SOURCE_DIR}/usr/lib" ]; then
+    rsync -av "${LIBS32_SOURCE_DIR}/usr/lib/" "${TARGET_DIR}/usr/lib32/"
     echo "  ✓ Copied /usr/lib contents to /usr/lib32"
 else
-    echo "  ✗ WARNING: ${LIBS32_TARGET_DIR}/usr/lib not found!"
+    echo "  ✗ WARNING: ${LIBS32_SOURCE_DIR}/usr/lib not found!"
 fi
 
 # Create or append to ld.so.conf with lib32 paths

@@ -1,0 +1,24 @@
+#!/bin/sh
+
+case "$1" in
+  start)
+    # Only run on first boot - check if cache already exists and is newer than ld.so.conf
+    if [ -f /etc/ld.so.cache ] && [ /etc/ld.so.cache -nt /etc/ld.so.conf ]; then
+      # Cache exists and is newer than config, skip
+      exit 0
+    fi
+    
+    echo "First boot: Updating dynamic linker cache..."
+    if [ -f /etc/multiarch ]; then
+      /sbin/ldconfig -v
+      echo "32-bit multiarch support enabled"
+    else
+      /sbin/ldconfig
+    fi
+    ;;
+  *)
+    echo "Usage: $0 {start}"
+    exit 1
+esac
+
+exit 0

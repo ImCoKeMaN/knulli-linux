@@ -6,7 +6,7 @@
 
 KNULLI_SYSTEM_SOURCE=
 
-KNULLI_SYSTEM_VERSION = gladiator-ii
+KNULLI_SYSTEM_VERSION = alpha
 KNULLI_SYSTEM_DATE_TIME = $(shell date "+%Y/%m/%d %H:%M")
 KNULLI_SYSTEM_DATE = $(shell date "+%Y/%m/%d")
 KNULLI_SYSTEM_DEPENDENCIES = tzdata
