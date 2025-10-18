@@ -106,7 +106,7 @@ define KNULLI_SPLASH_INSTALL_IMAGE
     convert "$(BR2_EXTERNAL_KNULLI_PATH)/package/system/knulli-splash/images/logo-16-9-480-rotate.png" -fill white -pointsize 20 -annotate 270x270+440+814 "$(KNULLI_SPLASH_TGVERSION)" "${TARGET_DIR}/usr/share/knulli/splash/logo-version-480x854.png"
     convert "$(BR2_EXTERNAL_KNULLI_PATH)/package/system/knulli-splash/images/logo-480p.png" -fill white -pointsize 20 -annotate +40+440 "$(KNULLI_SPLASH_TGVERSION)" "${TARGET_DIR}/usr/share/knulli/splash/logo-version-640x480.png"
     convert "$(BR2_EXTERNAL_KNULLI_PATH)/package/system/knulli-splash/images/logo-240.png" -fill white -pointsize 15 -annotate +20+220 "$(KNULLI_SPLASH_TGVERSION)" "${TARGET_DIR}/usr/share/knulli/splash/logo-version-320x240.png"
-    convert "$(BR2_EXTERNAL_KNULLI_PATH)/package/system/knulli-splash/images/logo-480-dmg.png" -fill white -pointsize 20 -annotate +40+440 "$(KNULLI_SPLASH_TGVERSION)" "${TARGET_DIR}/usr/share/knulli/splash/logo-version-640x480-dmg.png"
+#     convert "$(BR2_EXTERNAL_KNULLI_PATH)/package/system/knulli-splash/images/logo-480-dmg.png" -fill white -pointsize 20 -annotate +40+440 "$(KNULLI_SPLASH_TGVERSION)" "${TARGET_DIR}/usr/share/knulli/splash/logo-version-640x480-dmg.png"
 endef
 
 $(eval $(generic-package))

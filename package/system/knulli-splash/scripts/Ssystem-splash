@@ -30,16 +30,16 @@ do_start () {
         [ -f "$image" ] || exit 1
     fi
 
-    if [ "${V_BOARD_MODEL}" = "Loki_Zero" ] || [ "${V_BOARD_MODEL}" = "Retroid_Pocket_5" ]; then
+    if [ "${V_BOARD_MODEL}" = "Loki_Zero" ] || [ "${V_BOARD_MODEL}" = "Retroid_Pocket_5" ] || [ "${V_BOARD_MODEL}" = "Retroid_Pocket_Flip2" ]; then
         image="/usr/share/knulli/splash/boot-logo-1080x1920-left.png"
     fi
 
-    if [ "${V_BOARD_MODEL}" = "MIYOO_RK3566_355_V10_Board" ]; then
+    if [ "${V_BOARD_MODEL}" = "MIYOO_Flip" ]; then
         image="/usr/share/knulli/splash/boot-logo-640x480.png"
     fi
 
-    if [ "${V_BOARD_MODEL}" = "Anbernic_RG_Arc" ]; then
-        image="/usr/share/knulli/splash/boot-logo-480x640.png"
+    if [ "${V_BOARD_MODEL}" = "Anbernic_RG_ARC" ]; then
+        image="/usr/share/knulli/splash/boot-logo-480x640-left.png"
     fi
 
     if [ "${V_BOARD_MODEL}" = "MagicX_Mini_M" ]; then

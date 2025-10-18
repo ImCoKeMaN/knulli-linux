@@ -1,3 +1,9 @@
+default:
+  options:
+    retroarch.menu_driver: ozone
+    retroarch.menu_scale_factor: "1.500000"
+    retroarch.audio_driver: alsathread
+
 gamecube:
   emulator: libretro
   core:     dolphin

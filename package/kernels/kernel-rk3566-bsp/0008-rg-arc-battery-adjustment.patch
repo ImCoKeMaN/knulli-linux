@@ -1,0 +1,29 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3566-rg-arc-linux.dts	2025-10-15 14:43:26.699744436 +0000
++++ b/arch/arm64/boot/dts/rockchip/rk3566-rg-arc-linux.dts	2025-10-17 01:48:44.000000000 +0000
+@@ -1463,7 +1463,7 @@
+ 
+ 			battery {
+ 				compatible = "rk817,battery";
+-				ocv_table = <0xd48 0xd76 0xda4 0xdc5 0xde0 0xdf3 0xe03 0xe10 0xe1c 0xe2c 0xe42 0xe63 0xe82 0xea2 0xec7 0xef2 0xf22 0xf56 0xf90 0xfd6 0x104c>;
++				ocv_table = <0xd48 0xd76 0xda4 0xdc5 0xde0 0xdf3 0xe03 0xe10 0xe1c 0xe2c 0xe42 0xe63 0xe82 0xea2 0xec7 0xef2 0xf22 0xf46 0xf6a 0xf8e 0xfb2>;
+ 				design_capacity = <0xd90>;
+ 				design_qmax = <0xeeb>;
+ 				bat_res = <0x75>;
+@@ -1471,7 +1471,7 @@
+ 				sleep_exit_current = <0x12c>;
+ 				sleep_filter_current = <0x64>;
+ 				power_off_thresd = <0xd48>;
+-				zero_algorithm_vol = <0xf0a>;
++				zero_algorithm_vol = <0x00>;
+ 				max_soc_offset = <0x3c>;
+ 				monitor_sec = <0x05>;
+ 				sample_res = <0x0a>;
+@@ -1483,7 +1483,7 @@
+ 				min_input_voltage = <0x1194>;
+ 				max_input_current = <0x5dc>;
+ 				max_chrg_current = <0x7d0>;
+-				max_chrg_voltage = <0x109a>;
++				max_chrg_voltage = <0x1004>;
+ 				chrg_term_mode = <0x00>;
+ 				chrg_finish_cur = <0x12c>;
+ 				virtual_power = <0x00>;
