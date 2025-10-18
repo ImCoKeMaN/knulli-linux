@@ -83,7 +83,7 @@ get_gate_count() {
         h700)
             echo 2
             ;;
-        rk3566)
+        rk3568)
             echo 1
             ;;
         *)
