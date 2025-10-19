@@ -1,0 +1,12 @@
+config BR2_PACKAGE_HOST_ALLWINNER_UTILS
+    bool "host allwinner-utils"
+    help
+      Allwinner utilities for building boot images and environment.
+      
+      This package provides build tools for Allwinner platforms:
+      - dragonsecboot: Tool for packing boot components into boot_package.fex
+      - u_boot_env_gen: Tool for generating U-Boot environment partitions
+      
+      These are host tools used during the build process.
+      
+      https://github.com/knulli-cfw/hdzero-goggle-tools

@@ -1,0 +1,20 @@
+config BR2_PACKAGE_UBOOT_H700
+    bool "uboot-h700"
+    depends on BR2_PACKAGE_HOST_ALLWINNER_UTILS
+    depends on BR2_PACKAGE_HOST_DTC
+    help
+      U-Boot boot packages for Allwinner H700-based handheld devices.
+      
+      This package builds boot_package.fex files for various H700 devices:
+      - rg-cubexx, rg28xx, rg34xx series
+      - rg35xx series (h, plus, pro, sp)
+      - rg40xx series (h, v)
+      
+      Each device gets its device tree compiled and packed with U-Boot
+      components using Allwinner's dragonsecboot tool.
+      
+      The resulting boot packages are placed in:
+      output/images/h700-boot-packages/<device>_boot_package.fex
+
+comment "uboot-h700 needs host-allwinner-utils and host-dtc"
+    depends on !BR2_PACKAGE_HOST_ALLWINNER_UTILS || !BR2_PACKAGE_HOST_DTC

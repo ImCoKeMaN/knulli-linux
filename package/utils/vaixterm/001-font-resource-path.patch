@@ -9,3 +9,14 @@
          if (!*font) {
              ERROR_LOG("Failed to load fallback font! SDL_ttf Error: %s", TTF_GetError());
              SDL_DestroyRenderer(*renderer);
+--- a/include/config.h	2025-10-18 16:59:32.206302786 +0000
++++ b/include/config.h	2025-10-18 16:59:48.430324982 +0000
+@@ -61,7 +61,7 @@
+ #define DEFAULT_WINDOW_HEIGHT 480
+ #define DEFAULT_FONT_SIZE_POINTS 12
+ #define DEFAULT_SCROLLBACK_LINES 1000
+-#define DEFAULT_FONT_FILE_PATH "res/Martian.ttf"
++#define DEFAULT_FONT_FILE_PATH "/usr/share/vaixterm/res/Martian.ttf"
+ #define DEFAULT_BACKGROUND_IMAGE_PATH NULL // Or "" if you prefer an empty string
+ 
+ // --- Button Repeat Timing ---

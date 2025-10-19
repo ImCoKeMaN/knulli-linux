@@ -5943,3 +5943,20 @@ bennugd:
     Trouvez la documentation ici : https://wiki.batocera.org/systems:bennugd
   comment_br: |
     Para mais informações: https://wiki.batocera.org/systems:bennugd
+
+vaixterm:
+  name: VaixTerm
+  manufacturer: Tools
+  release: 2025
+  hardware: port
+  extensions: [vxt]
+  group: tools
+  emulators:
+    odcommander:
+      odcommander: { requireAnyOf: [BR2_PACKAGE_VAIXTERM] }
+  comment_en: |
+    A Robust SDL2 Terminal for Handheld & Embedded Systems.
+  comment_fr: |
+    Un terminal SDL2 robuste pour systèmes portables et embarqués.
+  comment_br: |
+    Um terminal SDL2 robusto para sistemas portáteis e embarcados.
