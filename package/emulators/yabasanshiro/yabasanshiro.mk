@@ -134,12 +134,12 @@ endef
 
 # Post-install: install library and extra files; attempt to strip the main binary if present
 define YABASANSHIRO_POST_PROCESS
-	# install libyabause into target lib dir (your previous behavior)
+	# install libyabause into target lib dir
 	$(INSTALL) -m 0755 $(@D)/yabause/src/libyabause.so -D $(TARGET_DIR)/usr/lib/libyabause.so
 
-	# evmap config (keeps your previous behavior — path references your external batocera package)
+	# evmapy config
 	mkdir -p $(TARGET_DIR)/usr/share/evmapy
-	cp -f $(BR2_EXTERNAL_BATOCERA_PATH)/package/batocera/emulators/yabasanshiro/saturn.yabasanshiro.keys $(TARGET_DIR)/usr/share/evmapy
+	cp -f $(BR2_EXTERNAL_KNULLI_PATH)/package/emulators/yabasanshiro/saturn.yabasanshiro.keys $(TARGET_DIR)/usr/share/evmapy
 
 	# if the retro_arena binary exists in the build tree, copy + strip it into target bin
 	if [ -f $(@D)/yabause/src/retro_arena/yabasanshiro ]; then \

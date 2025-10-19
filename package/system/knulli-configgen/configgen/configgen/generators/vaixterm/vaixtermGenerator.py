@@ -28,7 +28,7 @@ class VaixtermGenerator(Generator):
             return False # when file is not yet here or malformed
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
-        commandArray = ["vaixterm"]
+        commandArray = ["vaixterm", "-w", str(gameResolution["width"]), "-h", str(gameResolution["height"])]
 
         return Command.Command(array=commandArray,env={
             "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers, self.getInvertButtonsValue())
