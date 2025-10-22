@@ -4,7 +4,7 @@ BR2_EXTERNAL_BATOCERA_PATH = $(BR2_EXTERNAL_KNULLI_PATH)
 KNULLI_OVERRIDE_PACKAGES = libretro-flycastvl es-background-musics retroarch-assets \
 							retroarch libretro-parallel-n64 libretro-yabasanshiro \
 							common-shaders glsl-shaders slang-shaders batocera-shaders \
-							batocera-triggerhappy
+							batocera-triggerhappy azahar
 
 # Knulli packages
 include $(sort $(wildcard $(BR2_EXTERNAL_KNULLI_PATH)/package/audio/*/*.mk \

@@ -540,7 +540,7 @@ satellaview:
   emulator: libretro
   core:     snes9x
 saturn:
-  emulator: libretro
+  emulator: yabasanshiro
   core:     yabasanshiro
 scummvm:
   emulator: scummvm
