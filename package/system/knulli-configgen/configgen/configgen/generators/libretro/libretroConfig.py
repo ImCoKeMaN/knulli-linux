@@ -815,7 +815,10 @@ def createLibretroConfig(generator: Generator, system: Emulator, controllers: Co
         retroarchConfig['savestate_max_keep'] = '50'
     else:
         retroarchConfig['savestate_auto_index'] = 'true'
-        retroarchConfig['savestate_max_keep'] = '0'
+        if system.isOptSet('maxincrementalsavestates'):
+            retroarchConfig['savestate_max_keep'] = system.config['maxincrementalsavestates']
+        else:
+            retroarchConfig['savestate_max_keep'] = '0'
 
     # state_slot option
     if system.isOptSet('state_slot'):
