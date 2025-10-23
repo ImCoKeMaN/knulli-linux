@@ -61,7 +61,7 @@ class PPSSPPGenerator(Generator):
         nplayer = 1
         for playercontroller, pad in sorted(playersControllers.items()):
             if nplayer == 1:
-                commandArray.extend(["--njoy", str(pad.index)])
+                commandArray.append("--njoy".format(pad.index))
             nplayer = nplayer +1
 
         return Command.Command(

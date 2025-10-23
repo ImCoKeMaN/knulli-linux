@@ -1,0 +1,15 @@
+config BR2_PACKAGE_LIBRETRO_GAMETANK
+    bool "libretro-gametank"
+    depends on BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
+    select BR2_PACKAGE_HOST_RUSTC    
+    depends on !BR2_STATIC_LIBS
+    help
+      GameTank libretro core.
+      
+      Emulates the GameTank fantasy console.
+      A Rust-based libretro core.
+      
+      https://github.com/dwbrite/gametank_libretro
+
+comment "libretro-gametank needs Rust toolchain, dynamic library"
+    depends on !BR2_PACKAGE_HOST_RUST || BR2_STATIC_LIBS
