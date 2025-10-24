@@ -1340,7 +1340,8 @@ config BR2_PACKAGE_BATOCERA_CONSOLE_SYSTEMS
 	# Gamecube / Wii
 	select BR2_PACKAGE_DOLPHIN_EMU			if BR2_PACKAGE_BATOCERA_TARGET_X86_64_ANY || \
 	                                           BR2_PACKAGE_BATOCERA_TARGET_BCM2712 || \
-	                                           BR2_PACKAGE_BATOCERA_TARGET_SM8250 
+	                                           BR2_PACKAGE_BATOCERA_TARGET_SM8250 || \
+											   BR2_PACKAGE_BATOCERA_TARGET_RK3568
 											   # cannot use BR2_PACKAGE_BATOCERA_TARGET_RK3588 as Dolphin requires OpenGL
 
 	select BR2_PACKAGE_LIBRETRO_DOLPHIN		if BR2_PACKAGE_BATOCERA_TARGET_X86_64_ANY || \

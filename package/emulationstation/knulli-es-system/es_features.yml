@@ -13272,3 +13272,10 @@ sonic-mania:
 
 fba2x:
   shared: [videomode]
+
+yabasanshiro:
+  cfeatures:
+    yaba_bios_hle:
+      prompt: HLE BIOS
+      description: Use internal emulated BIOS. May affect compatibility with some games.
+      preset: switchauto
