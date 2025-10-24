@@ -715,6 +715,8 @@ menu "Knulli Packages"
   menu "Utils"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/utils/xdelta3/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/utils/vaixterm/Config.in"
+    source "$BR2_EXTERNAL_KNULLI_PATH/package/utils/syncthing/Config.in"
+    source "$BR2_EXTERNAL_KNULLI_PATH/package/utils/zramswap/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/utils/allwinner-utils/Config.in"
   endmenu
 

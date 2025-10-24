@@ -40,10 +40,10 @@ define SYNCTHING_BUILD_CMDS
 endef
 
 define SYNCTHING_INSTALL_TARGET_CMDS
-	mkdir -p $(TARGET_DIR)/usr/share/batocera/services
+	mkdir -p $(TARGET_DIR)/usr/share/knulli/services
 	$(INSTALL) -D $(@D)/syncthing $(TARGET_DIR)/usr/bin/syncthing
-	$(INSTALL) -Dm755 $(BR2_EXTERNAL_BATOCERA_PATH)/package/batocera/utils/syncthing/syncthing \
-	    $(TARGET_DIR)/usr/share/batocera/services/
+	$(INSTALL) -Dm755 $(BR2_EXTERNAL_BATOCERA_PATH)/package/utils/syncthing/syncthing \
+	    $(TARGET_DIR)/usr/share/knulli/services/
 endef
 
 $(eval $(golang-package))
