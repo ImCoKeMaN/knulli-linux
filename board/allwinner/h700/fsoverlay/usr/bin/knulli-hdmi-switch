@@ -27,8 +27,6 @@ while pidof emulationstation >/dev/null 2>&1; do
     [ "$i" -ge 10 ] && break
 done
 
-knulli-suspend 1 # workaround to force the display to initialize (prevents graphical problems)
-
 knulli-audio set auto
 
 exit 0

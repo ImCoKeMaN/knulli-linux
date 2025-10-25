@@ -2,7 +2,7 @@
 
 DISPLAY="/sys/kernel/debug/dispdbg"
 HDMI_STATE="/sys/devices/platform/soc/6000000.hdmi/extcon/hdmi/state"
-BOARD=$(cat /boot/boot/knulli.board)
+read -r BOARD < "/boot/boot/knulli.board"
 
 f_usage() {
     echo "$0 listOutputs" >&2
@@ -15,50 +15,67 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-# use for syntax only
-PSCREEN=
-if test "${1}" = "--screen"
-then
-    shift
-    PSCREEN=$1
-    shift
-fi
+set_fb() {
+    # check wanted geometry against current geometry, only change if needed.
+    want_x="$1"; want_y="$2"; want_vx="$3"; want_vy="$4"; want_bpp="$5"
+
+    set -- $(fbset | awk '/geometry/ {print $2, $3, $4, $5, $6}')
+    cur_x="$1"; cur_y="$2"; cur_vx="$3"; cur_vy="$4"; cur_bpp="$5"
+
+    if [ "$cur_x" = "$want_x" ] && [ "$cur_y" = "$want_y" ] && \
+       [ "$cur_vx" = "$want_vx" ] && [ "$cur_vy" = "$want_vy" ] && \
+       [ "$cur_bpp" = "$want_bpp" ]; then
+        return 0
+    fi
+
+    fbset -g "$want_x" "$want_y" "$want_vx" "$want_vy" "$want_bpp"
+}
 
 set_output() {
     OUTPUT=$1
     case "$OUTPUT" in
         hdmi)
             VIDEO=$(knulli-settings-get global.videooutput)
-            echo disp0 > $DISPLAY/name
-            echo switch1 > $DISPLAY/command
-            if [ "$VIDEO" = "hdmi-480p" ]; then
-                echo 4 2 0 0 0x4 0x201 0 1 0 8 > $DISPLAY/param
-                echo 1 > $DISPLAY/start
-                fbset -g 640 480 640 960 32 -t 25175 40 24 32 9 96 2
-            elif [ "$VIDEO" = "hdmi-720p" ]; then
-                echo 4 5 0 0 0x4 0x201 0 1 0 8 > $DISPLAY/param
-                echo 1 > $DISPLAY/start
-                fbset -g 1280 720 1280 1440 32 -t 13468 220 40 20 5 110 5
-            elif [ "$VIDEO" = "hdmi-1080p" ] || [ "$VIDEO" = "" ]; then
-                echo 4 10 0 0 0x4 0x201 0 1 0 8 > $DISPLAY/param
-                echo 1 > $DISPLAY/start
-                fbset -g 1280 720 1280 1440 32 -t 13468 220 40 20 5 110 5
-            fi
+            echo "disp0" > "$DISPLAY/name"
+            echo "switch1" > "$DISPLAY/command"
+            case "$VIDEO" in
+                hdmi-480p)
+                    echo "4 2 0 0 0x4 0x201 0 1 0 8" > "$DISPLAY/param"
+                    echo 1 > "$DISPLAY/start"
+                    set_fb 640 480 640 960 32
+                    ;;
+                hdmi-720p)
+                    echo "4 5 0 0 0x4 0x201 0 1 0 8" > "$DISPLAY/param"
+                    echo 1 > "$DISPLAY/start"
+                    set_fb 1280 720 1280 1440 32
+                    ;;
+                ""|hdmi-1080p)
+                    echo "4 10 0 0 0x4 0x201 0 1 0 8" > "$DISPLAY/param"
+                    echo 1 > "$DISPLAY/start"
+                    set_fb 1280 720 1280 1440 32
+                    ;;
+            esac
             ;;
         internal)
-            echo disp0 > $DISPLAY/name
-            echo switch > $DISPLAY/command
-            echo 1 0 > $DISPLAY/param
-            echo 1 > $DISPLAY/start
-            if [ "$BOARD" = "rg28xx" ]; then
-                fbset -g 480 640 480 1280 32
-            elif [ "$BOARD" = "rg-cubexx" ]; then
-                fbset -g 720 720 720 1440 32
-            elif [ "$BOARD" = "rg34xx" ] || [ "$BOARD" = "rg34xx-sp" ]; then
-                fbset -g 720 480 720 960 32
-            else
-                fbset -g 640 480 640 960 32
-            fi
+            echo "disp0" > "$DISPLAY/name"
+            echo "switch" > "$DISPLAY/command"
+            echo "1 0" > "$DISPLAY/param"
+            echo 1 > "$DISPLAY/start"
+
+            case "$BOARD" in
+                rg28xx)
+                    set_fb 480 640 480 1280 32
+                    ;;
+                rg-cubexx)
+                    set_fb 720 720 720 1440 32
+                    ;;
+                rg34xx|rg34xx-sp)
+                    set_fb 720 480 720 960 32
+                    ;;
+                *)
+                    set_fb 640 480 640 960 32
+                    ;;
+            esac
             ;;
         *)
             f_usage
@@ -77,7 +94,7 @@ case "${ACTION}" in
     "listModes")
         ;;
     "setOutput")
-        STATE=$(cat "$HDMI_STATE")
+        read -r STATE < "$HDMI_STATE"
         if [ "$STATE" = "HDMI=1" ]; then
             set_output hdmi
         else
@@ -98,10 +115,8 @@ case "${ACTION}" in
     "minTomaxResolution" | "minTomaxResolution-secure")
         ;;
     "supportSystemReflection")
-        exit 1
         ;;
     "supportSystemRotation")
-        exit 1
         ;;
     *)
         echo "error: invalid command ${ACTION}" >&2
