@@ -1,0 +1,17 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3566-miyoo-355-v10-linux.dts	2025-10-24 20:31:02.937693997 +0000
++++ b/arch/arm64/boot/dts/rockchip/rk3566-miyoo-355-v10-linux.dts	2025-10-24 20:32:13.249671373 +0000
+@@ -990,11 +990,13 @@
+ 	max-frequency = <150000000>;
+ 	no-sdio;
+ 	no-mmc;
++	supports-sd;
+ 	bus-width = <4>;
+ 	cap-mmc-highspeed;
+ 	cap-sd-highspeed;
+ 	disable-wp;
+-	sd-uhs-sdr104;
++	sd-uhs-sdr12;
++	sd-ush-sdr25;
+ 	vmmc-supply = <&vcc_sd>;
+ 	vqmmc-supply = <&vccio_sd>;
+ 	pinctrl-names = "default";

@@ -141,7 +141,7 @@ index c5340afa8..663c4707c 100644
 +        l_frameWidth = frameWidth;
 +        l_frameHeight = (frameHeight + 31) & (~31);
 +    } else {
-+        l_frameWidth = (frameWidth + 31) & (~31);
++        l_frameWidth = frameWidth;
 +        l_frameHeight = frameHeight;
      }
  
