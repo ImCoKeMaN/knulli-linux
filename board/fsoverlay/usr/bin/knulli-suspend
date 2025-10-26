@@ -121,11 +121,14 @@ if [ -n "$TIMER" ] && [ "$TIMER" -gt 0 ]; then
     rm -f "$WAKE_TIME" 2>/dev/null
   fi
 else
+  clear_rtcs
   rm -f "$WAKE_TIME" 2>/dev/null
   AUTO_SD=0
 fi
 
 pm-is-supported --suspend >/dev/null 2>&1 && pm-suspend
+
+clear_rtcs # Make sure any timers are cleared after suspending
 
 if [ "$AUTO_SD" -eq 1 ]; then
   check_auto_shutdown

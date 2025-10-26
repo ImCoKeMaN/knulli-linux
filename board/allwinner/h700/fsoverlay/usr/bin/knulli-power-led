@@ -1,0 +1,77 @@
+#!/bin/sh
+
+LED_ROOT="/sys/class/power_supply/axp2202-battery"
+LED_FULL="${LED_ROOT}/work_led"
+LED_SLP="${LED_ROOT}/workled_sleep"
+LED_LOW="${LED_ROOT}/lowpwr_led"
+
+is_discharging() {
+    [ "$(knulli-battery-check status 2>/dev/null)" = "Discharging" ]
+}
+
+set_on()  { echo 1 >"$1" 2>/dev/null; }
+set_off() { echo 0 >"$1" 2>/dev/null; }
+
+do_led() {
+    case "$2" in
+        on)
+          set_on "$1"
+          ;;
+        off)
+          set_off "$1"
+          ;;
+        *)
+          return 1
+          ;;
+    esac
+}
+
+set_critical() {
+    if ! is_discharging; then
+        exit 0
+    fi
+
+    trap 'set_on "$LED_LOW"; exit' INT TERM # Just in case it exits will revert to on
+
+    i=0
+    state=0 # 0=off,1=on
+    while [ $i -lt 240 ]; do
+        # abort if device stops discharging
+        if ! is_discharging; then
+            break
+        fi
+
+        if [ $state -eq 0 ]; then
+            set_on "$LED_LOW"; state=1
+            else
+            set_off "$LED_LOW"; state=0
+        fi
+
+        sleep 0.5
+        i=$((i+1))
+    done
+
+    set_on "$LED_LOW"
+}
+
+usage() {
+    echo "Usage: knulli-power-led {power|sleep|low} {on|off} | critical"
+}
+
+case "$1" in
+  power)
+    do_led "$LED_FULL" "$2" || usage
+    ;;
+  sleep)
+    do_led "$LED_SLP" "$2" || usage
+    ;;
+  low)
+    do_led "$LED_LOW" "$2" || usage
+    ;;
+  critical)
+    set_critical
+    ;;
+  *)
+    usage
+    ;;
+esac
