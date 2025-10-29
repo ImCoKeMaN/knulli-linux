@@ -1,5 +1,5 @@
 config BR2_PACKAGE_DRM_TOOL
-    bool "drm_tool"
+    bool "drm-tool"
     depends on BR2_TOOLCHAIN_HAS_THREADS
     depends on !BR2_STATIC_LIBS
     select BR2_PACKAGE_LIBDRM
@@ -11,6 +11,6 @@ config BR2_PACKAGE_DRM_TOOL
       
       https://github.com/NickCis/drm_tool
 
-comment "drm_tool needs a toolchain w/ threads, dynamic library"
+comment "drm-tool needs a toolchain w/ threads, dynamic library"
     depends on !BR2_TOOLCHAIN_HAS_THREADS || BR2_STATIC_LIBS
     

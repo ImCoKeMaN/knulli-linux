@@ -41,6 +41,7 @@ RUN dpkg --add-architecture i386 && \
 		python-is-python3 \
 		gcc-multilib \
 		g++-multilib \
+		vim \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
