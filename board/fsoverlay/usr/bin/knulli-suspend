@@ -1,49 +1,28 @@
 #!/bin/sh
 
+WAKE_TIME="/var/run/rtc-wake.epoch"
+SHUTDOWN_FLAG="/var/run/shutdown.flag"
+IDLE_STATE_FILE="/var/run/idle.state"
 LOCK_FILE="/var/run/knulli-suspend.lock"
 
 exec 9>"${LOCK_FILE}"
 if ! flock -n 9; then
-    exit 0
+  exit 0
 fi
 
 trap 'flock -u 9;' EXIT
 
-WAKE_TIME="/var/run/rtc-wake.epoch"
-
-usage() {
-  echo "Usage: $0 [TIMER_SECONDS [ -s|--shutdown ]]" >&2
-  exit 1
-}
-
-is_int() {
-    case "$1" in
-        ''|*[!0-9]*) return 1 ;;
-        *) return 0 ;;
-    esac
-}
+# Abort if system is shutting down
+if [ -f "$SHUTDOWN_FLAG" ]; then
+  exit 0
+fi
 
 save_time() {
-  TIMER="$1"
+  local TIMER="$1"
 
   now=$(date +%s)
   target=$(( now + TIMER ))
   echo "$target" > "$WAKE_TIME"
-}
-
-check_auto_shutdown() {
-  [ -r "$WAKE_TIME" ] || return 0
-  read -r recorded < "$WAKE_TIME" 2>/dev/null || recorded=""
-  rm -f "$WAKE_TIME"
-  [ -n "$recorded" ] || return 0
-
-  now=$(date +%s)
-  # 10s grace period to protect against shift
-  diff=$(( now - recorded ))
-  [ "$diff" -lt 0 ] && diff=$(( -diff ))
-  if [ "$diff" -le 10 ]; then
-    knulli-shutdown -s
-  fi
 }
 
 clear_rtcs() {
@@ -72,69 +51,85 @@ arm_rtcs() {
   [ "$armed" -eq 1 ]  # returns 0 if at least one armed, 1 otherwise
 }
 
-TIMER=""
-AUTO_SD=0
+check_auto_shutdown() {
+  [ -r "$WAKE_TIME" ] || return 0
+  read -r recorded < "$WAKE_TIME" 2>/dev/null || recorded=""
+  rm -f "$WAKE_TIME"
+  [ -n "$recorded" ] || return 0
 
-# 0 args: normal suspend
-# 1 arg : must be positive integer timer
-# 2 args: timer + (-s|--shutdown)
-case "$#" in
-  0)
-    ;;
-  1|2)
-    # validate first arg as timer once
-    if is_int "$1" && [ "$1" -gt 0 ]; then
-      TIMER="$1"
-      shift
+  now=$(date +%s)
+  # 10s grace period to protect against shift
+  diff=$(( now - recorded ))
+  [ "$diff" -lt 0 ] && diff=$(( -diff ))
+  if [ "$diff" -le 10 ]; then
+    knulli-shutdown -s
+  fi
+}
+
+check_idle_modes() {
+  local MODE
+  local TIMER
+  local EXTENDED_MODE
+  local EXTENDED_TIMER
+  local IDLE_STATE
+
+  MODE="$(/usr/bin/knulli-settings-get system.batterysaver.mode 2>/dev/null)"
+  TIMER="$(/usr/bin/knulli-settings-get system.idlewatcher.timer 2>/dev/null)"
+  EXTENDED_MODE="$(/usr/bin/knulli-settings-get system.batterysaver.extendedmode 2>/dev/null)"
+  EXTENDED_TIMER="$(/usr/bin/knulli-settings-get system.idlewatcher.extendedtimer 2>/dev/null)"
+
+  # Check first if initial mode is shutdown
+  if [ "$MODE" = "shutdown" ] && [ -n "$TIMER" ]; then
+    printf '%s' "$TIMER"
+    return 0
+  fi
+
+  # If initial mode is not shutdown, check extended mode
+  if [ "$EXTENDED_MODE" = "shutdown" ]; then
+    if [ -r "$IDLE_STATE_FILE" ]; then # Check if idlewatcher called suspend so we know initial mode timer is spent
+      read -r IDLE_STATE < "$IDLE_STATE_FILE" 2>/dev/null
     else
-      echo "Error: TIMER must be a positive integer." >&2
-      usage
+      IDLE_STATE=""
     fi
 
-    # if there’s a second arg, it must be the shutdown flag
-    if [ "$#" -eq 1 ]; then
-      case "$1" in
-        -s|--shutdown)
-          AUTO_SD=1
-          ;;
-        *)
-          echo "Error: second arg must be -s or --shutdown." >&2;
-          usage
-          ;;
-      esac
-      shift
+    if [ "$IDLE_STATE" = "0" ]; then
+      if [ -n "$EXTENDED_TIMER" ]; then
+        printf '%s' "$EXTENDED_TIMER"
+        return 0
+      fi
+    else
+      if [ -n "$TIMER" ] && [ -n "$EXTENDED_TIMER" ]; then
+        printf '%s' $(( TIMER + EXTENDED_TIMER ))
+        return 0
+      fi
     fi
-    ;;
-  *)
-    usage
-    ;;
-esac
+  fi
 
-# Arm only if timer is valid and > 0
-if [ -n "$TIMER" ] && [ "$TIMER" -gt 0 ]; then
+  # No rtc timer
+  return 1
+}
+
+RTC_TIMER=""
+
+if rtc_secs="$(check_idle_modes)"; then
   clear_rtcs
-  if arm_rtcs "$TIMER"; then
-    [ "$AUTO_SD" -eq 1 ] && save_time "$TIMER"
+  if arm_rtcs "$rtc_secs"; then
+    RTC_TIMER="$rtc_secs"
+    save_time "$RTC_TIMER"
   else
-    # No RTC armed: no auto-shutdown on manual wake
-    AUTO_SD=0
     rm -f "$WAKE_TIME" 2>/dev/null
   fi
 else
   clear_rtcs
   rm -f "$WAKE_TIME" 2>/dev/null
-  AUTO_SD=0
 fi
 
 pm-is-supported --suspend >/dev/null 2>&1 && pm-suspend
 
 clear_rtcs # Make sure any timers are cleared after suspending
 
-if [ "$AUTO_SD" -eq 1 ]; then
-  check_auto_shutdown
-else
-  rm -f "$WAKE_TIME" 2>/dev/null
-  sleep 0.5 # For a small debounce
-fi
+check_auto_shutdown
+
+sleep 0.5 # For a small debounce
 
 exit 0

@@ -8,10 +8,6 @@ GOVERNOR=""
 
 MODE="$(/usr/bin/knulli-settings-get system.batterysaver.mode)"
 
-EXTENDED_MODE="$(/usr/bin/knulli-settings-get system.batterysaver.extendedmode)"
-
-EXTENDED_TIMER="$(/usr/bin/knulli-settings-get system.idlewatcher.extendedtimer)"
-
 AGGRESSIVE="$(/usr/bin/knulli-settings-get system.batterysaver.aggressive)"
 
 check_pause() {
@@ -55,11 +51,8 @@ do_idle() {
             [[ "$AGGRESSIVE" == "1" ]] && do_aggressive
         ;;
         suspend)
-            if [[ "$EXTENDED_MODE" == "shutdown" ]] && [[ -n "$EXTENDED_TIMER" ]]; then
-              knulli-suspend "$EXTENDED_TIMER" -s # for rtc wakeup then auto shutdown
-            else
-              knulli-suspend
-            fi
+            knulli-suspend
+
         ;;
         shutdown)
             knulli-shutdown -s
