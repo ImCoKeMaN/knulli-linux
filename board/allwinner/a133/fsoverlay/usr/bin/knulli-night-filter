@@ -1,0 +1,43 @@
+#!/bin/sh
+
+TEMP_FILE="/sys/class/disp/disp/attr/color_temperature"
+
+show_current() {
+    local val="$(knulli-settings-get system.display.nightfilter 2>/dev/null)"
+    if [ -n "$val" ]; then
+        echo "$val"
+    fi
+}
+
+clamp_value() {
+    v="$1"
+    [ "$v" -lt 0 ] && v=0
+    [ "$v" -gt 100 ] && v=100
+    echo "$v"
+}
+
+apply_value() {
+    pct="$1"
+    raw=$(( (pct * 255 + 50) / 100 ))
+    echo "$raw" > "$TEMP_FILE" 2>/dev/null
+    knulli-settings-set system.display.nightfilter "$pct"
+}
+
+set_value() {
+    pct="$(clamp_value "$1")"
+    apply_value "$pct"
+}
+
+case "$1" in
+    "")
+        show_current
+        ;;
+    [0-9]*)
+        set_value "$1"
+        ;;
+    *)
+        echo "Usage: knulli-nightfilter [0-100]"
+        ;;
+esac
+
+exit 0
