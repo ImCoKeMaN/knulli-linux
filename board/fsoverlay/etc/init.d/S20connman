@@ -99,8 +99,7 @@ knulli_wifi_configure() {
 		${optionalPassphrase}
 		${optionalPriority}
 		Autoconnect=true
-		[IPv6]
-		Method=off
+		IPv6=off
 	_EOF_
     else
         rm "${settings_file}" 2>/dev/null
