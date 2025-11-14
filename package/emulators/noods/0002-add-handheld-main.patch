@@ -1,0 +1,259 @@
+--- /dev/null
++++ b/src/console/main_handheld.cpp
+@@ -0,0 +1,256 @@
++/*
++    Simple SDL2+GLES frontend for handheld devices
++    Based on NooDS Switch/Vita implementations
++*/
++
++#ifdef __HANDHELD__
++
++#include <cstring>
++#include <SDL2/SDL.h>
++#include <GLES2/gl2.h>
++
++#include "console_ui.h"
++
++struct Texture {
++    GLuint tex;
++    int width, height;
++    Texture(int w, int h): tex(0), width(w), height(h) {}
++};
++
++SDL_Window *window;
++SDL_GLContext glContext;
++GLuint program, vbo;
++uint32_t audioBuffer[1024];
++bool running = true;
++bool playing = false;
++
++// Default key mappings for SDL2
++uint32_t ConsoleUI::defaultKeys[] = {
++    SDLK_x, SDLK_z, SDLK_BACKSPACE, SDLK_RETURN,
++    SDLK_RIGHT, SDLK_LEFT, SDLK_UP, SDLK_DOWN,
++    SDLK_s, SDLK_a, SDLK_d, SDLK_c,
++    SDLK_ESCAPE
++};
++
++const char *ConsoleUI::keyNames[] = {
++    "X", "Z", "Backspace", "Return", "Right", "Left", "Up", "Down",
++    "S", "A", "D", "C", "Escape", "N/A", "N/A", "N/A"
++};
++
++const char *vertexShader = R"(
++attribute vec2 inPos;
++attribute vec2 inTexCoord;
++attribute vec3 inColor;
++varying vec2 vtxTexCoord;
++varying vec3 vtxColor;
++
++void main() {
++    gl_Position = vec4(-1.0 + inPos.x / 640.0, 1.0 - inPos.y / 480.0, 0.0, 1.0);
++    vtxTexCoord = inTexCoord;
++    vtxColor = inColor;
++}
++)";
++
++const char *fragmentShader = R"(
++precision mediump float;
++varying vec2 vtxTexCoord;
++varying vec3 vtxColor;
++uniform sampler2D texDiffuse;
++
++void main() {
++    gl_FragColor = texture2D(texDiffuse, vtxTexCoord) * vec4(vtxColor / 255.0, 1.0);
++}
++)";
++
++void ConsoleUI::startFrame(uint32_t color) {
++    float r = float(color & 0xFF) / 255.0f;
++    float g = float((color >> 8) & 0xFF) / 255.0f;
++    float b = float((color >> 16) & 0xFF) / 255.0f;
++    float a = float(color >> 24) / 255.0f;
++    glClearColor(r, g, b, a);
++    glClear(GL_COLOR_BUFFER_BIT);
++}
++
++void ConsoleUI::endFrame() {
++    glFinish();
++    SDL_GL_SwapWindow(window);
++}
++
++void *ConsoleUI::createTexture(uint32_t *data, int width, int height) {
++    Texture *texture = new Texture(width, height);
++    glGenTextures(1, &texture->tex);
++    glBindTexture(GL_TEXTURE_2D, texture->tex);
++    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
++    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
++    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
++    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
++    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
++    return texture;
++}
++
++void ConsoleUI::destroyTexture(void *tex) {
++    Texture *texture = (Texture*)tex;
++    glDeleteTextures(1, &texture->tex);
++    delete texture;
++}
++
++void ConsoleUI::drawTexture(void *tex, float tx, float ty, float tw, float th,
++                           float x, float y, float w, float h, bool filter, int rotation, uint32_t color) {
++    Texture *texture = (Texture*)tex;
++    glBindTexture(GL_TEXTURE_2D, texture->tex);
++    
++    float r = (color & 0xFF) / 255.0f;
++    float g = ((color >> 8) & 0xFF) / 255.0f;
++    float b = ((color >> 16) & 0xFF) / 255.0f;
++    
++    float vertices[] = {
++        x, y, tx / texture->width, ty / texture->height, r, g, b,
++        x + w, y, (tx + tw) / texture->width, ty / texture->height, r, g, b,
++        x, y + h, tx / texture->width, (ty + th) / texture->height, r, g, b,
++        x + w, y + h, (tx + tw) / texture->width, (ty + th) / texture->height, r, g, b
++    };
++    
++    glBindBuffer(GL_ARRAY_BUFFER, vbo);
++    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
++    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
++}
++
++uint32_t ConsoleUI::getInputHeld() {
++    const uint8_t *state = SDL_GetKeyboardState(NULL);
++    uint32_t pressed = 0;
++    
++    for (int i = 0; i < 13; i++) {
++        if (state[SDL_GetScancodeFromKey(defaultKeys[i])])
++            pressed |= BIT(i);
++    }
++    
++    return pressed;
++}
++
++uint32_t ConsoleUI::getInputTouch() {
++    int x, y;
++    uint32_t buttons = SDL_GetMouseState(&x, &y);
++    if (buttons & SDL_BUTTON(SDL_BUTTON_LEFT))
++        return (x & 0xFFF) | ((y & 0xFFF) << 16) | BIT(31);
++    return 0;
++}
++
++static GLuint compileShader(GLenum type, const char *source) {
++    GLuint shader = glCreateShader(type);
++    glShaderSource(shader, 1, &source, NULL);
++    glCompileShader(shader);
++    
++    GLint success;
++    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
++    if (!success) {
++        char log[512];
++        glGetShaderInfoLog(shader, 512, NULL, log);
++        printf("Shader compilation failed: %s\n", log);
++    }
++    return shader;
++}
++
++MenuTouch ndsTouch() {
++    uint32_t touch = ConsoleUI::getInputTouch();
++    if (!(touch & BIT(31))) return MenuTouch();
++    
++    int x = touch & 0xFFF;
++    int y = (touch >> 16) & 0xFFF;
++    
++    // Map to NDS screen coordinates
++    return MenuTouch(x * 256 / 640, y * 192 / 480);
++}
++
++int main(int argc, char **argv) {
++    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
++        printf("SDL init failed: %s\n", SDL_GetError());
++        return 1;
++    }
++    
++    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
++    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
++    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
++    
++    window = SDL_CreateWindow("NooDS",
++        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
++        640, 480, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
++    
++    if (!window) {
++        printf("Window creation failed: %s\n", SDL_GetError());
++        SDL_Quit();
++        return 1;
++    }
++    
++    glContext = SDL_GL_CreateContext(window);
++    SDL_GL_SetSwapInterval(1);
++    
++    // Compile shaders
++    GLuint vShader = compileShader(GL_VERTEX_SHADER, vertexShader);
++    GLuint fShader = compileShader(GL_FRAGMENT_SHADER, fragmentShader);
++    
++    program = glCreateProgram();
++    glAttachShader(program, vShader);
++    glAttachShader(program, fShader);
++    glLinkProgram(program);
++    glUseProgram(program);
++    
++    glDeleteShader(vShader);
++    glDeleteShader(fShader);
++    
++    // Set up VBO
++    glGenBuffers(1, &vbo);
++    glBindBuffer(GL_ARRAY_BUFFER, vbo);
++    
++    GLint posAttrib = glGetAttribLocation(program, "inPos");
++    glEnableVertexAttribArray(posAttrib);
++    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), 0);
++    
++    GLint texAttrib = glGetAttribLocation(program, "inTexCoord");
++    glEnableVertexAttribArray(texAttrib);
++    glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(2 * sizeof(float)));
++    
++    GLint colAttrib = glGetAttribLocation(program, "inColor");
++    glEnableVertexAttribArray(colAttrib);
++    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(4 * sizeof(float)));
++    
++    glEnable(GL_BLEND);
++    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
++    
++    // Initialize console UI
++    ConsoleUI::initialize(640, 480, "", "");
++    std::string ndsPath = ConsoleUI::fileBrowser();
++    
++    if (ndsPath.empty()) {
++        SDL_GL_DeleteContext(glContext);
++        SDL_DestroyWindow(window);
++        SDL_Quit();
++        return 0;
++    }
++    
++    // Main loop
++    ScreenLayout layout;
++    SDL_Event event;
++    
++    while (running) {
++        while (SDL_PollEvent(&event)) {
++            if (event.type == SDL_QUIT)
++                running = false;
++            else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
++                ConsoleUI::pauseMenu();
++        }
++        
++        ConsoleUI::mainLoop(ndsTouch, &layout);
++    }
++    
++    // Cleanup
++    glDeleteBuffers(1, &vbo);
++    glDeleteProgram(program);
++    SDL_GL_DeleteContext(glContext);
++    SDL_DestroyWindow(window);
++    SDL_Quit();
++    
++    return 0;
++}
++
++#endif
+

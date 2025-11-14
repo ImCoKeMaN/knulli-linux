@@ -143,6 +143,9 @@ if ls "${RELEASES_DIR}/"*"_rootfs.squashfs" 1> /dev/null 2>&1; then
         # ROOTFS_TARGET is in the form of md5sum_rootfs.squashfs. We need to extract the md5sum into a variable
         ROOTFS_MD5SUM=$(basename "${ROOTFS_TARGET}" | sed -e s+'^\([0-9a-f]*\)_rootfs.squashfs$'+'\1'+)
         echo "Creating delta from ${ROOTFS_TARGET} (source) to current rootfs.squashfs (target) with source md5sum ${ROOTFS_MD5SUM}"
+        # Create patches directory if it does not exist
+        mkdir -p "${UPDATES_DIR}/patches" || exit 1
+        echo "Creating patch file ${UPDATES_DIR}/patches/${ROOTFS_MD5SUM}_to_${CURRENT_ROOTFS_MD5SUM}.patch"
         # create the delta.xdelta3 patch that can be applied to the old rootfs to get the new rootfs
         xdelta3 -e -S none -s "${ROOTFS_TARGET}" "${BINARIES_DIR}/rootfs.squashfs" "${UPDATES_DIR}/patches/${ROOTFS_MD5SUM}_to_${CURRENT_ROOTFS_MD5SUM}.patch" || exit 1
     done

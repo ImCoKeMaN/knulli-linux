@@ -1,0 +1,24 @@
+config BR2_PACKAGE_NOODS
+    bool "noods"
+    depends on BR2_INSTALL_LIBSTDCPP
+    depends on BR2_TOOLCHAIN_HAS_THREADS
+    depends on !BR2_STATIC_LIBS
+    depends on BR2_PACKAGE_HAS_LIBEGL
+    depends on BR2_PACKAGE_HAS_LIBGLES
+    select BR2_PACKAGE_SDL2
+    select BR2_PACKAGE_LIBPNG
+    help
+      NooDS - A (hopefully!) speedy Nintendo DS emulator
+      
+      NooDS is an experimental Nintendo DS emulator written in C++
+      with speed in mind. It aims to be fast and accurate while
+      maintaining a clean and readable codebase.
+      
+      Configured for OpenGL ES (GLES) support.
+      
+      https://github.com/Hydr8gon/NooDS
+
+comment "noods needs a toolchain w/ C++, threads, dynamic library, EGL, GLES"
+    depends on !BR2_INSTALL_LIBSTDCPP || !BR2_TOOLCHAIN_HAS_THREADS || \
+        BR2_STATIC_LIBS || !BR2_PACKAGE_HAS_LIBEGL || !BR2_PACKAGE_HAS_LIBGLES
+        

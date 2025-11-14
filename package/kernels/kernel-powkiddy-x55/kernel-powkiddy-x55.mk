@@ -34,9 +34,13 @@ endef
 
 define KERNEL_POWKIDDY_X55_INSTALL_TARGET_CMDS
     # Install kernel Image
+    # Note: Using dd instead of cp to avoid sparse file corruption issues
+    # when copying across Docker volume mounts (Ubuntu 24.04+ with newer coreutils)
     mkdir -p $(BINARIES_DIR)/kernel-powkiddy-x55
-    $(INSTALL) -D -m 0644 $(@D)/arch/$(KERNEL_POWKIDDY_X55_ARCH)/boot/Image \
-        $(BINARIES_DIR)/kernel-powkiddy-x55/Image
+    dd if=$(@D)/arch/$(KERNEL_POWKIDDY_X55_ARCH)/boot/Image \
+        of=$(BINARIES_DIR)/kernel-powkiddy-x55/Image \
+        bs=1M conv=fsync
+    chmod 0644 $(BINARIES_DIR)/kernel-powkiddy-x55/Image
     # Install device tree
     $(INSTALL) -D -m 0644 $(@D)/arch/$(KERNEL_POWKIDDY_X55_ARCH)/boot/dts/rockchip/$(KERNEL_POWKIDDY_X55_DTB) \
         $(BINARIES_DIR)/kernel-powkiddy-x55/$(KERNEL_POWKIDDY_X55_DTB)

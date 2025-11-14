@@ -2,6 +2,10 @@
 
 BOOTCONF="/boot/knulli-boot.conf"
 LOG="/tmp/resize.log"
+BOARD_FILE="/boot/boot/knulli.board"
+
+# Get board
+CURRENT_BOARD=$(cat "$BOARD_FILE" 2>/dev/null)
 
 # only at start
 test "$1" != "start" && exit 0
@@ -35,24 +39,32 @@ function format_internal() {
 
     echo "Format internal type: $FORMAT_INTERNAL_TYPE" >> "$LOG"
     PART=$(knulli-part "share_internal")
+    PARTNUM=$(knulli-part "share_internal_num")
     DISK=$(knulli-part prefix "${PART}")
-    echo "Disk = $DISK" >> "$LOG"
+    echo "Disk = $DISK, Part = $PART, PartNum = $PARTNUM" >> "$LOG"
 
     case "${FORMAT_INTERNAL_TYPE}" in
 	    "ext4")
             mkfs.ext4 -L SHARE -q -F -F ${PART} # what to do in case of error ? nothing.
             echo -e "t\n${PARTNUM}\n8300\nw\nY\n" | gdisk ${DISK}
+            sync
+            sfdisk --part-type ${DISK} ${PARTNUM} 0FC63DAF-8483-4772-8E79-3D69D8477DE4
 		    ;;
 	    "exfat")
             mkfs.exfat -n SHARE ${PART} # what to do in case of error ? nothing.
             echo -e "t\n${PARTNUM}\n0700\nw\nY\n" | gdisk ${DISK}
+            sync
+            sfdisk --part-type ${DISK} ${PARTNUM} EBD0A0A2-B9E5-4433-87C0-68B6B72699C7
 		    ;;
 	    *)
 		# do nothing
     esac
 
     # Allwinner H700 & A133
-    echo -e "r\nb\nc\nY\nw\nY\n" | gdisk ${DISK}
+    #if [ "${CURRENT_BOARD}" = "h700" ] || [ "${CURRENT_BOARD}" = "a133" ]; then
+        echo -e "r\nb\nc\nY\nw\nY\n" | gdisk ${DISK}
+    #fi
+
     partprobe ${DISK}
 }
 
@@ -140,7 +152,9 @@ if grep -qE '^[ ]*autoresize[ ]*=[ ]*true[ ]*$' "${BOOTCONF}"; then
     remove_trigger autoresize
 
     # Allwinner H700
-    echo -e 'r\nb\nc\nY\nw\nY\n' | gdisk ${DISK}
+    #if [ "${CURRENT_BOARD}" = "h700" ] || [ "${CURRENT_BOARD}" = "a133" ]; then
+        echo -e 'r\nb\nc\nY\nw\nY\n' | gdisk ${DISK}
+    #fi
     partprobe ${DISK}
 
     # We are going to reformat the internal partition as exfat

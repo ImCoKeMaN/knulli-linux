@@ -226,3 +226,26 @@ else
     echo "OS_DATE=$SUFFIXDATE" >> "$OS_RELEASE_PATH"
 fi
 
+# Move Batocera share resources to Knulli
+echo "========================================"
+echo "Moving Batocera resources to Knulli..."
+echo "========================================"
+
+if [ -d "${TARGET_DIR}/usr/share/batocera" ]; then
+    # Create knulli directory if it doesn't exist
+    mkdir -p "${TARGET_DIR}/usr/share/knulli" || exit 1
+    
+    # Move all content from batocera to knulli
+    if [ "$(ls -A ${TARGET_DIR}/usr/share/batocera)" ]; then
+        cp -af "${TARGET_DIR}/usr/share/batocera/"* "${TARGET_DIR}/usr/share/knulli/" || exit 1
+        echo "Moved batocera resources to knulli"
+    else
+        echo "Batocera directory is empty, nothing to move"
+    fi
+    
+    # Remove the batocera directory
+    rm -rf "${TARGET_DIR}/usr/share/batocera" || exit 1
+    echo "Removed batocera directory"
+else
+    echo "No batocera directory found, skipping..."
+fi

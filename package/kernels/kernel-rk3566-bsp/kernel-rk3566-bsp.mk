@@ -46,9 +46,13 @@ endef
 
 define KERNEL_RK3566_BSP_INSTALL_TARGET_CMDS
     # Install kernel Image
+    # Note: Using dd instead of cp to avoid sparse file corruption issues
+    # when copying across Docker volume mounts (Ubuntu 24.04+ with newer coreutils)
     mkdir -p $(BINARIES_DIR)/$(KERNEL_RK3566_BSP_TARGET_DIR)
-    $(INSTALL) -D -m 0644 $(@D)/arch/$(KERNEL_RK3566_BSP_ARCH)/boot/Image \
-        $(BINARIES_DIR)/$(KERNEL_RK3566_BSP_TARGET_DIR)/Image
+    dd if=$(@D)/arch/$(KERNEL_RK3566_BSP_ARCH)/boot/Image \
+        of=$(BINARIES_DIR)/$(KERNEL_RK3566_BSP_TARGET_DIR)/Image \
+        bs=1M conv=fsync
+    chmod 0644 $(BINARIES_DIR)/$(KERNEL_RK3566_BSP_TARGET_DIR)/Image
     # Install all specified device trees
     $(foreach dtb,$(KERNEL_RK3566_BSP_DTBS), \
         $(INSTALL) -D -m 0644 $(@D)/arch/$(KERNEL_RK3566_BSP_ARCH)/boot/dts/rockchip/$(dtb) \

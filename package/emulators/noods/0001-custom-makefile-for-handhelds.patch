@@ -1,0 +1,36 @@
+--- /dev/null
++++ b/Makefile.handheld
+@@ -0,0 +1,32 @@
++NAME     := noods
++SOURCES  := src src/common src/console
++CXXFLAGS := -std=c++11 -O3 -flto $(shell $(PKG_CONFIG) --cflags sdl2) -Isrc -D__HANDHELD__ -DGLES
++LDFLAGS  := $(shell $(PKG_CONFIG) --libs sdl2) -lGLESv2
++
++CXXFILES := $(foreach dir,$(SOURCES),$(wildcard $(dir)/*.cpp))
++HFILES   := $(foreach dir,$(SOURCES),$(wildcard $(dir)/*.h))
++OBJS     := $(patsubst %.cpp,%.o,$(notdir $(CXXFILES)))
++BUILD    := build
++FILES    := $(addprefix $(BUILD)/,$(OBJS))
++
++VPATH := $(SOURCES)
++
++all: $(BUILD) $(NAME)
++
++$(NAME): $(FILES)
++	$(CXX) -o $@ $(FILES) $(LDFLAGS)
++
++$(BUILD)/%.o: %.cpp $(HFILES)
++	@mkdir -p $(dir $@)
++	$(CXX) -c -o $@ $(CXXFLAGS) $(addprefix -I,$(SOURCES)) $<
++
++$(BUILD):
++	@mkdir -p $(BUILD)
++
++clean:
++	rm -f $(NAME)
++	rm -rf $(BUILD)
++
++install: $(NAME)
++	install -D -m 0755 $(NAME) $(DESTDIR)/usr/bin/$(NAME)
++
++.PHONY: all clean install

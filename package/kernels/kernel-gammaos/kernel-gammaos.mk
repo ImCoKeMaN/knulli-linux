@@ -34,9 +34,13 @@ endef
 
 define KERNEL_GAMMAOS_INSTALL_TARGET_CMDS
     # Install kernel Image
+    # Note: Using dd instead of cp to avoid sparse file corruption issues
+    # when copying across Docker volume mounts (Ubuntu 24.04+ with newer coreutils)
     mkdir -p $(BINARIES_DIR)/kernel-gammaos
-    $(INSTALL) -D -m 0644 $(@D)/arch/$(KERNEL_GAMMAOS_ARCH)/boot/Image \
-        $(BINARIES_DIR)/kernel-gammaos/Image
+    dd if=$(@D)/arch/$(KERNEL_GAMMAOS_ARCH)/boot/Image \
+        of=$(BINARIES_DIR)/kernel-gammaos/Image \
+        bs=1M conv=fsync
+    chmod 0644 $(BINARIES_DIR)/kernel-gammaos/Image
     # Install device tree
     $(INSTALL) -D -m 0644 $(@D)/arch/$(KERNEL_GAMMAOS_ARCH)/boot/dts/rockchip/$(KERNEL_GAMMAOS_DTB) \
         $(BINARIES_DIR)/kernel-gammaos/$(KERNEL_GAMMAOS_DTB)
