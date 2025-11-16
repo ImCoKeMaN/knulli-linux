@@ -43,27 +43,41 @@ function format_internal() {
     DISK=$(knulli-part prefix "${PART}")
     echo "Disk = $DISK, Part = $PART, PartNum = $PARTNUM" >> "$LOG"
 
+    # Detect partition table type
+    TABLETYPE=$(parted -s ${DISK} print | grep 'Partition Table' | awk '{print $3}')
+    echo "Partition table type: $TABLETYPE" >> "$LOG"
+
     case "${FORMAT_INTERNAL_TYPE}" in
 	    "ext4")
             mkfs.ext4 -L SHARE -q -F -F ${PART} # what to do in case of error ? nothing.
-            echo -e "t\n${PARTNUM}\n8300\nw\nY\n" | gdisk ${DISK}
-            sync
-            sfdisk --part-type ${DISK} ${PARTNUM} 0FC63DAF-8483-4772-8E79-3D69D8477DE4
+            if [ "${TABLETYPE}" = "gpt" ]; then
+                echo -e "t\n${PARTNUM}\n8300\nw\nY\n" | gdisk ${DISK}
+                sync
+                sfdisk --part-type ${DISK} ${PARTNUM} 0FC63DAF-8483-4772-8E79-3D69D8477DE4
+            else
+                # MBR: set type to 83 (Linux)
+                sfdisk --part-type ${DISK} ${PARTNUM} 83
+            fi
 		    ;;
 	    "exfat")
             mkfs.exfat -n SHARE ${PART} # what to do in case of error ? nothing.
-            echo -e "t\n${PARTNUM}\n0700\nw\nY\n" | gdisk ${DISK}
-            sync
-            sfdisk --part-type ${DISK} ${PARTNUM} EBD0A0A2-B9E5-4433-87C0-68B6B72699C7
+            if [ "${TABLETYPE}" = "gpt" ]; then
+                echo -e "t\n${PARTNUM}\n0700\nw\nY\n" | gdisk ${DISK}
+                sync
+                sfdisk --part-type ${DISK} ${PARTNUM} EBD0A0A2-B9E5-4433-87C0-68B6B72699C7
+            else
+                # MBR: set type to 07 (NTFS/exFAT)
+                sfdisk --part-type ${DISK} ${PARTNUM} 07
+            fi
 		    ;;
 	    *)
 		# do nothing
     esac
 
     # Allwinner H700 & A133
-    #if [ "${CURRENT_BOARD}" = "h700" ] || [ "${CURRENT_BOARD}" = "a133" ]; then
+    if [ "${CURRENT_BOARD}" = "h700" ] || [ "${CURRENT_BOARD}" = "a133" ]; then
         echo -e "r\nb\nc\nY\nw\nY\n" | gdisk ${DISK}
-    #fi
+    fi
 
     partprobe ${DISK}
 }
@@ -84,7 +98,7 @@ if grep -qE '^[ ]*autoresize[ ]*=[ ]*true[ ]*$' "${BOOTCONF}"; then
     
     # Determine if we should format based on initial size
     FORMAT_ALLOWED=false
-    if [ "$PARTSIZE" -eq 256 ] || [ "$PARTSIZE" -eq 512 ]; then
+    if [ "$PARTSIZE" -le 600 ]; then
         FORMAT_ALLOWED=true
         echo "Initial partition size is $PARTSIZE, formatting will be allowed" >> "$LOG"
     else
@@ -152,9 +166,9 @@ if grep -qE '^[ ]*autoresize[ ]*=[ ]*true[ ]*$' "${BOOTCONF}"; then
     remove_trigger autoresize
 
     # Allwinner H700
-    #if [ "${CURRENT_BOARD}" = "h700" ] || [ "${CURRENT_BOARD}" = "a133" ]; then
+    if [ "${CURRENT_BOARD}" = "h700" ] || [ "${CURRENT_BOARD}" = "a133" ]; then
         echo -e 'r\nb\nc\nY\nw\nY\n' | gdisk ${DISK}
-    #fi
+    fi
     partprobe ${DISK}
 
     # We are going to reformat the internal partition as exfat
