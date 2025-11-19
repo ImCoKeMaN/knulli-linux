@@ -192,28 +192,35 @@ then
     X=$(bl_get)
     PCT=$(get_percent "$X")
     STEP="$2"
-    DELTA=$(( STEP * XMAX / 100 ))
 
-    if [ "${1}" = "+" ]; then
-
-        if [ "${X}" -eq 0 ]; then
-            NEWVAL=${XMIN}
+    if [ "$1" = "+" ]; then
+        if [ "$PCT" -eq 0 ]; then
+            # 0 -> 1%
+            NEWPCT=1
+        elif [ "$PCT" -eq 1 ]; then
+            # 1% -> requested step
+            NEWPCT=$STEP
         else
-            # If currently at the 1% floor, deduct it from the requested next step up
-            if [ "$PCT" -eq 1 ] && [ "$STEP" -gt 0 ]; then
-                DELTA=$(( (STEP - 1) * XMAX / 100 ))
-            fi
-            NEWVAL=$(( X + DELTA ))
+            NEWPCT=$(( PCT + STEP ))
         fi
+        [ "$NEWPCT" -gt 100 ] && NEWPCT=100
 
-    elif [ "${1}" = "-" ]; then
-
-        NEWVAL=$(( X - DELTA ))
-
-        if [ "${NEWVAL}" -lt "${XMIN}" ] && [ "${X}" -ne "${XMIN}" ] && [ "${X}" -ne 0 ]; then
-            NEWVAL=${XMIN}
+    elif [ "$1" = "-" ]; then
+        if [ "$PCT" -le 1 ]; then
+            # 1% or below -> 0
+            NEWPCT=0
+        else
+            TMP=$(( PCT - STEP ))
+            # Don't skip the 1% floor on the way down
+            if [ "$TMP" -le 1 ]; then
+                NEWPCT=1
+            else
+                NEWPCT=$TMP
+            fi
         fi
     fi
+
+    NEWVAL=$(percent_to_abs "$NEWPCT")
 
     [ "$NEWVAL" -eq "$X" ] && exit 0
     setValue "${NEWVAL}"
