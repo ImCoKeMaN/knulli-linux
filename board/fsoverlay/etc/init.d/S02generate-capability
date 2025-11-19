@@ -35,6 +35,7 @@ case "$ARCH" in
         BOARD_CAPABILITIES[rumble]="rg35xx-plus rg35xx-h rg35xx-2024 rg35xx-sp rg34xx-sp rg28xx rg40xx-h rg40xx-v rg-cubexx rg34xx rg35xx-pro"
         BOARD_CAPABILITIES[adb]="rg35xx-plus rg35xx-h rg35xx-2024 rg35xx-sp rg34xx-sp rg28xx rg40xx-h rg40xx-v rg-cubexx rg34xx rg35xx-pro"
         BOARD_CAPABILITIES[hud]="rg35xx-plus rg35xx-h rg35xx-2024 rg35xx-sp rg34xx-sp rg28xx rg40xx-h rg40xx-v rg-cubexx rg34xx rg35xx-pro"
+        BOARD_CAPABILITIES[pwrled]="rg35xx-plus rg35xx-h rg35xx-2024 rg35xx-sp rg34xx-sp rg28xx rg40xx-h rg40xx-v rg-cubexx rg34xx rg35xx-pro"
         ;;
     a133)
         BOARD_CAPABILITIES[rgb]="trimui-smart-pro trimui-brick"
@@ -64,6 +65,7 @@ case "$ARCH" in
         BOARD_CAPABILITIES[adb]="rg-arc-s powkiddy-x55 miyoo-flip"
         BOARD_CAPABILITIES[bezelproject]="powkiddy-x55"
         BOARD_CAPABILITIES[hud]="rg-arc-s powkiddy-x55 miyoo-flip"
+        BOARD_CAPABILITIES[pwrled]="rg-arc-s powkiddy-x55 miyoo-flip"
         ;;
     sm8250)
         BOARD_CAPABILITIES[rgb]="rp5"

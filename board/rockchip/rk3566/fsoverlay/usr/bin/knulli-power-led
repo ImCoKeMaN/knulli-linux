@@ -1,20 +1,25 @@
 #!/bin/sh
 
+if ! knulli-board-capability "pwrled"; then
+    exit 1
+fi
+
 LED_ROOT="/sys/class/leds"
 LED_FULL="${LED_ROOT}/battery_full"
-LED_CHG="${LED_ROOT}/battery_charging"
 LED_LOW="${LED_ROOT}/low_power"
+
+LED_STATE="/var/run/led_state"
 
 is_discharging() {
     [ "$(knulli-battery-check status 2>/dev/null)" = "Discharging" ]
 }
 
 set_on() {
-  echo 1 >"$1/brightness" 2>/dev/null;
+    echo 1 >"$1/brightness" 2>/dev/null
 }
 
 set_off() {
-  echo 0 >"$1/brightness" 2>/dev/null;
+    echo 0 >"$1/brightness" 2>/dev/null
 }
 
 set_critical() {
@@ -22,7 +27,7 @@ set_critical() {
         exit 0
     fi
 
-    trap 'set_on "$LED_LOW"; exit' INT TERM # Just in case it exits will revert to on
+    trap "set_on \"$LED_LOW\"; exit" INT TERM # Just in case it exits will revert to on
 
     i=0
     state=0 # 0=off,1=on
@@ -42,23 +47,59 @@ set_critical() {
         i=$((i+1))
     done
 
-    set_on "$LED_LOW"
+    set_off "$LED_LOW"
+}
+
+usage() {
+    echo "Usage: knulli-power-led {power|low} {on|off} | cycle | critical"
 }
 
 case "$1" in
   power)
-    [ "$2" = "off" ] && set_off "$LED_FULL" || set_on "$LED_FULL"
-    ;;
-  charging)
-    [ "$2" = "off" ] && set_off "$LED_CHG" || set_on "$LED_CHG"
-    ;;
+      case "$2" in
+          on)
+              set_on "$LED_FULL"
+              echo 1 >"$LED_STATE" 2>/dev/null
+              ;;
+          off)
+              set_off "$LED_FULL"
+              echo 0 >"$LED_STATE" 2>/dev/null
+              ;;
+          *)
+              usage
+              ;;
+      esac
+      ;;
   low)
-    [ "$2" = "off" ] && set_off "$LED_LOW" || set_on "$LED_LOW"
-    ;;
-  critical)
-    set_critical
-    ;;
-  *)
-    echo "Usage: knulli-power-led full|charging|low [on|off] | critical" ;;
+      case "$2" in
+          on)
+              set_on "$LED_LOW"
+              ;;
+          off)
+              set_off "$LED_LOW"
+              ;;
+          *)
+              usage
+              ;;
+      esac
+      ;;
+  cycle)
+      state="$(cat "$LED_STATE" 2>/dev/null)"
 
+      if [ "$state" -eq 1 ]; then
+          set_off "$LED_FULL"
+          echo 0 > "$LED_STATE"
+      else
+          set_on "$LED_FULL"
+          echo 1 > "$LED_STATE"
+      fi
+      ;;
+  critical)
+      set_critical
+      ;;
+  *)
+      usage
+      ;;
 esac
+
+exit 0

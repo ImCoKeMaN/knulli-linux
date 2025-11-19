@@ -1,0 +1,28 @@
+#!/bin/sh
+
+[ "$1" = "start" ] || exit 0
+
+if ! knulli-board-capability "pwrled"; then
+    exit 1
+fi
+
+POWER_LED_BIN="/usr/bin/knulli-power-led"
+
+[ -f "$POWER_LED_BIN" ] || exit 0
+
+led="$(/usr/bin/knulli-settings-get system.power.led 2>/dev/null)"
+
+case "$led" in
+  0)
+    "$POWER_LED_BIN" power off
+    ;;
+  1)
+    "$POWER_LED_BIN" power on
+    ;;
+  *)
+    # fallback if not set or invalid
+    "$POWER_LED_BIN" power on
+    ;;
+esac
+
+exit 0
