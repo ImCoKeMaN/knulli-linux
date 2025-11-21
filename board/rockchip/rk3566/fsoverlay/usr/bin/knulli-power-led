@@ -5,10 +5,24 @@ if ! knulli-board-capability "pwrled"; then
 fi
 
 LED_ROOT="/sys/class/leds"
-LED_FULL="${LED_ROOT}/battery_full"
-LED_LOW="${LED_ROOT}/low_power"
-
 LED_STATE="/var/run/led_state"
+
+read -r BOARD < /boot/boot/knulli.board
+
+case "$BOARD" in
+    rg-arc-s)
+        LED_PWR="${LED_ROOT}/battery_full"
+        LED_LOW="${LED_ROOT}/low_power"
+    ;;
+    miyoo-flip)
+        LED_PWR="${LED_ROOT}/work"
+        LED_LOW="${LED_ROOT}/charger"
+    ;;
+    *)
+        echo "Unknown device: $BOARD"
+        exit 1
+    ;;
+esac
 
 is_discharging() {
     [ "$(knulli-battery-check status 2>/dev/null)" = "Discharging" ]
@@ -54,52 +68,83 @@ usage() {
     echo "Usage: knulli-power-led {power|low} {on|off} | cycle | critical"
 }
 
-case "$1" in
-  power)
-      case "$2" in
-          on)
-              set_on "$LED_FULL"
-              echo 1 >"$LED_STATE" 2>/dev/null
-              ;;
-          off)
-              set_off "$LED_FULL"
-              echo 0 >"$LED_STATE" 2>/dev/null
-              ;;
-          *)
-              usage
-              ;;
-      esac
-      ;;
-  low)
-      case "$2" in
-          on)
-              set_on "$LED_LOW"
-              ;;
-          off)
-              set_off "$LED_LOW"
-              ;;
-          *)
-              usage
-              ;;
-      esac
-      ;;
-  cycle)
-      state="$(cat "$LED_STATE" 2>/dev/null)"
+# fail-safe so we at least know the state for later
+if [ ! -f "$LED_STATE" ]; then
+    set_on "$LED_PWR"
+    echo 1 > "$LED_STATE"
+fi
 
-      if [ "$state" -eq 1 ]; then
-          set_off "$LED_FULL"
-          echo 0 > "$LED_STATE"
-      else
-          set_on "$LED_FULL"
-          echo 1 > "$LED_STATE"
-      fi
-      ;;
-  critical)
-      set_critical
-      ;;
-  *)
-      usage
-      ;;
+case "$1" in
+    power)
+        case "$2" in
+            on)
+                set_on "$LED_PWR"
+                echo 1 >"$LED_STATE" 2>/dev/null
+            ;;
+            off)
+                set_off "$LED_PWR"
+                echo 0 >"$LED_STATE" 2>/dev/null
+            ;;
+            *)
+                usage
+            ;;
+        esac
+    ;;
+    low)
+        case "$2" in
+            on)
+                set_on "$LED_LOW"
+            ;;
+            off)
+                set_off "$LED_LOW"
+            ;;
+            *)
+                usage
+            ;;
+        esac
+    ;;
+    cycle)
+        state="$(cat "$LED_STATE" 2>/dev/null)"
+
+        if [ "$state" -eq 1 ]; then
+            set_off "$LED_PWR"
+            echo 0 > "$LED_STATE"
+        else
+            set_on "$LED_PWR"
+            echo 1 > "$LED_STATE"
+        fi
+    ;;
+    critical)
+        set_critical
+    ;;
+    notification)
+        state="$(cat "$LED_STATE" 2>/dev/null)"
+
+        if [ "$state" -eq 1 ] 2>/dev/null; then
+            # LED currently ON
+            for _ in 1 2; do
+                set_off "$LED_PWR"
+                sleep 0.15
+                set_on "$LED_PWR"
+                sleep 0.15
+            done
+            # Restore ON
+            set_on "$LED_PWR"
+        else
+            # LED currently OFF
+            for _ in 1 2; do
+                set_on "$LED_PWR"
+                sleep 0.15
+                set_off "$LED_PWR"
+                sleep 0.15
+            done
+            # Restore OFF
+            set_off "$LED_PWR"
+        fi
+    ;;
+    *)
+        usage
+    ;;
 esac
 
 exit 0

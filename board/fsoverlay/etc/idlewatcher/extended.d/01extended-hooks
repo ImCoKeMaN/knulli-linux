@@ -23,19 +23,10 @@ do_extended() {
 }
 
 case "$1" in
-  idle)
-
-    ;;
-  extended)
-    if ! check_pause; then
-      do_extended
-    fi
-    ;;
-  active)
-
-    ;;
-  *)
-
+    extended)
+        if ! check_pause; then
+            do_extended
+        fi
     ;;
 esac
 

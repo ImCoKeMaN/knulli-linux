@@ -17,7 +17,7 @@ case "$ACTION" in
     enable)
         case "$MODE" in
             mute)
-                /usr/bin/knulli-audio setSystemVolume mute
+                amixer -c 0 set 'DAC volume' 0
                 echo "mute" > "$TOGGLE_STATE"
                 ;;
             rgboff)
@@ -37,7 +37,7 @@ case "$ACTION" in
         fi
         case "$MODE" in
             mute)
-                /usr/bin/knulli-audio setSystemVolume unmute
+                amixer -c 0 set 'DAC volume' 160
                 ;;
             rgboff)
                 /usr/bin/knulli-settings-set led.mode 1

@@ -34,8 +34,14 @@ if inotifywait -qq -t "$LONG_PRESS_THRESHOLD" -e delete_self "$POWER_BUTTON_STAT
 else
     # Shutdown if timeout is reached (long press)
     if [ -f "$POWER_BUTTON_STATE" ]; then
-        if [ -f /usr/bin/knulli-rumble ]; then
-            knulli-rumble 0.2
+        # Rumble feedback
+        if knulli-board-capability "rumble" >/dev/null 2>&1 && [ -f /usr/bin/knulli-rumble ]; then
+            knulli-rumble 0.2 &
+        fi
+
+        # Power LED flash
+        if knulli-board-capability "pwrled" >/dev/null 2>&1 && [ -f /usr/bin/knulli-power-led ]; then
+            knulli-power-led notification &
         fi
         shutdown_system
     fi
