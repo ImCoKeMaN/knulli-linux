@@ -17,10 +17,10 @@ do_poweroff() {
 
     # Lets hide what happens from the user during shutdown/reboot to make for a more seemless experience
     knulli-brightness dispoff
-    amixer set Master mute
+    knulli-audio setSystemVolume mute
 
     if check_ingame; then
-         knulli-es-swissknife --emukill
+         curl -s -o /dev/null http://127.0.0.1:1234/emukill
     fi
 
     if [ "$POWEROFF" = "reboot" ]; then

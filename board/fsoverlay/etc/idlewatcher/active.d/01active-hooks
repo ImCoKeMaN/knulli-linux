@@ -34,30 +34,21 @@ do_active() {
         dim)
             [[ "${AGGRESSIVE:-0}" == "1" ]] && undo_aggressive
 
-            pactl set-sink-mute @DEFAULT_SINK@ false
+            knulli-audio setSystemVolume unmute
             knulli-brightness dim
         ;;
         dispoff)
             [[ "${AGGRESSIVE:-0}" == "1" ]] && undo_aggressive
 
             knulli-brightness dispon
-            pactl set-sink-mute @DEFAULT_SINK@ false
+            knulli-audio setSystemVolume unmute
         ;;
     esac
 }
 
 case "$1" in
-  idle)
-
-    ;;
-  extended)
-
-    ;;
-  active)
-    do_active
-    ;;
-  *)
-
+    active)
+        do_active
     ;;
 esac
 

@@ -3,11 +3,11 @@
 case "$1" in
     suspend)
         knulli-brightness dispoff
-        pactl set-sink-mute @DEFAULT_SINK@ true
+        knulli-audio setSystemVolume mute
         ;;
     resume|thaw)
         knulli-brightness dispon
-        pactl set-sink-mute @DEFAULT_SINK@ false
+        knulli-audio setSystemVolume unmute
         ;;
 esac
 
