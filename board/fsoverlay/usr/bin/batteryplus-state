@@ -1,0 +1,73 @@
+#!/bin/bash
+# Helper for BatteryPlus:
+#  - Updates /tmp/battery.status
+#  - Runs /etc/batteryplus/state.d/* with the given state argument
+#
+# Intended usage (udev):
+#   SUBSYSTEM=="power_supply", ACTION=="change", RUN+="/usr/bin/batteryplus-state change"
+#
+# Hooks:
+#   /etc/batteryplus/state.d/*
+#     - any executable files here will be called as:
+#         hook_path "<state>"
+#       where <state> is the first argument passed to this script
+#
+# Example:
+#   batteryplus-state Charging
+#   batteryplus-state Discharging
+#   batteryplus-state Full
+
+STATUS_FILE="/tmp/battery.status"
+HOOK_DIR="/etc/batteryplus/state.d"
+
+IN_STATE="$1"
+OUT_STATE=""
+
+# Exit if no arg
+[ -z "$IN_STATE" ] && exit 0
+
+change_state() {
+    local state="$1"
+
+    if [ "$state" = "change" ]; then
+        local status
+        status=$(cat /sys/class/power_supply/*{BAT,bat,FUEL,fuel}*/status 2>/dev/null | head -1)
+
+        [ -z "$status" ] && status="Unknown"
+        OUT_STATE="$status"
+    else
+         # Normalize common inputs
+        case "$state" in
+            charging|Charging|CHARGING) OUT_STATE="Charging" ;;
+            discharging|Discharging|DISCHARGING) OUT_STATE="Discharging" ;;
+            full|Full|FULL) OUT_STATE="Full" ;;
+            *) exit 0 ;;
+        esac
+    fi
+
+    echo "$OUT_STATE" > "$STATUS_FILE"
+}
+
+# Accept only real states
+case "$IN_STATE" in
+    change|[cC]harging|[dD]ischarging|[fF]ull)
+        change_state "$IN_STATE"
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+
+# Ensure hook directory exists
+mkdir -p "$HOOK_DIR"
+
+# Run all hooks in state.d asynchronously passing the state
+if [ -d "$HOOK_DIR" ]; then
+    for hook in "$HOOK_DIR"/*; do
+        [ -f "$hook" ] || continue
+        # Run in background
+        "$hook" "$OUT_STATE" >/dev/null 2>&1 &
+    done
+fi
+
+exit 0

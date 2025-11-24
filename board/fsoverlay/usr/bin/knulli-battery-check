@@ -35,21 +35,12 @@ get_status() {
     echo "$status"
 }
 
-change_status() {
-    local status
-    status=$(cat /sys/class/power_supply/*{BAT,bat,FUEL,fuel}*/status 2>/dev/null | head -1)
-    [[ -n $status ]] && echo "$status" > "$BATT_STATUS"
-}
-
 case "$1" in
     capacity)
         get_battery
         ;;
     status)
         get_status
-        ;;
-    change)
-        change_status
         ;;
     report|"")
         echo "Battery Status Report:"
