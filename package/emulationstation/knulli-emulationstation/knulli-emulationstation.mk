@@ -151,7 +151,7 @@ endef
 # default for most of architectures
 KNULLI_EMULATIONSTATION_PREFIX = SDL_NOMOUSE=1
 KNULLI_EMULATIONSTATION_CMD = emulationstation-standalone
-KNULLI_EMULATIONSTATION_ARGS = --no-splash $${EXTRA_OPTS}
+KNULLI_EMULATIONSTATION_ARGS = $${EXTRA_OPTS}
 KNULLI_EMULATIONSTATION_POSTFIX = \&
 
 # disabling cec. causing perf issue on init/deinit
