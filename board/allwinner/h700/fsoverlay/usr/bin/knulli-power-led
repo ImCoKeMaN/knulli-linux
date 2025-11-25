@@ -1,29 +1,26 @@
 #!/bin/sh
 
+#!/bin/sh
+
+if ! knulli-board-capability "pwrled"; then
+    exit 1
+fi
+
 LED_ROOT="/sys/class/power_supply/axp2202-battery"
-LED_FULL="${LED_ROOT}/work_led"
-LED_SLP="${LED_ROOT}/workled_sleep"
+LED_STATE="/var/run/led_state"
+LED_PWR="${LED_ROOT}/work_led"
 LED_LOW="${LED_ROOT}/lowpwr_led"
 
 is_discharging() {
     [ "$(knulli-battery-check status 2>/dev/null)" = "Discharging" ]
 }
 
-set_on()  { echo 1 >"$1" 2>/dev/null; }
-set_off() { echo 0 >"$1" 2>/dev/null; }
+set_on() {
+    echo 1 >"$1" 2>/dev/null
+}
 
-do_led() {
-    case "$2" in
-        on)
-          set_on "$1"
-          ;;
-        off)
-          set_off "$1"
-          ;;
-        *)
-          return 1
-          ;;
-    esac
+set_off() {
+    echo 0 >"$1" 2>/dev/null
 }
 
 set_critical() {
@@ -31,7 +28,7 @@ set_critical() {
         exit 0
     fi
 
-    trap 'set_on "$LED_LOW"; exit' INT TERM # Just in case it exits will revert to on
+    trap "set_on \"$LED_LOW\"; exit" INT TERM # Just in case it exits will revert to on
 
     i=0
     state=0 # 0=off,1=on
@@ -51,27 +48,90 @@ set_critical() {
         i=$((i+1))
     done
 
-    set_on "$LED_LOW"
+    set_off "$LED_LOW"
 }
 
 usage() {
-    echo "Usage: knulli-power-led {power|sleep|low} {on|off} | critical"
+    echo "Usage: knulli-power-led {power|low} {on|off} | cycle | critical"
 }
 
+# fail-safe so we at least know the state for later
+if [ ! -f "$LED_STATE" ]; then
+    set_on "$LED_PWR"
+    echo 1 > "$LED_STATE"
+fi
+
 case "$1" in
-  power)
-    do_led "$LED_FULL" "$2" || usage
+    power)
+        case "$2" in
+            on)
+                set_on "$LED_PWR"
+                echo 1 >"$LED_STATE" 2>/dev/null
+            ;;
+            off)
+                set_off "$LED_PWR"
+                echo 0 >"$LED_STATE" 2>/dev/null
+            ;;
+            *)
+                usage
+            ;;
+        esac
     ;;
-  sleep)
-    do_led "$LED_SLP" "$2" || usage
+    low)
+        case "$2" in
+            on)
+                set_on "$LED_LOW"
+            ;;
+            off)
+                set_off "$LED_LOW"
+            ;;
+            *)
+                usage
+            ;;
+        esac
     ;;
-  low)
-    do_led "$LED_LOW" "$2" || usage
+    cycle)
+        state="$(cat "$LED_STATE" 2>/dev/null)"
+
+        if [ "$state" -eq 1 ]; then
+            set_off "$LED_PWR"
+            echo 0 > "$LED_STATE"
+        else
+            set_on "$LED_PWR"
+            echo 1 > "$LED_STATE"
+        fi
     ;;
-  critical)
-    set_critical
+    critical)
+        set_critical
     ;;
-  *)
-    usage
+    notification)
+        state="$(cat "$LED_STATE" 2>/dev/null)"
+
+        if [ "$state" -eq 1 ] 2>/dev/null; then
+            # LED currently ON
+            for _ in 1 2; do
+                set_off "$LED_PWR"
+                sleep 0.15
+                set_on "$LED_PWR"
+                sleep 0.15
+            done
+            # Restore ON
+            set_on "$LED_PWR"
+        else
+            # LED currently OFF
+            for _ in 1 2; do
+                set_on "$LED_PWR"
+                sleep 0.15
+                set_off "$LED_PWR"
+                sleep 0.15
+            done
+            # Restore OFF
+            set_off "$LED_PWR"
+        fi
+    ;;
+    *)
+        usage
     ;;
 esac
+
+exit 0

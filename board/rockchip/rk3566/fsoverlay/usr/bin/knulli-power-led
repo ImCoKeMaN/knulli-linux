@@ -6,6 +6,8 @@ fi
 
 LED_ROOT="/sys/class/leds"
 LED_STATE="/var/run/led_state"
+LED_PWR=""
+LED_LOW=""
 
 read -r BOARD < /boot/boot/knulli.board
 
