@@ -1,0 +1,11 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3566-evb2-lp4x-v10-linux.dts	2025-11-23 18:40:19.621704623 +0000
++++ b/arch/arm64/boot/dts/rockchip/rk3566-evb2-lp4x-v10-linux.dts	2025-11-23 18:41:01.222376827 +0000
+@@ -717,7 +717,7 @@
+ 			min_input_voltage = <4500>;
+ 			max_input_current = <2000>;
+ 			max_chrg_current = <2000>;
+-			max_chrg_voltage = <4300>;
++			max_chrg_voltage = <1005>;
+ 			chrg_term_mode = <0>;
+ 			chrg_finish_cur = <300>;
+ 			virtual_power = <0>;
