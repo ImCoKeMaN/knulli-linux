@@ -1,7 +1,5 @@
 #!/bin/sh
 
-#!/bin/sh
-
 if ! knulli-board-capability "pwrled"; then
     exit 1
 fi
