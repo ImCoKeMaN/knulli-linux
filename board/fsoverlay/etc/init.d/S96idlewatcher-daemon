@@ -49,7 +49,7 @@ ensure_conf() {
 idle=300
 extended=900
 deadzone=25
-hooks_mirror=
+hooks_dir=
 EOF
   fi
 }
