@@ -34,9 +34,9 @@
  				sample_res = <0x0a>;
  				virtual_power = <0x00>;
 +				fb_temperature = <0x19>;
-+                                energy_mode = <0x00>;
-+                                zero_reserve_dsoc = <0x00>;
-+                                low_power_sleep = <0x01>;
++				energy_mode = <0x00>;
++				zero_reserve_dsoc = <0x00>;
++				low_power_sleep = <0x01>;
  			};
  
  			charger {
