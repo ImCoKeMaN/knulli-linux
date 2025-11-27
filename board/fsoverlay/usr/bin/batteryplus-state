@@ -17,6 +17,7 @@
 #   batteryplus-state Discharging
 #   batteryplus-state Full
 
+TS_FILE="/tmp/batteryplus-state.ts"
 STATUS_FILE="/tmp/battery.status"
 HOOK_DIR="/etc/batteryplus/state.d"
 
@@ -26,26 +27,29 @@ OUT_STATE=""
 # Exit if no arg
 [ -z "$IN_STATE" ] && exit 0
 
+normalize_state() {
+    case "$1" in
+        charging|Charging|CHARGING) echo "Charging" ;;
+        discharging|Discharging|DISCHARGING) echo "Discharging" ;;
+        full|Full|FULL) echo "Full" ;;
+        *) echo "" ;;
+    esac
+}
+
 change_state() {
     local state="$1"
 
     if [ "$state" = "change" ]; then
-        local status
-        status=$(cat /sys/class/power_supply/*{BAT,bat,FUEL,fuel}*/status 2>/dev/null | head -1)
-
-        [ -z "$status" ] && status="Unknown"
-        OUT_STATE="$status"
+        local raw=""
+        for p in /sys/class/power_supply/*{BAT,bat,FUEL,fuel}*/status; do
+            [ -f "$p" ] || continue
+            read -r raw < "$p" 2>/dev/null || raw=""
+            break
+        done
+        OUT_STATE=$(normalize_state "$raw")
     else
-         # Normalize common inputs
-        case "$state" in
-            charging|Charging|CHARGING) OUT_STATE="Charging" ;;
-            discharging|Discharging|DISCHARGING) OUT_STATE="Discharging" ;;
-            full|Full|FULL) OUT_STATE="Full" ;;
-            *) exit 0 ;;
-        esac
+        OUT_STATE=$(normalize_state "$state")
     fi
-
-    echo "$OUT_STATE" > "$STATUS_FILE"
 }
 
 # Accept only real states
@@ -57,6 +61,35 @@ case "$IN_STATE" in
         exit 0
         ;;
 esac
+
+# If no valid state, exit
+[ -z "$OUT_STATE" ] && exit 0
+
+# Only write if state actually changed
+old_state=""
+if [ -f "$STATUS_FILE" ]; then
+    read -r old_state < "$STATUS_FILE" 2>/dev/null || old_state=""
+fi
+
+if [ "$old_state" = "$OUT_STATE" ]; then
+    # No change, don't touch file or run hooks
+    exit 0
+fi
+
+# Very short debounce using timestamp since flock does not work with udev rules (they just queue)
+now=$(date +%s%3N)  # ms
+last_ts=0
+if [ -f "$TS_FILE" ]; then
+    read -r last_ts < "$TS_FILE" 2>/dev/null || last_ts=0
+fi
+
+if [ "$last_ts" -gt 0 ] && [ "$(( now - last_ts ))" -lt 200 ]; then
+    echo "$now" >"$TS_FILE"
+    exit 0
+fi
+
+echo "$OUT_STATE" > "$STATUS_FILE"
+echo "$now" >"$TS_FILE"
 
 # Ensure hook directory exists
 mkdir -p "$HOOK_DIR"
