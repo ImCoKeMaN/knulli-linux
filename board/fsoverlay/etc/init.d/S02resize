@@ -3,9 +3,11 @@
 BOOTCONF="/boot/knulli-boot.conf"
 LOG="/tmp/resize.log"
 BOARD_FILE="/boot/boot/knulli.board"
+ARCH_FILE="/usr/share/knulli/knulli.arch"
 
-# Get board
+# Get board & arch
 CURRENT_BOARD=$(cat "$BOARD_FILE" 2>/dev/null)
+CURRENT_ARCH=$(cat "$ARCH_FILE" 2>/dev/null)
 
 # only at start
 test "$1" != "start" && exit 0
@@ -75,7 +77,7 @@ function format_internal() {
     esac
 
     # Allwinner H700 & A133
-    if [ "${CURRENT_BOARD}" = "h700" ] || [ "${CURRENT_BOARD}" = "a133" ]; then
+    if [ "${CURRENT_ARCH}" = "h700" ] || [ "${CURRENT_ARCH}" = "a133" ]; then
         echo -e "r\nb\nc\nY\nw\nY\n" | gdisk ${DISK}
     fi
 
@@ -166,7 +168,7 @@ if grep -qE '^[ ]*autoresize[ ]*=[ ]*true[ ]*$' "${BOOTCONF}"; then
     remove_trigger autoresize
 
     # Allwinner H700
-    if [ "${CURRENT_BOARD}" = "h700" ] || [ "${CURRENT_BOARD}" = "a133" ]; then
+    if [ "${CURRENT_ARCH}" = "h700" ] || [ "${CURRENT_ARCH}" = "a133" ]; then
         echo -e 'r\nb\nc\nY\nw\nY\n' | gdisk ${DISK}
     fi
     partprobe ${DISK}
