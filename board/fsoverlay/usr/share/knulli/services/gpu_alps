@@ -4,6 +4,13 @@ DAEMON="/usr/bin/gpu-alps"
 PIDFILE="/var/run/gpu-alps.pid"
 DAEMON_NAME=$(basename "$DAEMON")
 
+check_ingame() {
+    HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:1234/runningGame")
+    test $? != 0                 && return 0
+    test "${HTTP_STATUS}" != 201 && return 0 # in game
+    return 1  # 201 when not in game
+}
+
 is_supported() {
     MIN_F=""
 
@@ -18,12 +25,16 @@ is_supported() {
 
 do_start() {
     if ! is_supported; then
-        curl -s POST http://127.0.0.1:1234/messagebox -d "This device is not supported." >/dev/null 2>&1
+        if ! check_ingame; then
+            curl -s POST http://127.0.0.1:1234/messagebox -d "This device is not supported." >/dev/null 2>&1
+        fi
         knulli-services disable gpu_alps
         exit 1
     fi
 
-    curl -s POST http://127.0.0.1:1234/messagebox -d "GPU frequency will now adjust to match CPU load." >/dev/null 2>&1
+    if ! check_ingame; then
+        curl -s POST http://127.0.0.1:1234/messagebox -d "GPU frequency will now adjust to match CPU load." >/dev/null 2>&1
+    fi
 
     echo "Starting $DAEMON_NAME."
     if [ -f "$PIDFILE" ] && start-stop-daemon --status --pidfile "$PIDFILE" > /dev/null 2>&1; then
