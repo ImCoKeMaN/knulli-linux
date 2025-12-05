@@ -1,0 +1,17 @@
+config BR2_PACKAGE_UBOOT_A133
+    bool "uboot-a133"
+    depends on BR2_aarch64
+    help
+      U-Boot boot packages for Allwinner A133-based handheld devices.
+      
+      This package builds boot_package.fex files for various A133 devices:
+      - TrimUI Smart Pro, TrimUI Brick
+      - Powkiddy V90S, V20
+      - MagicX Zero 28, Zero 40
+      - Xu20 V32
+      
+      Each device gets its device tree compiled and packed with U-Boot
+      components using Allwinner's dragonsecboot tool.
+      
+      The resulting boot packages are placed in:
+      output/images/a133-boot-packages/<device>_boot_package.fex

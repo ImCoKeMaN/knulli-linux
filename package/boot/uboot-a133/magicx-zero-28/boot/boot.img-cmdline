@@ -1,0 +1,1 @@
+loglevel=8 earlycon earlyprintk=sunxi-uart,0x05000000 initcall_debug=0 console=ttyS0 rootwait root=/dev/mmcblk0p4 rdinit=/init
