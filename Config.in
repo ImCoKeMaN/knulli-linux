@@ -335,7 +335,7 @@ menu "Emulators"
 
     source "$BR2_EXTERNAL_KNULLI_PATH/batocera/package/batocera/emulators/lightspark/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/batocera/package/batocera/emulators/ruffle/Config.in"
-    source "$BR2_EXTERNAL_KNULLI_PATH/batocera/package/batocera/emulators/drastic/Config.in"
+   #source "$BR2_EXTERNAL_KNULLI_PATH/batocera/package/batocera/emulators/drastic/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/batocera/package/batocera/emulators/lexaloffle-pico8/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/batocera/package/batocera/emulators/lexaloffle-voxatron/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/batocera/package/batocera/emulators/simcoupe/Config.in"
@@ -444,7 +444,7 @@ menu "Emulators"
     source "$BR2_EXTERNAL_KNULLI_PATH/batocera/package/batocera/emulators/mupen64plus/mupen64plus-input-sdl/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/batocera/package/batocera/emulators/mupen64plus/mupen64plus-audio-sdl/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/batocera/package/batocera/emulators/mupen64plus/mupen64plus-rsp-hle/Config.in"
-    source "$BR2_EXTERNAL_KNULLI_PATH/batocera/package/batocera/emulators/mupen64plus/mupen64plus-gliden64/Config.in"
+   #source "$BR2_EXTERNAL_KNULLI_PATH/batocera/package/batocera/emulators/mupen64plus/mupen64plus-gliden64/Config.in"
   endmenu
 
 endmenu
