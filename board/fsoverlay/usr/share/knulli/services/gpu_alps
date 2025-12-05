@@ -1,0 +1,72 @@
+#!/bin/bash
+
+DAEMON="/usr/bin/gpu-alps"
+PIDFILE="/var/run/gpu-alps.pid"
+DAEMON_NAME=$(basename "$DAEMON")
+
+is_supported() {
+    MIN_F=""
+
+    for p in /sys/class/devfreq/*{GPU,gpu,Mali,mali}*/min_freq; do
+        [ -f "$p" ] || continue
+        MIN_F="$p"
+        return 0 # Success
+    done
+
+    return 1 # No min_freq found
+}
+
+do_start() {
+    if ! is_supported; then
+        curl -s POST http://127.0.0.1:1234/messagebox -d "This device is not supported." >/dev/null 2>&1
+        knulli-services disable gpu_alps
+        exit 1
+    fi
+
+    curl -s POST http://127.0.0.1:1234/messagebox -d "GPU frequency will now adjust to match CPU load." >/dev/null 2>&1
+
+    echo "Starting $DAEMON_NAME."
+    if [ -f "$PIDFILE" ] && start-stop-daemon --status --pidfile "$PIDFILE" > /dev/null 2>&1; then
+        echo "$DAEMON_NAME is already running."
+        exit 0
+    fi
+
+    start-stop-daemon --start --quiet --background --make-pidfile --pidfile "$PIDFILE" --exec "$DAEMON" -- "$MIN_F" \
+        && echo "$DAEMON_NAME started OK" || { echo "$DAEMON_NAME failed to start"; exit 1; }
+}
+
+do_stop() {
+    echo "Stopping $DAEMON_NAME."
+    start-stop-daemon --stop --quiet --pidfile "$PIDFILE" \
+        && { echo "$DAEMON_NAME stopped"; rm -f "$PIDFILE"; } || { echo "$DAEMON_NAME is not running."; exit 1; }
+}
+
+do_status() {
+    if [ -f "$PIDFILE" ] && start-stop-daemon --status --pidfile "$PIDFILE" >/dev/null 2>&1; then
+        echo "$DAEMON_NAME is running (pid from $PIDFILE)"
+        exit 0
+    else
+        echo "$DAEMON_NAME is not running"
+        exit 1
+    fi
+}
+
+case "$1" in
+    start)
+        do_start ;;
+    stop)
+        do_stop ;;
+    status)
+        do_status ;;
+    restart)
+        do_stop
+        sleep 1
+        do_start
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+        ;;
+esac
+
+exit 0
