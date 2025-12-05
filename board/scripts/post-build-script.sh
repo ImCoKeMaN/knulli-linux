@@ -78,6 +78,15 @@ rm -f "${TARGET_DIR}/etc/udev/rules.d/99-legiongo.rules" || exit 1
 rm -f "${TARGET_DIR}/etc/udev/rules.d/99-ledspicer.rules" || exit 1
 
 rm -f "${TARGET_DIR}/etc/udev/rules.d/99-anbernic-gpio-pad.rules" || exit 1
+
+# Remove services we don't need
+rm -f "${TARGET_DIR}/usr/share/knulli/services/ledspicer" || exit 1
+
+rm -f "${TARGET_DIR}/usr/share/knulli/services/pigpio" || exit 1
+
+# Remove misc stuff we don't need
+rm -f "${TARGET_DIR}/usr/share/knulli/configgen/scripts/mali_g52_gpu_launch_hooks.sh" || exit 1
+
 ## === REMOVE END ===
 
 # use /userdata/system/iptables.conf for S35iptables
