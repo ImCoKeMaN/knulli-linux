@@ -6,6 +6,8 @@ default:
     retroarch.menu_driver: ozone
     retroarch.menu_scale_factor: "1.500000"
     retroarch.audio_driver: alsathread
+    retroarch.ozone_font_scale: "1"
+    retroarch.ozone_font_scale_factor_global: "1.200000"
 
 nds:
   emulator: advanced_drastic
@@ -22,12 +24,13 @@ atomiswave:
 dreamcast:
   emulator: libretro
   core:     flycastvl
-  options:
-    hud_support: false
 naomi:
   emulator: libretro
   core:     flycastvl
 n64:
+  emulator: libretro
+  core:     parallel_n64
+n64dd:
   emulator: libretro
   core:     parallel_n64
 cdi:

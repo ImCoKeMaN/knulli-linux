@@ -1,0 +1,42 @@
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index aaaaaaa..bbbbbbb 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2960,6 +2960,8 @@ static int dw_mci_init_slot(struct dw_mci *host)
+ 	struct mmc_host *mmc;
+ 	struct dw_mci_slot *slot;
+ 	int ret;
++	struct resource *res;
++	unsigned long base_addr = 0;
+ 
+ 	mmc = mmc_alloc_host(sizeof(struct dw_mci_slot), host->dev);
+ 	if (!mmc)
+@@ -3003,6 +3005,27 @@ static int dw_mci_init_slot(struct dw_mci *host)
+ 
+ 	dw_mci_get_cd(mmc);
+ 
++	/* [Miyoo Flip Patch] Fix for Slot 2 (fe2c0000) stability */
++	res = platform_get_resource(to_platform_device(host->dev), IORESOURCE_MEM, 0);
++	if (res)
++		base_addr = res->start;
++
++	if (base_addr == 0xfe2c0000) {
++		dev_info(host->dev, "Miyoo Flip: Slot 2 detected. Applying stabilization fix (Delay+HS)...\n");
++
++		/* 1. Force 500ms delay for power stabilization */
++		mdelay(500);
++
++		/* 2. Limit capabilities to High-Speed (50MHz, 3.3V) only */
++		/* Matches Stock OS behavior to prevent UHS negotiation failures */
++		mmc->caps &= ~(MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 |
++			       MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 |
++			       MMC_CAP_UHS_DDR50);
++		mmc->caps &= ~MMC_CAP_1_8V_DDR;
++		if (mmc->f_max > 50000000)
++			mmc->f_max = 50000000;
++	}
++
+ 	ret = mmc_add_host(mmc);
+ 	if (ret)
+ 		goto err_host_allocated;
+
