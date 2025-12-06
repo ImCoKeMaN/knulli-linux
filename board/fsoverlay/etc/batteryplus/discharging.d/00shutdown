@@ -1,6 +1,6 @@
 #!/bin/sh
 
-TIMEOUT=60 # seconds
+TIMEOUT=30 # seconds
 COUNT=0
 
 is_discharging() {
@@ -13,12 +13,12 @@ if ! is_discharging; then
 fi
 
 # Start critical led blinking
-if [ -f /usr/bin/knulli-power-led ]; then
+if knulli-board-capability "pwrled"; then
     /usr/bin/knulli-power-led critical &
 fi
 
 # Countdown while discharging
-while [ $COUNT -lt $TIMEOUT ]; do
+while [ "$COUNT" -lt "$TIMEOUT" ]; do
     if ! is_discharging; then
         exit 0
     fi
