@@ -1385,7 +1385,7 @@ def writeBezelConfig(generator: Generator, bezel: str | None, shaderBezel: bool,
 
     # Set video viewport bias for viewport positioning
     retroarchConfig['video_viewport_bias_x']  = 0.000000
-    retroarchConfig['video_viewport_bias_y']  = 1.000000
+    retroarchConfig['video_viewport_bias_y']  = 0.000000
 
     # stretch option
     if system.isOptSet('bezel_stretch') and system.getOptBoolean('bezel_stretch') == True:
