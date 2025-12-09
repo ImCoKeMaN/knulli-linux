@@ -1,21 +1,5 @@
 #!/bin/sh
 
-# We need the graphics module in order to use SDL since we are
-# using the sdl-compat/SDL2 for rendering
-insmod /lib/modules/mali_kbase.ko
-
-# Rotate screen for the rg28xx
-BOARD=$(cat /boot/boot/knulli.board)
-if [ "$BOARD" = "rg28xx" ]; then
-    fbset -g 480 640 480 1280 32 -t 13426 192 56 22 1 136 3
-fi
-
-# Call the charger process
-/usr/bin/charger
-
-# Start the progress bar
-/usr/bin/progressbar &
-
 # Start all init scripts in /etc/init.d
 # executing them in numerical order.
 #
