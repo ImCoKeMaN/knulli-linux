@@ -171,11 +171,12 @@ do_start() {
         fi
         sleep 0.25
     done
-    sleep 0.5
 
-    if [ "$settingsWlan" = "1" ];then
+    if [ "$settingsWlan" = "1" ]; then
         wifi_enable
-        wifi_retry
+        if [ "$1" = "retry" ]; then
+            wifi_retry &
+        fi
     else
         wifi_disable
     fi
@@ -191,9 +192,29 @@ do_stop() {
     printf "done."
 }
 
+do_status() {
+    if ! pidof connmand >/dev/null 2>&1; then
+        echo "connman: not running."
+        return 2
+    fi
+
+    if ! ip route show default 2>/dev/null | grep -q '^default'; then
+        echo "connman: no network route."
+        return 1
+    fi
+
+    if ping -q -c1 -W1 8.8.8.8 >/dev/null 2>&1; then
+        echo "connman: internet online."
+        return 0
+    else
+        echo "connman: network up, but no internet."
+        return 1
+    fi
+}
+
 case "$1" in
     start)
-        do_start
+        do_start retry
         ;;
     stop)
         do_stop
@@ -203,8 +224,11 @@ case "$1" in
         sleep 0.5
         do_start
         ;;
+    status)
+        do_status
+        ;;
     *)
-        echo "usage: $0 {start|stop|restart|reload}"
+        echo "usage: $0 {start|stop|restart|reload|status}"
         ;;
 esac
 
