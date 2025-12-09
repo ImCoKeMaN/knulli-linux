@@ -53,6 +53,7 @@ case "$ARCH" in
         BOARD_CAPABILITIES[rumble]="ps5000 ps7000"
         BOARD_CAPABILITIES[adb]="powkiddy_a13 ps5000 ps7000"
         BOARD_CAPABILITIES[hud]="powkiddy_a13 ps5000 ps7000"
+        ;;
     rk3326)
         BOARD_CAPABILITIES[analogstick]="r36s g350 magicx-mini-m"
         BOARD_CAPABILITIES[rumble]="r36s g350 magicx-mini-m"
