@@ -124,6 +124,41 @@ wifi_disable() {
     connmanctl disable wifi 2>/dev/null
 }
 
+wifi_check_connected() {
+    # Loop over all managed wifi interfaces (excluding p2p)
+    for iface in $(iw dev 2>/dev/null | awk '
+        /Interface/ {iface=$2}
+        /type managed/ {
+            if (iface !~ /^p2p/) print iface
+        }
+    '); do
+        if iw dev "$iface" link 2>/dev/null | grep -q "Connected to"; then
+            return 0
+        fi
+    done
+
+    # no connection if we got to this point
+    return 1
+}
+
+wifi_retry() {
+    timeout=10
+    while [ $timeout -gt 0 ]; do
+        # Any managed wifi interface connected yet?
+        if wifi_check_connected; then
+            return 0
+        fi
+
+        sleep 1
+        timeout=$((timeout - 1))
+    done
+
+    printf "wifi failed to connect on first try... Retrying...\n" >&2
+    wifi_disable
+    sleep 1
+    wifi_enable
+}
+
 do_start() {
     knulli_hostname
     wifi_configure_all
@@ -139,13 +174,13 @@ do_start() {
     sleep 0.5
 
     if [ "$settingsWlan" = "1" ];then
-        # Detach the wifi enable process
-        wifi_enable &
+        wifi_enable
+        wifi_retry
     else
         wifi_disable
     fi
 
-    echo "done."
+    printf "done."
 }
 
 do_stop() {
@@ -153,7 +188,7 @@ do_stop() {
     wifi_disable
 
     start-stop-daemon -K -q -p /var/run/connmand.pid  2>/dev/null
-    echo "done."
+    printf "done."
 }
 
 case "$1" in

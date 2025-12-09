@@ -76,7 +76,7 @@ case "${ACTION}" in
         do_scanlist
         ;;
     "start")
-        /etc/init.d/S20connman restart
+        /etc/init.d/S08connman restart
         ;;
     "enable")
         knulli-settings-set wifi.enabled 1
@@ -84,7 +84,7 @@ case "${ACTION}" in
             knulli-settings-set wifi.ssid "$1"
             knulli-settings-set wifi.key "$2"
         fi
-        /etc/init.d/S20connman reload
+        /etc/init.d/S08connman reload
 
         settings_ssid="$(knulli-settings-get wifi.ssid)"
 
@@ -97,7 +97,7 @@ case "${ACTION}" in
         ;;
     "disable")
         knulli-settings-set wifi.enabled 0
-        /etc/init.d/S20connman reload
+        /etc/init.d/S08connman reload
         wait_for_ip down
         ;;
     "get_route")

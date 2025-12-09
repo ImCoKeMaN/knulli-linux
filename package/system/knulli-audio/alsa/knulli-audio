@@ -96,19 +96,18 @@ case "${ACTION}" in
                                 read -r HDMI_STATE < "/sys/class/drm/card0-HDMI-A-1/status"
                             fi
 
-                            if [[ "$BOARD" == "powkiddy-rgb30" ]]; then
-                                amixer -c 0 sset "Playback Path" "HP"
-                            fi
-
                             if [ "$HDMI_STATE" = "connected" ]; then
                                 MODE=alsa_output._sys_devices_platform_hdmi-sound_sound_card1.stereo-fallback
                             else
                                 MODE=alsa_output._sys_devices_platform_rk817-sound_sound_card0.stereo-fallback
                             fi
 
+                            if [[ "$BOARD" == "powkiddy-rgb30" ]]; then
+                                amixer -c 0 sset "Playback Path" "HP"
+                            fi
+
                             # Needed for audio resume after suspend
                             amixer -c 0 sset 'Resume Path' 'ON'
-                            MODE=alsa_output._sys_devices_platform_rk817-sound_sound_card0.stereo-fallback
                             LANG=C pactl set-default-sink "${MODE}" || exit 1
                             ;;
                         *)
