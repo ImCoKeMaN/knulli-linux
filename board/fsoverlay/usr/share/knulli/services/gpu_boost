@@ -1,7 +1,7 @@
 #!/bin/bash
 
-DAEMON="/usr/bin/gpu-alps"
-PIDFILE="/var/run/gpu-alps.pid"
+DAEMON="/usr/bin/gpu-boost"
+PIDFILE="/var/run/gpu-boost.pid"
 DAEMON_NAME=$(basename "$DAEMON")
 
 check_ingame() {
@@ -28,7 +28,7 @@ do_start() {
         if ! check_ingame; then
             curl -s POST http://127.0.0.1:1234/messagebox -d "This device is not supported." >/dev/null 2>&1
         fi
-        knulli-services disable gpu_alps
+        knulli-services disable gpu_boost
         exit 1
     fi
 
