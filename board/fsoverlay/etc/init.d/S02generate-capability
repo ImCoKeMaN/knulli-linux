@@ -84,6 +84,17 @@ case "$ARCH" in
         BOARD_CAPABILITIES[bezelproject]="rp5"
         BOARD_CAPABILITIES[hud]="rp5"
         ;;
+    a527)
+        BOARD_CAPABILITIES[rgb]="trimui-smart-pro-s"
+        BOARD_CAPABILITIES[hdmi]="trimui-smart-pro-s"
+        BOARD_CAPABILITIES[wifi]="trimui-smart-pro-s"
+        BOARD_CAPABILITIES[bluetooth]="trimui-smart-pro-s"
+        BOARD_CAPABILITIES[analogstick]="trimui-smart-pro-s"
+        BOARD_CAPABILITIES[rumble]="trimui-smart-pro-s"
+        BOARD_CAPABILITIES[adb]="trimui-smart-pro-s"
+        BOARD_CAPABILITIES[bezelproject]="trimui-smart-pro-s"
+        BOARD_CAPABILITIES[hud]="trimui-smart-pro-s"
+        ;;
     *)
         echo "Unknown ARCH: $ARCH — skipping."
         exit 0

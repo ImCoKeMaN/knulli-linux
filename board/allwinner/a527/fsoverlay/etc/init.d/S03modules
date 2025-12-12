@@ -1,0 +1,19 @@
+#!/bin/sh
+
+BOARD=$(cat /boot/boot/knulli.board)
+
+case $1 in
+    start)
+      modprobe mali_kbase
+      modprobe aic8800_fdrv
+      modprobe aic8800_btlpm
+      ;;
+  stop)
+      rmmod mali_kbase
+      rmmod aic8800_fdrv
+      rmmod aic8800_btlpm
+      ;;
+esac
+
+exit 0
+

@@ -1,0 +1,19 @@
+#!/bin/sh
+
+mount -t proc  -o nodev,noexec,nosuid proc  /proc   
+mount -t sysfs -o nodev,noexec,nosuid sysfs /sys    
+mount -t devtmpfs none /dev
+
+exec < /dev/console > /dev/console 2>&1
+
+mount -o rw,remount /
+mkdir -p /dev/pts
+mkdir -p /dev/shm
+mount -a
+
+mount /dev/mmcblk0p1 /boot
+
+/etc/init.d/rcS
+
+/bin/sh
+
