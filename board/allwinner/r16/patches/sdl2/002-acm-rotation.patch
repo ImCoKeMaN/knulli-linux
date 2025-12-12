@@ -1,9 +1,8 @@
-diff -urN sdl2-2.0.22/src/render/opengles2/SDL_render_gles2.c ../../../../../dont-delete-knulli.linux/output/acm/build/sdl2-2.0.22/src/render/opengles2/SDL_render_gles2.c
---- a/src/render/opengles2/SDL_render_gles2.c	2022-04-09 01:19:19.000000000 +0000
-+++ b/src/render/opengles2/SDL_render_gles2.c	2022-09-12 15:58:19.346361427 +0000
-@@ -1998,6 +1998,16 @@
- static SDL_Renderer *
- GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
+--- a/src/render/opengles2/SDL_render_gles2.c	2025-06-02 16:38:50.000000000 +0000
++++ b/src/render/opengles2/SDL_render_gles2.c	2025-12-01 19:10:08.660282612 +0000
+@@ -2032,6 +2032,16 @@ static int GLES2_UnbindTexture(SDL_Rende
+ 
+ static int GLES2_CreateRenderer(SDL_Renderer *renderer, SDL_Window *window, Uint32 flags)
  {
 +    // Rotation matrix
 +    float scale = 640;
@@ -15,29 +14,23 @@ diff -urN sdl2-2.0.22/src/render/opengles2/SDL_render_gles2.c ../../../../../don
 +    SDL_Rect targetrect;
 +    SDL_Point origin;
 +
-     SDL_Renderer *renderer;
-     GLES2_RenderData *data;
+     GLES2_RenderData *data = NULL;
      Uint32 window_flags = 0; /* -Wconditional-uninitialized */
-@@ -2160,8 +2170,13 @@
+     GLint window_framebuffer;
+@@ -2197,8 +2207,8 @@ static int GLES2_CreateRenderer(SDL_Rend
  
      data->drawstate.blend = SDL_BLENDMODE_INVALID;
      data->drawstate.clear_color = 0xFFFFFFFF;
 -    data->drawstate.projection[3][0] = -1.0f;
 -    data->drawstate.projection[3][3] = 1.0f;
 +
-+//    data->drawstate.projection[3][0] = -scale;
-+//    data->drawstate.projection[3][3] = scale;
-+//    data->drawstate.projection[3][0] = -1.0f;
-+//    data->drawstate.projection[3][3] = 1.0f;
-+
 +    memcpy(data->drawstate.projection, rotmatrix, 4*4*sizeof(GLfloat));
  
      GL_CheckError("", renderer);
  
-diff -urN sdl2-2.0.22/src/render/SDL_render.c ../../../../../dont-delete-knulli.linux/output/acm/build/sdl2-2.0.22/src/render/SDL_render.c
---- a/src/render/SDL_render.c	2022-04-21 17:37:37.000000000 +0000
-+++ b/src/render/SDL_render.c	2022-09-12 15:58:19.350361417 +0000
-@@ -3394,13 +3394,38 @@
+--- a/src/render/SDL_render.c	2025-01-01 15:47:53.000000000 +0000
++++ b/src/render/SDL_render.c	2025-12-01 19:10:08.657282615 +0000
+@@ -3428,13 +3428,36 @@ int SDL_RenderCopy(SDL_Renderer *rendere
  {
      SDL_FRect dstfrect;
      SDL_FRect *pdstfrect = NULL;
@@ -46,6 +39,8 @@ diff -urN sdl2-2.0.22/src/render/SDL_render.c ../../../../../dont-delete-knulli.
 -        dstfrect.y = (float)dstrect->y;
 -        dstfrect.w = (float)dstrect->w;
 -        dstfrect.h = (float)dstrect->h;
+-        pdstfrect = &dstfrect;
+-    }
 +    SDL_Rect targetrect;
 +    SDL_Point origin;
 +    
@@ -75,9 +70,7 @@ diff -urN sdl2-2.0.22/src/render/SDL_render.c ../../../../../dont-delete-knulli.
 +            dstfrect.h = 960;//((float) ros_h - 160) * renderer->scale.y*3.3;
 +        } 
 +        SDL_Log("DSTRECT: %.1f, %.1f, %.1f, %.1f, SCALE: %.1f, %.1f, ROS: %d, %d\n", dstfrect.x, dstfrect.y, dstfrect.w, dstfrect.h, renderer->scale.x, renderer->scale.y, ros_w, ros_h);
-         pdstfrect = &dstfrect;
-     }
-+
++    }
      return SDL_RenderCopyF(renderer, texture, srcrect, pdstfrect);
  }
  
