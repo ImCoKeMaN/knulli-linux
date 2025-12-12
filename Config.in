@@ -669,6 +669,7 @@ menu "Knulli Packages"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/cores/libretro-race/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/cores/libretro-vm/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/cores/libretro-panda3ds/Config.in"
+    source "$BR2_EXTERNAL_KNULLI_PATH/package/cores/libretro-parallel-n64/Config.in"
   endmenu
 
   menu "Toolchains"
