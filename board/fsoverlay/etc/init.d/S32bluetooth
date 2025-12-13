@@ -20,6 +20,10 @@ case "$1" in
             /usr/bin/knulli-settings-set -f /etc/bluetooth/input.conf ClassicBondedOnly true
         fi
 
+        if [ "$BOARD" = "a527" ]; then
+            echo 1 > /proc/bluetooth/sleep/btwrite
+        fi
+
         # Reset radio
         rfkill block bluetooth >/dev/null 2>&1
         sleep 0.3
@@ -36,7 +40,11 @@ case "$1" in
                 /usr/bin/rtk_hciattach -n -s 115200 ttyS1 xradio &
                 is_hci0=1
                 ;;
-            *)
+            a527)
+                /usr/bin/aic_hciattach -n ttyAS1 aic &
+                is_hci0=1
+                ;;
+            	*)
                 ;;
         esac
 
