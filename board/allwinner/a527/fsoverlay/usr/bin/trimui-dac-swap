@@ -1,0 +1,16 @@
+#!/bin/sh
+
+case "$1" in
+    headphone)
+        amixer -c 0 sset 'DACL DACR Swap' Off
+        ;;
+    speaker)
+        amixer -c 0 sset 'DACL DACR Swap' On
+        ;;
+    *)
+        echo "Usage: $0 [speaker|headphone]" >&2
+        exit 1
+        ;;
+esac
+
+exit 0
