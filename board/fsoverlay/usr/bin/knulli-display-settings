@@ -1,0 +1,64 @@
+#!/bin/sh
+
+NL="/sys/class/disp/disp/attr/color_temperature"
+
+is_int() {
+    case "$1" in
+        ''|*[!0-9]*) return 1 ;;
+        *) return 0 ;;
+    esac
+}
+
+clamp_value() {
+    v="$1"
+    is_int "$v" || return 1
+    [ "$v" -gt 99 ] && v=99
+    echo "$v"
+}
+
+convert_255() {
+    in="$1"
+    echo $(( (in * 255 + 49) / 99 ))
+}
+
+do_get() {
+    if [ -f "$NL" ]; then
+        echo "nightlight"
+    fi
+}
+
+do_set() {
+    setting="$1"
+    value="$2"
+
+    case "$setting" in
+        nightlight)
+            v="$(clamp_value "$value")" || {
+                echo "invalid value" >&2
+                exit 1
+            }
+            new_val="$(convert_255 "$v")"
+            echo "$new_val" > "$NL" || exit 1
+            ;;
+        *)
+            echo "unknown setting: $setting" >&2
+            exit 1
+            ;;
+    esac
+}
+
+case "$1" in
+    --get-capabilities)
+        do_get
+        ;;
+    *)
+        # ES calls knulli-display-settings <setting> <value>
+        [ $# -eq 2 ] || {
+            echo "usage: $0 <setting> <value>" >&2
+            exit 1
+        }
+        do_set "$1" "$2"
+        ;;
+esac
+
+exit 0
