@@ -1,0 +1,13 @@
+#!/bin/sh
+
+[ "$1" = "start" ] || exit 0
+
+SETTINGS_GET="/usr/bin/knulli-settings-get"
+DISP_SETTINGS="/usr/bin/knulli-display-settings"
+
+temp_val="$("$SETTINGS_GET" "system.display.temperature" 2>/dev/null)"
+if [ -n "$temp_val" ]; then
+    "$DISP_SETTINGS" "temperature" "$temp_val" >/dev/null 2>&1
+fi
+
+exit 0

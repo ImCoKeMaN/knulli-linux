@@ -25,6 +25,11 @@ do_poweroff() {
         fi
     fi
 
+    # Gets the fan daemon to exit early and set fan to max speed during shutdown process as an extra safety measure
+    if knulli-board-capability "fan" && [ -f /etc/init.d/S06fan-control-daemon ]; then
+        /etc/init.d/S06fan-control-daemon stop
+    fi
+
     if [ "$POWEROFF" = "reboot" ]; then
         mount -o remount,rw /boot
         touch "$REBOOT_FLAG" # So the system knows if it's restart or cold boot for the charging binary in rcS
