@@ -3,7 +3,6 @@
 # === constants ===
 ARCH="$(tr -d ' \t\r\n' </usr/share/knulli/knulli.arch 2>/dev/null)"
 CPU_PATH="/sys/devices/system/cpu"
-UNLOCK_FILE="/userdata/system/.unlockcpu"
 POLICY_GLOB="/sys/devices/system/cpu/cpufreq/policy*"
 
 # === usage / flags ===
@@ -11,8 +10,6 @@ f_usage() {
     echo "$0 list" >&2
     echo "$0 set <KHz>" >&2
 }
-
-is_unlocked() { [ -e "$UNLOCK_FILE" ]; }
 
 # === policy helpers ===
 list_policies() {
@@ -77,40 +74,25 @@ get_max_freq() {
     list_all_freqs | tail -n 1
 }
 
-# === gating for list ===
-get_gate_count() {
+# === add warning label if needed ===
+get_warn_freq() {
     case "$ARCH" in
         h700)
-            echo 2
+            echo 1704000
             ;;
         *)
-            echo 0
             ;;
     esac
-}
-
-# Apply gating when locked (remove top-N)
-list_allowed_freqs() {
-    if is_unlocked; then
-        list_all_freqs
-        return
-    fi
-    gate_n="$(get_gate_count)"
-    if [ "${gate_n:-0}" -le 0 ]; then
-        list_all_freqs
-        return
-    fi
-    list_all_freqs | awk -v n="$gate_n" '{ a[NR]=$0 } END { m=NR-n; if (m<0) m=0; for (i=1;i<=m;i++) print a[i] }'
 }
 
 # === defaults ===
 get_default_freq() {
     case "$ARCH" in
         h700)
-            echo 1416000
+            echo 1512000
             ;;
         a133)
-            echo 1416000
+            echo 1512000
             ;;
         *)
             get_max_freq
@@ -122,15 +104,19 @@ get_default_freq() {
 do_list() {
     ANCHOR="$(select_anchor_policy)"
     DEFAULT="$(get_default_freq)"
-    allowed="$(list_allowed_freqs)"
-    [ -z "$allowed" ] && return
+    WARNING="$(get_warn_freq)"
+    allfreqs="$(list_all_freqs)"
+    [ -z "$allfreqs" ] && return
 
-    echo "$allowed" | while read -r freq; do
+    echo "$allfreqs" | while read -r freq; do
         [ -z "$freq" ] && continue
         mhz=$((freq / 1000))
+
         if [ -n "$DEFAULT" ] && [ "$freq" = "$DEFAULT" ]; then
             # value (kHz) then a space, then the full label
             printf "%s %s MHz (DEFAULT)\n" "$freq" "$mhz"
+        elif [ -n "$WARNING" ] && [ "$freq" = "$WARNING" ]; then
+            printf "%s %s MHz (WARNING)\n" "$freq" "$mhz"
         else
             printf "%s %s MHz\n" "$freq" "$mhz"
         fi
@@ -155,11 +141,8 @@ do_set() {
             done
         else
             for p in $POLS; do
-                if is_unlocked; then
-                    d="$(policy_max "$p" 2>/dev/null)" || continue
-                else
-                    d="$(policy_gated_max "$p" 2>/dev/null)" || continue
-                fi
+                d="$(policy_max "$p" 2>/dev/null)" || continue
+
                 cur=""; IFS= read -r cur < "$p/scaling_max_freq" 2>/dev/null || true
                 [ -n "$d" ] && [ "$d" != "$cur" ] && echo "$d" > "$p/scaling_max_freq" 2>/dev/null
             done
@@ -175,10 +158,6 @@ do_set() {
     CF_ANCHOR="$(clamp_for_policy "$ANCHOR" "$FREQ")"
     [ -z "$CF_ANCHOR" ] && { echo "Unsupported: $FREQ" >&2; exit 1; }
     [ "$CF_ANCHOR" != "$FREQ" ] && { echo "Unsupported: $FREQ" >&2; exit 1; }
-    # If locked, enforce gating using the exact requested value
-    if ! is_unlocked; then
-        list_allowed_freqs | freq_in_list "$FREQ" || { echo "Gated: $FREQ" >&2; exit 1; }
-    fi
 
     for p in $POLS; do
         cf="$(clamp_for_policy "$p" "$FREQ")"
