@@ -5925,10 +5925,10 @@
 			clock-latency-ns = <0x3b9b0>;
 		};
 
-        opp@1600000000-ab {
+		opp@1600000000-ab {
 			opp-hz = <0x00 0x5f5e1000>;
 			opp-microvolt-a1 = <0x11b340>;
-			opp-microvolt-b1 = <0x118c30>;
+			opp-microvolt-b1 = <0x111700>;
 			opp-microvolt-b0 = <0x111700>;
 			clock-latency-ns = <0x3b9b0>;
 		};
@@ -5936,7 +5936,7 @@
 		opp@1704000000-ab {
 			opp-hz = <0x00 0x6590fa00>;
 			opp-microvolt-a1 = <0x11b340>;
-			opp-microvolt-b1 = <0x11b340>;
+			opp-microvolt-b1 = <0x118c30>;
 			opp-microvolt-b0 = <0x111700>;
 			clock-latency-ns = <0x3b9b0>;
 		};
@@ -6187,7 +6187,7 @@
 		#cooling-cells = <0x02>;
 		gpu_idle = <0x01>;
 		dvfs_status = <0x01>;
-		operating-points = <0x03a980 0x0dbba0 0x0493e0 0x0dbba0 0x057e40 0x0dbba0 0x0668a0 0x0dbba0 0x06f540 0x0dbba0 0x07b0c0 0x0dbba0 0x086c40 0x0dbba0 0x0927c0 0x0dbba0 0x09e340 0x0ea600>;
+		operating-points = <0x03a980 0x0dbba0  0x052080 0x0dbba0  0x0668a0 0x0dbba0  0x07b0c0 0x0dbba0  0x0927c0 0x0dbba0  0x0a9ec0 0x0ea600>;
 		linux,phandle = <0xd4>;
 		phandle = <0xd4>;
 
