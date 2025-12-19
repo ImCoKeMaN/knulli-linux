@@ -1,0 +1,24 @@
+--- a/drivers/bluetooth/btrtl.c	2025-12-09 18:52:43.823658845 +0900
++++ b/drivers/bluetooth/btrtl.c	2025-12-15 09:50:30.129116526 +0900
+@@ -90,6 +90,13 @@
+ 	  .fw_name  = "rtl_bt/rtl8723b_fw.bin",
+ 	  .cfg_name = "rtl_bt/rtl8723b_config" },
+ 
++	/* 8733BU (Added for Miyoo Flip) */
++        { IC_INFO(RTL_ROM_LMP_8723B, 0xf),
++          .config_needed = false,
++          .has_rom_version = true,
++          .fw_name  = "rtl_bt/rtl8733b_fw.bin",
++          .cfg_name = "rtl_bt/rtl8733b_config" },
++
+ 	/* 8723D */
+ 	{ IC_INFO(RTL_ROM_LMP_8723B, 0xd),
+ 	  .config_needed = true,
+@@ -295,6 +302,7 @@
+ 		{ RTL_ROM_LMP_8821A, 10 },	/* 8821C */
+ 		{ RTL_ROM_LMP_8822B, 13 },	/* 8822C */
+ 		{ RTL_ROM_LMP_8761A, 14 },	/* 8761B */
++		{ RTL_ROM_LMP_8723B, 19 },	/* 8733B for Miyoo Flip */
+ 		{ RTL_ROM_LMP_8852A, 20 },	/* 8852B */
+ 	};
+ 
