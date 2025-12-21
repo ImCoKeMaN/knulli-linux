@@ -2,11 +2,17 @@
 
 # ScummVM ini file locations
 LIBRETRO_SCUMMVM_INI="/userdata/bios/scummvm.ini"
+STANDALONE_SCUMMVM_PATH="/userdata/system/configs/scummvm"
 STANDALONE_SCUMMVM_INI="/userdata/system/configs/scummvm/scummvm.ini"
 
 if [ ! -f "$LIBRETRO_SCUMMVM_INI" ]; then
   echo "$LIBRETRO_SCUMMVM_INI missing - creating file."
   touch "$LIBRETRO_SCUMMVM_INI"
+fi
+
+if [ ! -d "$STANDALONE_SCUMMVM_PATH" ]; then
+  echo "$STANDALONE_SCUMMVM_PATH missing - creating directory."
+  mkdir -p "$STANDALONE_SCUMMVM_PATH"
 fi
 
 if [ ! -f "$STANDALONE_SCUMMVM_INI" ]; then
