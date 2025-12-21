@@ -91,13 +91,24 @@ case "${ACTION}" in
                             amixer -c 0 sset 'LINEOUT volume' 0
                             LANG=C pactl set-default-sink "${MODE}" || exit 1
                             ;;
+                        "a527")
+                            MODE=alsa_output._sys_devices_platform_soc_3000000_soc_3000000_codec_mach_sound_card0.playback.0.0
+
+                            amixer -c 0 sset 'SPK' on
+                            amixer -c 0 sset 'HPOUT' on
+                            amixer -c 0 sset 'LINEOUTL' on
+                            amixer -c 0 sset 'LINEOUTR' on
+
+                            amixer -c 0 sset 'HPOUT Gain' "$(knulli-settings-get audio.headphone || echo 5)"
+                            amixer -c 0 sset 'LINEOUT Gain' 23
+
+                            amixer -c 0 sset 'DACL DACR Swap' On # Fixes reversed audio channels
+
+                            LANG=C pactl set-default-sink "${MODE}" || exit 1
+                            ;;
                         "rk3568")
                             if [ -f "/sys/class/drm/card0-HDMI-A-1/status" ]; then
                                 read -r HDMI_STATE < "/sys/class/drm/card0-HDMI-A-1/status"
-                            fi
-
-                            if [[ "$BOARD" == "powkiddy-rgb30" ]]; then
-                                amixer -c 0 sset "Playback Path" "HP"
                             fi
 
                             if [ "$HDMI_STATE" = "connected" ]; then
@@ -106,9 +117,12 @@ case "${ACTION}" in
                                 MODE=alsa_output._sys_devices_platform_rk817-sound_sound_card0.stereo-fallback
                             fi
 
+                            if [[ "$BOARD" == "powkiddy-rgb30" ]]; then
+                                amixer -c 0 sset "Playback Path" "HP"
+                            fi
+
                             # Needed for audio resume after suspend
                             amixer -c 0 sset 'Resume Path' 'ON'
-                            MODE=alsa_output._sys_devices_platform_rk817-sound_sound_card0.stereo-fallback
                             LANG=C pactl set-default-sink "${MODE}" || exit 1
                             ;;
                         *)

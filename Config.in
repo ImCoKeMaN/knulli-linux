@@ -669,6 +669,7 @@ menu "Knulli Packages"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/cores/libretro-race/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/cores/libretro-vm/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/cores/libretro-panda3ds/Config.in"
+    source "$BR2_EXTERNAL_KNULLI_PATH/package/cores/libretro-parallel-n64/Config.in"
   endmenu
 
   menu "Toolchains"
@@ -697,6 +698,7 @@ menu "Knulli Packages"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/gpu/mali-libs/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/gpu/mali-mp400-sunxi/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/gpu/mali-mp400-sunxi-driver/Config.in"
+    source "$BR2_EXTERNAL_KNULLI_PATH/package/gpu/mali-g57-sunxi/Config.in"
   endmenu
 
   menu "System"

@@ -46,8 +46,12 @@ class Advanced_DrasticGenerator(Generator):
             os.makedirs(advanced_drastic_root, exist_ok = True)
             os.system("cp -rv /usr/share/advanced_drastic/* /userdata/system/configs/advanced_drastic")
             if os.path.exists("/usr/share/advanced_drastic/devices/" + board ):
-                os.system("cp -rv /usr/share/advanced_drastic/devices/" + board + "/* /userdata/system/configs/advanced_drastic")
+                os.system("cp -rv /usr/share/advanced_drastic/devices/" + board + "/* /userdata/system/configs/advanced_drastic/config")
             os.system("cp /boot/boot/knulli.board /userdata/system/configs/advanced_drastic")
+
+        if (not os.path.isfile(advanced_drastic_conf)) or (not os.path.isdir(advanced_drastic_root + "/config")):
+            os.makedirs(advanced_drastic_root + "/config", exist_ok=True)
+            os.system("cp -rv /usr/share/advanced_drastic/devices/" + board + "/* /userdata/system/configs/advanced_drastic/config")
 
         # Bind mount saves and states locations
         saves_target = os.path.join(advanced_drastic_root, "backup")

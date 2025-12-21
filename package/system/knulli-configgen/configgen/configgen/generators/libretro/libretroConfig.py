@@ -83,19 +83,48 @@ systemNetplayModes = {'host', 'client', 'spectator'}
 # Cores that require .slang shaders (even on OpenGL, not only Vulkan)
 coreForceSlangShaders = { 'mupen64plus-next' }
 
-def connected_to_internet(timeout: float = 1.0) -> bool:
-    """
-    Consider online if we can open a TCP socket to RetroAchievements (HTTPS 443).
-    """
-    host, port = "retroachievements.org", 443
+def connected_to_internet() -> bool:
+    for host in ("one.one.one.one", "dns.google"):
+            try:
+                rc = subprocess.run(
+                    ["timeout", "1", "ping", "-c", "1", "-t", "255", host],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False,
+                ).returncode
+
+                if rc == 0:
+                    eslog.debug(f"Ping to {host} ok")
+                    return True
+                else:
+                    eslog.debug(f"Ping to {host} failed")
+
+            except Exception as e:
+                eslog.debug(f"Ping to {host} raised {e}")
+
+    eslog.debug("Ping failed... Trying DNS fallback")
+
+    old_timeout = socket.getdefaulttimeout()
     try:
-        with socket.create_connection((host, port), timeout=timeout):
-            eslog.debug(f"Connected to {host}:{port}")
-            return True
-    except Exception as e:
-        eslog.debug(f"Connectivity check to {host}:{port} failed: {e}")
-        eslog.error("Not connected to the internet (RetroAchievements unreachable)")
+        # use DNS timeout only inside this function
+        socket.setdefaulttimeout(1.0)
+
+        for attempt in range(20):
+            try:
+                socket.gethostbyname("retroachievements.org")
+                eslog.debug("DNS RA success")
+                return True
+            except Exception as e:
+                eslog.debug(
+                    f"DNS RA lookup failed"
+                )
+                time.sleep(0.25)
+
+        eslog.error("DNS RA failed after several retries")
         return False
+
+    finally:
+        socket.setdefaulttimeout(old_timeout)
 
 def writeLibretroConfig(generator: Generator, retroconfig: UnixSettings, system: Emulator, controllers: ControllerMapping, metadata: Mapping[str, str], guns: GunMapping, wheels: DeviceInfoMapping, rom: Path, bezel: str | None, shaderBezel: bool, gameResolution: Resolution, gfxBackend: str) -> None:
     writeLibretroConfigToFile(retroconfig, createLibretroConfig(generator, system, controllers, metadata, guns, wheels, rom, bezel, shaderBezel, gameResolution, gfxBackend))

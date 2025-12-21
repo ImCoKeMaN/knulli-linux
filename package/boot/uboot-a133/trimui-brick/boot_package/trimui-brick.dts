@@ -6107,7 +6107,7 @@
 			opp-microvolt-b1 = <0xdbba0>;
 			opp-microvolt-b2 = <0xe4e1c 0xe4e1c 0xe57e0>;
 			opp-microvolt-b3 = <0xe09c0 0xe09c0 0xe1d48>;
-			opp-microvolt-c0 = <0xdbba0>;
+			opp-microvolt-c0 = <0xcf850>;
 		};
 
 		opp@600000000 {
@@ -6124,7 +6124,7 @@
 			opp-microvolt-b1 = <0xdbba0>;
 			opp-microvolt-b2 = <0xe4e1c 0xe4e1c 0xe57e0>;
 			opp-microvolt-b3 = <0xe09c0 0xe09c0 0xe1d48>;
-			opp-microvolt-c0 = <0xdbba0>;
+			opp-microvolt-c0 = <0xcf850>;
 		};
 
 		opp@816000000 {
@@ -6141,7 +6141,7 @@
 			opp-microvolt-b1 = <0xdbba0>;
 			opp-microvolt-b2 = <0xe4e1c 0xe4e1c 0xe57e0>;
 			opp-microvolt-b3 = <0xe09c0 0xe09c0 0xe1d48>;
-			opp-microvolt-c0 = <0xdbba0>;
+			opp-microvolt-c0 = <0xcf850>;
 		};
 
 		opp@1008000000 {
@@ -6158,7 +6158,7 @@
 			opp-microvolt-b1 = <0xe7ef0>;
 			opp-microvolt-b2 = <0xea600 0xea600 0xeafc4>;
 			opp-microvolt-b3 = <0xe4e1c 0xe4e1c 0xe57e0>;
-			opp-microvolt-c0 = <0xdbba0>;
+			opp-microvolt-c0 = <0xcf850>;
 		};
 
 		opp@1200000000 {
@@ -6175,7 +6175,7 @@
 			opp-microvolt-b1 = <0xf4240>;
 			opp-microvolt-b2 = <0xee098 0xee098 0xef420>;
 			opp-microvolt-b3 = <0xea600 0xea600 0xeafc4>;
-			opp-microvolt-c0 = <0xe4e1c 0xe4e1c 0xe57e0>;
+			opp-microvolt-c0 = <0xdbba0 0xdbba0 0xe57e0>;
 		};
 
 		opp@1320000000 {
@@ -6201,7 +6201,7 @@
 			opp-microvolt-b1 = <0x1053b0 0x1053b0 0x106738>;
 			opp-microvolt-b2 = <0x102ca0 0x102ca0 0x103664>;
 			opp-microvolt-b3 = <0xfd4bc 0xfd4bc 0xfde80>;
-			opp-microvolt-c0 = <0xf9060 0xf9060 0xfa3e8>;
+			opp-microvolt-c0 = <0xee098 0xee098 0xfa3e8>;
 		};
 
 		opp@1464000000 {
@@ -6228,19 +6228,19 @@
 		opp@1608000000 {
 			opp-hz = <0x00 0x5fd82200>;
 			clock-latency-ns = <0x3b9b0>;
-			opp-microvolt-c0 = <0x10c8e0>;
+			opp-microvolt-c0 = <0x100590 0x100590 0x10c8e0>;
 		};
 
 		opp@1800000000 {
 			opp-hz = <0x00 0x6b49d200>;
 			clock-latency-ns = <0x3b9b0>;
-			opp-microvolt-c0 = <0x120160 0x120160 0x121eac>;
+			opp-microvolt-c0 = <0x113e10 0x113e10 0x121eac>;
 		};
 
 		opp@2000000000 {
 			opp-hz = <0x00 0x77359400>;
 			clock-latency-ns = <0x3b9b0>;
-			opp-microvolt-c0 = <0x1312d0 0x1312d0 0x13301c>;
+			opp-microvolt-c0 = <0x124f80 0x124f80 0x13301c>;
 		};
 	};
 
@@ -6508,7 +6508,7 @@
 		dvfs_status = <0x01>;
 		pll_rate = <0xaae60>;
 		independent_power = <0x00>;
-		operating-points = <0xaae60 0x10c8e0 0x61698 0xe7ef0 0x37aa0 0xe7ef0>;
+		operating-points = <0xafc80 0x10c8e0 0x61698 0xe7ef0 0x37aa0 0xe7ef0>;
 		linux,phandle = <0x1bf>;
 		phandle = <0x1bf>;
 	};

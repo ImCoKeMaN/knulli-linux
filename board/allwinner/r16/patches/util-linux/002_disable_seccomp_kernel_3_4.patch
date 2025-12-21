@@ -1,0 +1,37 @@
+--- a/misc-utils/Makemodule.am	2024-07-04 07:54:41.232242066 +0000
++++ b/misc-utils/Makemodule.am	2025-12-01 17:34:04.869349467 +0000
+@@ -324,6 +324,7 @@ waitpid_CFLAGS = $(AM_CFLAGS)
+ endif
+ 
+ if BUILD_ENOSYS
++if HAVE_LINUX_SECCOMP_H
+ 
+ misc-utils/enosys.c: syscalls.h
+ 
+@@ -341,6 +342,7 @@ enosys_SOURCES = misc-utils/enosys.c
+ enosys_LDADD = $(LDADD) libcommon.la
+ enosys_CFLAGS = $(AM_CFLAGS)
+ endif
++endif
+ 
+ if BUILD_LSCLOCKS
+ usrbin_exec_PROGRAMS += lsclocks
+--- a/configure.ac	2025-12-01 17:34:04.868349469 +0000
++++ b/configure.ac	2025-12-01 17:39:42.947824486 +0000
+@@ -509,6 +508,7 @@ have_linux_mount_h=$ac_cv_header_linux_m
+ have_linux_pr_h=$ac_cv_header_linux_pr_h
+ have_linux_raw_h=$ac_cv_header_linux_raw_h
+ have_linux_securebits_h=$ac_cv_header_linux_securebits_h
++have_linux_seccomp_h=$ac_cv_header_linux_seccomp_h
+ have_linux_version_h=$ac_cv_header_linux_version_h
+ have_linux_watchdog_h=$ac_cv_header_linux_watchdog_h
+ have_pty_h=$ac_cv_header_pty_h
+@@ -521,6 +521,8 @@ have_sys_signalfd_h=$ac_cv_header_sys_si
+ have_utmpx_h=$ac_cv_header_utmpx_h
+ have_mntent_h=$ac_cv_header_mntent_h
+ 
++AM_CONDITIONAL([HAVE_LINUX_SECCOMP_H], [test "x$have_linux_seccomp_h" = xyes])
++
+ AS_CASE([$linux_os:$have_linux_version_h],
+   [yes:no],
+     [AC_MSG_ERROR([kernel headers required on Linux])]

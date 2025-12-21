@@ -1,0 +1,15 @@
+#!/bin/sh
+
+BOARD=$(cat /boot/boot/knulli.board)
+
+case $1 in
+    start)
+		trimui_inputd &
+	;;
+    stop)
+		killall -9 trimui_inputd
+	;;
+esac
+
+exit 0
+

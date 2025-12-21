@@ -31,9 +31,11 @@ if [ "$count" -eq 1 ] && [ "$(awk -v e="$elapsed" -v w="$WINDOW" 'BEGIN { print 
     : > "$COUNTER_FILE"
     echo "$now" > "$DEBOUNCE_FILE"
     if check_ingame; then
-        knulli-es-swissknife --emukill
+        if ! curl -s "http://127.0.0.1:1234/emukill" >/dev/null 2>&1; then
+            knulli-es-swissknife --emukill >/dev/null 2>&1
+        fi
     else
-        knulli-es-swissknife --restart
+        curl -s "http://127.0.0.1:1234/quit" >/dev/null 2>&1
     fi
     exit 0
 fi

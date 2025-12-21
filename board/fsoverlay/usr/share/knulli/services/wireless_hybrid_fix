@@ -2,7 +2,7 @@
 
 WPA_CONF="/etc/wpa_supplicant.conf"
 WPA_SUPPLICANT_CMD="/usr/sbin/wpa_supplicant"
-CONNMAN_SERVICE="/etc/init.d/S20connman"
+CONNMAN_SERVICE="/etc/init.d/S08connman"
 PID_FILE="/var/run/wpa_supplicant.pid"
 
 case "$1" in

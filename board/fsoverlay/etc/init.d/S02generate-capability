@@ -53,6 +53,7 @@ case "$ARCH" in
         BOARD_CAPABILITIES[rumble]="ps5000 ps7000"
         BOARD_CAPABILITIES[adb]="powkiddy_a13 ps5000 ps7000"
         BOARD_CAPABILITIES[hud]="powkiddy_a13 ps5000 ps7000"
+        ;;
     rk3326)
         BOARD_CAPABILITIES[analogstick]="r36s g350 magicx-mini-m"
         BOARD_CAPABILITIES[rumble]="r36s g350 magicx-mini-m"
@@ -60,7 +61,8 @@ case "$ARCH" in
         BOARD_CAPABILITIES[hud]="r36s g350 magicx-mini-m powkiddy-rgb30 powkiddy_a13 ps5000 ps7000"
         ;;
     rk3568)
-        BOARD_CAPABILITIES[lid]="miyoo-flip"
+        # Technically the flip has a lid/hall sensor but it's just wired to the power button
+        #BOARD_CAPABILITIES[lid]="miyoo-flip"
         BOARD_CAPABILITIES[hdmi]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip"
         BOARD_CAPABILITIES[wifi]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip"
         BOARD_CAPABILITIES[bluetooth]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip"
@@ -81,6 +83,19 @@ case "$ARCH" in
         BOARD_CAPABILITIES[adb]="rp5"
         BOARD_CAPABILITIES[bezelproject]="rp5"
         BOARD_CAPABILITIES[hud]="rp5"
+        BOARD_CAPABILITIES[fan]="rp5"
+        ;;
+    a527)
+        BOARD_CAPABILITIES[rgb]="trimui-smart-pro-s"
+        BOARD_CAPABILITIES[hdmi]="trimui-smart-pro-s"
+        BOARD_CAPABILITIES[wifi]="trimui-smart-pro-s"
+        BOARD_CAPABILITIES[bluetooth]="trimui-smart-pro-s"
+        BOARD_CAPABILITIES[analogstick]="trimui-smart-pro-s"
+        BOARD_CAPABILITIES[rumble]="trimui-smart-pro-s"
+        BOARD_CAPABILITIES[adb]="trimui-smart-pro-s"
+        BOARD_CAPABILITIES[bezelproject]="trimui-smart-pro-s"
+        BOARD_CAPABILITIES[hud]="trimui-smart-pro-s"
+        BOARD_CAPABILITIES[fan]="trimui-smart-pro-s"
         ;;
     *)
         echo "Unknown ARCH: $ARCH — skipping."

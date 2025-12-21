@@ -20,7 +20,14 @@ do_poweroff() {
     knulli-audio setSystemVolume mute
 
     if check_ingame; then
-         curl -s -o /dev/null http://127.0.0.1:1234/emukill
+        if ! curl -s "http://127.0.0.1:1234/emukill" >/dev/null 2>&1; then
+            knulli-es-swissknife --emukill >/dev/null 2>&1
+        fi
+    fi
+
+    # Gets the fan daemon to exit early and set fan to max speed during shutdown process as an extra safety measure
+    if knulli-board-capability "fan" && [ -f /etc/init.d/S06fan-control-daemon ]; then
+        /etc/init.d/S06fan-control-daemon stop
     fi
 
     if [ "$POWEROFF" = "reboot" ]; then
