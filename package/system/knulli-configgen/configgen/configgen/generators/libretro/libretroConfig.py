@@ -5,6 +5,7 @@ import json
 import logging
 import subprocess
 import socket
+import time
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
@@ -84,6 +85,11 @@ systemNetplayModes = {'host', 'client', 'spectator'}
 coreForceSlangShaders = { 'mupen64plus-next' }
 
 def connected_to_internet() -> bool:
+    wifi_enabled = (subprocess.check_output(["knulli-settings-get", "wifi.enabled"],text=True).strip() == "1")
+
+    if not wifi_enabled:
+        return False
+
     for host in ("one.one.one.one", "dns.google"):
             try:
                 rc = subprocess.run(
