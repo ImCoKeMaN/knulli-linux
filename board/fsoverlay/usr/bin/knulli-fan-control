@@ -60,9 +60,9 @@ case "$BOARD" in
         FAN_STATE="/sys/class/thermal/cooling_device0/cur_state"
         FAN_MAX=31
 
-        # Temperature (C)
-        T_OFF=35 # below this -> fan off
-        T_MIN=40
+        # Temperature ramp (C)
+        T_OFF=30 # below this -> fan off
+        T_MIN=35
         T_MAX=60
     ;;
     rp5|rpflip2|rpmini)
@@ -77,7 +77,7 @@ case "$BOARD" in
         # Temperature ramp (C)
         T_OFF=30 # below this -> fan off
         T_MIN=35
-        T_MAX=70
+        T_MAX=80
     ;;
     *)
     echo "Device not supported!"
@@ -104,7 +104,7 @@ build_temp_file_list() {
 
         IFS= read -r t < "$z/type" 2>/dev/null || continue
         case "$t" in
-            cpu*|cluster*|gpu*)
+            cpu*|cluster*)
                 TEMP_FILES="$TEMP_FILES $z/temp"
                 ;;
         esac
