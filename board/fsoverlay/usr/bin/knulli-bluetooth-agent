@@ -406,8 +406,16 @@ def refresh_audio_on_connect(properties):
   for i in range(100):
     sinks = subprocess.check_output(["pactl", "list", "short", "sinks"], encoding='utf-8')
     if "bluez_" in sinks:
-      current_output = subprocess.check_output(["knulli-audio", "get"], encoding='utf-8').strip()
-      subprocess.run(["knulli-audio", "set", current_output])
+      sink_name = ""
+      for line in sinks.splitlines():
+        if "bluez_" in line:
+          sink_name = line.split()[1]
+          break
+
+      time.sleep(0.5)
+      subprocess.run(["knulli-audio", "set", sink_name])
+      subprocess.run(["pactl", "set-sink-mute", sink_name, "0"])
+
       logging.info("Bluetooth audio sink detected: proceeding with audio refresh.")
       return
     time.sleep(0.1)
