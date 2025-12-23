@@ -1,0 +1,158 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3566-rg-arc-linux.dts	2025-12-07 03:45:44.047868423 +0000
++++ b/arch/arm64/boot/dts/rockchip/rk3566-rg-arc-linux.dts	2025-12-19 15:44:57.303420532 +0000
+@@ -431,50 +431,50 @@
+ 
+ 		opp-408000000 {
+ 			opp-hz = <0x00 0x18519600>;
+-			opp-microvolt = <0x0C3500 0x0C3500 0x118c30>;
++			opp-microvolt = <0x0bd2c0 0x0bd2c0 0x118c30>;
+ 			clock-latency-ns = <0x9c40>;
+ 		};
+ 
+ 		opp-600000000 {
+ 			opp-hz = <0x00 0x23c34600>;
+-			opp-microvolt = <0x0C3500 0x0C3500 0x118c30>;
++			opp-microvolt = <0x0c3500 0x0c3500 0x118c30>;
+ 			clock-latency-ns = <0x9c40>;
+ 		};
+ 
+ 		opp-816000000 {
+ 			opp-hz = <0x00 0x30a32c00>;
+-			opp-microvolt = <0x0C3500 0x0C3500 0x118c30>;
++			opp-microvolt = <0x0c3500 0x0c3500 0x118c30>;
+ 			clock-latency-ns = <0x9c40>;
+ 			opp-suspend;
+ 		};
+ 
+ 		opp-1104000000 {
+ 			opp-hz = <0x00 0x41cdb400>;
+-			opp-microvolt = <0x0C3500 0x0C3500 0x118c30>;
++			opp-microvolt = <0x0c3500 0x0c3500 0x118c30>;
+ 			clock-latency-ns = <0x9c40>;
+ 		};
+ 
+ 		opp-1416000000 {
+ 			opp-hz = <0x00 0x54667200>;
+-			opp-microvolt = <0x0D5D80 0x0D5D80 0x118c30>;
++			opp-microvolt = <0x0cf850 0x0cf850 0x118c30>;
+ 			clock-latency-ns = <0x9c40>;
+ 		};
+ 
+ 		opp-1608000000 {
+ 			opp-hz = <0x00 0x5fd82200>;
+-			opp-microvolt = <0x0E7EF0 0x0E7EF0 0x118c30>;
++			opp-microvolt = <0x0dbba0 0x0dbba0 0x118c30>;
+ 			clock-latency-ns = <0x9c40>;
+ 		};
+ 
+ 		opp-1800000000 {
+ 			opp-hz = <0x00 0x6b49d200>;
+-			opp-microvolt = <0x0fa3e8 0x0fa3e8 0x118c30>;
++			opp-microvolt = <0x0e7ef0 0x0e7ef0 0x118c30>;
+ 			clock-latency-ns = <0x9c40>;
+ 		};
+ 
+ 		opp-1992000000 {
+ 			opp-hz = <0x0 0x76bb8200>;
+-			opp-microvolt = <0x10c8e0 0x10c8e0 0x118c30>;
++			opp-microvolt = <0x0f4240 0x0f4240 0x118c30>;
+ 			clock-latency-ns = <0x9c40>;
+ 		};
+ 	};
+@@ -1278,7 +1278,7 @@
+ 				DCDC_REG2 {
+ 					regulator-always-on;
+ 					regulator-boot-on;
+-					regulator-min-microvolt = <0xc96a8>;
++					regulator-min-microvolt = <0x0c3500>;
+ 					regulator-max-microvolt = <0x149970>;
+ 					regulator-init-microvolt = <0xe7ef0>;
+ 					regulator-ramp-delay = <0x1771>;
+@@ -1470,8 +1470,8 @@
+ 				sleep_enter_current = <0x12c>;
+ 				sleep_exit_current = <0x12c>;
+ 				sleep_filter_current = <0x64>;
+-				power_off_thresd = <0xd48>;
+-				zero_algorithm_vol = <0x00>;
++				power_off_thresd = <0x00>;
++				zero_algorithm_vol = <0xf0a>;
+ 				max_soc_offset = <0x3c>;
+ 				monitor_sec = <0x05>;
+ 				sample_res = <0x0a>;
+@@ -1692,7 +1692,7 @@
+ 		power-domains = <0x1f 0x06>;
+ 		operating-points-v2 = <0x5c>;
+ 		iommus = <0x5d>;
+-		status = "okay";
++		status = "disabled";
+ 		rknpu-supply = <0x5e>;
+ 		phandle = <0x161>;
+ 	};
+@@ -1796,32 +1796,37 @@
+ 
+ 		opp-200000000 {
+ 			opp-hz = <0x00 0xbebc200>;
+-			opp-microvolt = <0xc96a8>;
++			opp-microvolt = <0x0c3500>;
+ 		};
+ 
+ 		opp-300000000 {
+ 			opp-hz = <0x00 0x11e1a300>;
+-			opp-microvolt = <0xc96a8>;
++			opp-microvolt = <0x0c3500>;
+ 		};
+ 
+ 		opp-400000000 {
+ 			opp-hz = <0x00 0x17d78400>;
+-			opp-microvolt = <0xc96a8>;
++			opp-microvolt = <0x0c3500>;
+ 		};
+ 
+ 		opp-600000000 {
+ 			opp-hz = <0x00 0x23c34600>;
+-			opp-microvolt = <0xc96a8>;
++			opp-microvolt = <0x0c3500>;
+ 		};
+ 
+ 		opp-700000000 {
+ 			opp-hz = <0x00 0x29b92700>;
+-			opp-microvolt = <0xdbba0>;
++			opp-microvolt = <0x0cf850>;
+ 		};
+ 
+ 		opp-800000000 {
+ 			opp-hz = <0x00 0x2faf0800>;
+-			opp-microvolt = <0xf4240>;
++			opp-microvolt = <0x0dbba0>;
++		};
++
++		opp-900000000 {
++			opp-hz = <0x00 0x35a4e900>;
++			opp-microvolt = <0x0e7ef0>;
+ 		};
+ 	};
+ 
+@@ -2486,7 +2491,7 @@
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <0x88>;
+ 			phandle = <0x17a>;
+-			rotation = <90>;
++			rotation = <0x5a>;
+ 
+ 			display-timings {
+ 				native-mode = <0x89>;
+@@ -5350,12 +5355,14 @@
+ 			gpios = <0x34 0x15 0x00>;
+ 			label = "battery_full";
+ 			default-state = "on";
++			retain-state-suspended;
+ 		};
+ 
+ 		led@2 {
+ 			gpios = <0x34 0x16 0x00>;
+ 			label = "battery_charging";
+ 			retain-state-suspended;
++			linux,default-trigger = "battery-charging";
+ 		};
+ 
+ 		led@3 {
