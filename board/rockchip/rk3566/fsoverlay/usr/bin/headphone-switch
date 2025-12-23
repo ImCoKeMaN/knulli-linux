@@ -1,6 +1,6 @@
 #!/bin/sh
 
-STATE_FILE="/sys$1/state"
+STATE_FILE="$1/state"
 AMIXER="/usr/bin/amixer"
 
 # Fallback if the state file is missing
