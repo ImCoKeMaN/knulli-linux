@@ -101,7 +101,9 @@ def writeControllersConfig(retroconfig: UnixSettings, system: Emulator, controll
 
     # No menu in non full uimode
     if system.config["uimode"] != "Full":
-        del retroarchspecials['b']
+        for key, action in list(retroarchspecials.items()):
+            if action == "menu_toggle":
+                del retroarchspecials[key]
 
     # Check if hotkeys need to be removed/disabled (Needed for N64 controllers without a dedicated hotkey button)
     # Assign value based on core
