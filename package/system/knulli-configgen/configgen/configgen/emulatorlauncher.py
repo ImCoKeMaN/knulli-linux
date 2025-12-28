@@ -254,7 +254,7 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: str, romConfigur
     return exitCode
 
 def getHudBezel(system: Emulator, generator: Generator, rom: str, gameResolution: Resolution, bordersSize: str | None, bordersRatio: str | None):
-    if generator.supportsInternalBezels():
+    if generator.supportsInternalBezels() or not generator.supportsExternalBezels():
         eslog.debug(f"skipping bezels for emulator {system.config['emulator']}")
         return None
     # no good reason for a bezel
@@ -309,6 +309,10 @@ def getHudBezel(system: Emulator, generator: Generator, rom: str, gameResolution
     screen_ratio = gameResolution["width"] / gameResolution["height"]
     bezel_ratio  = bezel_width / bezel_height
 
+    if (bezel_width == gameResolution["width"] and bezel_height == gameResolution["height"]):
+        eslog.debug("game resolution equals bezel size - no bezel applied")
+        return None
+
     # the screen and bezel ratio must be approximatly the same
     if bordersSize is None:
         if abs(screen_ratio - bezel_ratio) > max_ratio_delta:
@@ -330,6 +334,7 @@ def getHudBezel(system: Emulator, generator: Generator, rom: str, gameResolution
 
     ## the bezel left and right cover must be maximum
     ingame_ratio = generator.getInGameRatio(system.config, gameResolution, rom)
+    eslog.debug(f"ingame ratio: {ingame_ratio}")
     img_height = bezel_height
     img_width  = img_height * ingame_ratio
 
