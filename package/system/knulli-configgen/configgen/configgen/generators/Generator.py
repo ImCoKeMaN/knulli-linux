@@ -39,6 +39,10 @@ class Generator(metaclass=ABCMeta):
     def supportsInternalBezels(self) -> bool:
         return False
 
+    # Most emulators support external bezels, however, ScummVM does not
+    def supportsExternalBezels(self) -> bool:
+        return True
+
     # mangohud must be called by the generator itself (wine based emulator for example)
     def hasInternalMangoHUDCall(self) -> bool:
         return False
