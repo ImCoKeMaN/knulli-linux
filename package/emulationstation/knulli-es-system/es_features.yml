@@ -131,6 +131,7 @@ shared:
         "None": none
         "Game info/art": game
         "Performance": perf
+        "Battery": bat
         "Custom": custom
     hud_corner:
       archs_exclude: [s905 bcm2835 bcm2836]
