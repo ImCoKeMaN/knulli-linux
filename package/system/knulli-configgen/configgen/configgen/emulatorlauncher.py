@@ -471,7 +471,7 @@ def getHudConfig(system: Emulator, systemName: str, emulator: str, core: str, ro
     elif mode == "custom" and system.isOptSet('hud_custom') and system.config["hud_custom"] != "" :
         configstr += system.config["hud_custom"].replace("\\n", "\n")
     elif mode == "bat":
-        configstr += f"position={hud_position}\nlegacy_layout=false\nhud_compact\nwidth=38\nfps=0\nframe_timing=0\ncpu_stats=0\ngpu_stats=0\nexec=sh -c 'echo \"$(cat /tmp/battery.percent)%\"'\nfont_size=38\nbackground_alpha=0\nfont_file=/usr/share/fonts/dejavu/DejaVuSansMono.ttf"
+        configstr += f"position={hud_position}\nlegacy_layout=false\nhud_compact\nwidth=38\nfps=0\nframe_timing=0\ncpu_stats=0\ngpu_stats=0\nexec=sh -c 'echo \"$(cat /tmp/battery.percent)%\"'\nfont_size=38\ntext_outline_thickness=0.5\nalpha=0.9\nbackground_alpha=0\nfont_file=/usr/share/fonts/dejavu/DejaVuSansMono.ttf"
     else:
         configstr = configstr + "background_alpha=0\n" # hide the background
 
