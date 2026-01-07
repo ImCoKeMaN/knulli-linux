@@ -87,7 +87,6 @@ case "$ARCH" in
         ;;
     a527)
         BOARD_CAPABILITIES[rgb]="trimui-smart-pro-s"
-        BOARD_CAPABILITIES[hdmi]="trimui-smart-pro-s"
         BOARD_CAPABILITIES[wifi]="trimui-smart-pro-s"
         BOARD_CAPABILITIES[bluetooth]="trimui-smart-pro-s"
         BOARD_CAPABILITIES[analogstick]="trimui-smart-pro-s"

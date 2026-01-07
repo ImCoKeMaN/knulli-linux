@@ -1,0 +1,42 @@
+#!/bin/bash
+
+BOARD=$(cat /boot/boot/knulli.board)
+# We only want the script to run for these devices
+if [ "$BOARD" != "trimui-smart-pro-s" ]; then
+    exit 1
+fi
+
+get_wlan() {
+  for dev in /sys/class/net/*; do
+    [ -e "$dev/wireless" ] && basename "$dev"
+  done
+}
+
+rfkill_block_wifi() {
+  rfkill block wifi 2>/dev/null || true
+  rfkill block wlan 2>/dev/null || true
+  rfkill block phy0 2>/dev/null || true
+}
+
+rfkill_unblock_wifi() {
+  rfkill unblock wifi 2>/dev/null || true
+  rfkill unblock wlan 2>/dev/null || true
+  rfkill unblock phy0 2>/dev/null || true
+}
+
+case "${1}" in
+   suspend)
+      for iface in $(get_wlan); do
+        ip link set "$iface" down 2>/dev/null || true
+      done
+      rfkill_block_wifi
+      ;;
+   thaw|resume)
+      for iface in $(get_wlan); do
+        ip link set "$iface" up 2>/dev/null || true
+      done
+      rfkill_unblock_wifi
+      ;;
+esac
+
+exit 0
