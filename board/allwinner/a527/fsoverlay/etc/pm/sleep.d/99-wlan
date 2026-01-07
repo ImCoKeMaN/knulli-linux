@@ -32,10 +32,13 @@ case "${1}" in
       rfkill_block_wifi
       ;;
    thaw|resume)
+      rfkill_unblock_wifi
+      sleep 0.2
       for iface in $(get_wlan); do
         ip link set "$iface" up 2>/dev/null || true
       done
-      rfkill_unblock_wifi
+
+      /etc/init.d/S08connman restart 2>/dev/null || true
       ;;
 esac
 
