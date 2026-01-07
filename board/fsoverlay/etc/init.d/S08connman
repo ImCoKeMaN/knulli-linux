@@ -214,7 +214,7 @@ do_status() {
         return 1
     fi
 
-    if ping -q -c1 -W1 8.8.8.8 >/dev/null 2>&1; then
+    if fping -c1 -t1000 8.8.8.8 >/dev/null 2>&1; then
         echo "connman: internet online."
         return 0
     else
