@@ -4,17 +4,41 @@ if ! knulli-board-capability "toggleswitch"; then
     exit 1
 fi
 
+ARCH_FILE="/usr/share/knulli/knulli.arch"
+read -r ARCH < "$ARCH_FILE" 2>/dev/null
+
+case "$ARCH" in
+    a133) GPIO=243 ;;
+    a527) GPIO=363 ;;
+    *) echo "${ARCH} is unsupported" >&2; exit 1 ;;
+esac
+
 # Wait for emulationstation to be ready so this runs after everything else has initialized
 for i in {1..20}; do
     [ -f /tmp/emulationstation.ready ] && break
     sleep 0.5
 done
 
-SWITCH_STATE=$(cat /sys/class/gpio/gpio243/value)
+sleep 0.25
+
+# Export GPIO if not already exported
+if [ ! -d "/sys/class/gpio/gpio${GPIO}" ]; then
+    echo "${GPIO}" > /sys/class/gpio/export 2>/dev/null || true
+fi
+
+# Wait for sysfs
+for i in {1..20}; do
+    [ -r "/sys/class/gpio/gpio${GPIO}/value" ] && break
+    sleep 0.1
+done
+
+[ -f "/sys/class/gpio/gpio${GPIO}/value" ] || exit 1
+
+SWITCH_STATE=$(cat /sys/class/gpio/gpio${GPIO}/value)
 
 case "$1" in
     start)
-        if [ "$SWITCH_STATE" -eq 1 ]; then
+        if [ "$SWITCH_STATE" = "1" ]; then
             toggle-switch enable
         else
             toggle-switch disable

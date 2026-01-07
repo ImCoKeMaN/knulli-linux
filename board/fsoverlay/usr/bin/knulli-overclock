@@ -92,7 +92,7 @@ get_default_freq() {
             echo 1512000
             ;;
         a133)
-            echo 1512000
+            echo 1416000
             ;;
         *)
             get_max_freq

@@ -1,20 +1,16 @@
 #!/bin/sh
 
-BOARD=$(cat /boot/boot/knulli.board)
+BIN="/usr/bin/trimui_inputd"
 
-case $1 in
+[ -f "$BIN" ] || exit 0
+
+case "$1" in
     start)
-	if [ "$BOARD" = "trimui-smart-pro" ]; then 
-		trimui_inputd_smart_pro &
-	elif [ "$BOARD" = "trimui-brick" ] || [ "$BOARD" = "magicx-zero-40"] || [ "$BOARD" = "magicx-zero-28" ]; then
-		trimui_inputd_brick &
-	fi
-	;;
-     stop)
-	killall -9 trimui_inputd_smart_pro
-	killall -9 trimui_inputd_brick
-	;;
+        "$BIN" &
+        ;;
+    stop)
+        killall -9 trimui_inputd 2>/dev/null || true
+        ;;
 esac
 
 exit 0
-

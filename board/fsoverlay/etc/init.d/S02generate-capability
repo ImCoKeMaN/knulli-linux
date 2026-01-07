@@ -96,6 +96,7 @@ case "$ARCH" in
         BOARD_CAPABILITIES[bezelproject]="trimui-smart-pro-s"
         BOARD_CAPABILITIES[hud]="trimui-smart-pro-s"
         BOARD_CAPABILITIES[fan]="trimui-smart-pro-s"
+        BOARD_CAPABILITIES[toggleswitch]="trimui-smart-pro-s"
         ;;
     *)
         echo "Unknown ARCH: $ARCH — skipping."
