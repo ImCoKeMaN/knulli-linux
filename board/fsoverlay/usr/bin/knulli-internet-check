@@ -1,0 +1,47 @@
+#!/bin/sh
+# Exit 0 = online, 1 = offline
+
+MODE="$1"
+
+HOST_GENERIC="one.one.one.one"
+HOST_CHEEVOS="retroachievements.org"
+HOST_UPDATES="updates.knulli.org"
+
+if [ "$(knulli-settings-get wifi.enabled 2>/dev/null)" != "1" ]; then
+  echo "internet check: wifi disabled"
+  exit 1
+fi
+
+# Reachability probe
+http_try() {
+  curl -sS --connect-timeout 1 -m 2 "http://$1/" >/dev/null 2>&1
+}
+
+# Build probe order
+PROBES=""
+
+case "$MODE" in
+  cheevos)
+    PROBES="$HOST_CHEEVOS $HOST_GENERIC"
+    ;;
+  updates)
+    PROBES="$HOST_UPDATES $HOST_GENERIC"
+    ;;
+  *)
+    PROBES="$HOST_GENERIC"
+    ;;
+esac
+
+# Try probes in order
+for host in $PROBES; do
+  echo "internet check: checking $host"
+  if http_try "$host"; then
+    echo "internet check: $host reachable"
+    exit 0
+  else
+    echo "internet check: $host unreachable"
+  fi
+done
+
+echo "internet check: offline"
+exit 1
