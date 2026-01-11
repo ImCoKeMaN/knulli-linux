@@ -48,10 +48,7 @@ if [ $SCAN_REQUIRED -eq 0 ]; then
 fi
 
 if [ $SCAN_REQUIRED -eq 1 ]; then
-  # Send notification that Syncthing is scanning. (Helpful in case device freezes.)
-  echo "Scanning of local folders..."
-  curl -s http://localhost:1234/notify -d "SYNCTHING: Scanning for changed files." >/dev/null
-  
+  echo "Scanning of local folders..."  
   # Start sync.
   curl --header "X-Api-Key: $SYNCTHING_API_KEY" -X POST http://127.0.0.1:8384/rest/db/scan
 fi
