@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# Check if Syncthing service is enabled, abort if not.
+ENABLED_SERVICES="$(/usr/bin/knulli-settings-get system.services)"
+if [[ ${ENABLED_SERVICES} != *"syncthing"* ]];then
+  echo "Syncthing not running. Aborting."
+  exit 0
+fi
+
+VAR_SYNC_PID="/var/run/knulli-sync.pid"
+
+# If script is already running, kill it before starting another
+if [ -f $VAR_SYNC_PID ]; then
+  kill $(cat $VAR_SYNC_PID)
+  echo "Script was already running - terminated other instance."
+  rm $VAR_SYNC_PID
+fi
+
+# Register running script
+echo $$ > $VAR_SYNC_PID
+
+# Retrieve syncthing API key from config file.
+SYNCTHING_API_KEY=$(cat ~/configs/syncthing/config.xml | sed -n 's/.*<apikey>\([^<]*\).*/\1/p')
+
+# Retrieve folder IDs from config file.
+FOLDER_ID_MULTILINE_STRING=$(cat ~/configs/syncthing/config.xml | sed -n 's/.*<folder id="\([^"]\+\).*/\1/p')
+
+# Store folder IDs in array.
+FOLDER_IDS=()
+while read FOLDER_ID; do
+  FOLDER_IDS+=( "$FOLDER_ID" )
+done <<< $FOLDER_ID_MULTILINE_STRING
+
+SCAN_REQUIRED=0
+
+# Launch manual scan if file system is isn't ext4
+FILESYSTEM=$(df -Th | grep /userdata)
+if [[ $FILESYSTEM != *" ext4 "* ]]; then
+  SCAN_REQUIRED=1
+fi
+
+if [ $SCAN_REQUIRED -eq 0 ]; then
+  FOLDERS_WITH_WATCHER_DISABLED=$(cat ~/configs/syncthing/config.xml | sed -n 's/.*<folder id="\([^"]\+\).*fsWatcherEnabled="false".*/\1/p')
+  FOLDERS_WITH_WATCHER_DISABLED_COUNT=$(echo "$FOLDERS_WITH_WATCHER_DISABLED" | sed '/^\s*$/d' | wc -l)
+  if [ $FOLDERS_WITH_WATCHER_DISABLED_COUNT -gt 0 ]; then
+    SCAN_REQUIRED=1
+  fi
+fi
+
+if [ $SCAN_REQUIRED -eq 1 ]; then
+  # Send notification that Syncthing is scanning. (Helpful in case device freezes.)
+  echo "Scanning of local folders..."
+  curl -s http://localhost:1234/notify -d "SYNCTHING: Scanning for changed files." >/dev/null
+  
+  # Start sync.
+  curl --header "X-Api-Key: $SYNCTHING_API_KEY" -X POST http://127.0.0.1:8384/rest/db/scan
+fi
+
+# Deregister script
+rm $VAR_SYNC_PID
+
+exit 0
