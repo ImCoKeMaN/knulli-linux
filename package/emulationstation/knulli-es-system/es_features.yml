@@ -79,7 +79,7 @@ shared:
       prompt: SRM FILE UPDATE INTERVAL (MINUTES)
       description: For libretro cores, if your game allows in-game saving, the corresponding SRM file is updated every X minutes.
       choices:
-        "ONLY ON GAME EXIT (DEFAULT)":  ""
+        "ONLY ON GAME EXIT (DEFAULT)":  "0"
         "1": "1"
         "5": "5"
         "10": "10"
