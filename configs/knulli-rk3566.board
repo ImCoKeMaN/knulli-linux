@@ -35,6 +35,9 @@ BR2_PACKAGE_KERNEL_RK3566_BSP=y
 # Kernel for Miyoo Flip V2
 BR2_PACKAGE_KERNEL_GAMMAOS=y
 
+# Kernel for Anbernic RG-DS
+BR2_PACKAGE_KERNEL_RG_DS=y
+
 # U-Boot blobs for RK3566 BSP boards
 BR2_PACKAGE_UBOOT_RK3566=y
 
