@@ -819,6 +819,12 @@ def createLibretroConfig(generator: Generator, system: Emulator, controllers: Co
         retroarchConfig['savestate_auto_save'] = 'false'
         retroarchConfig['savestate_auto_load'] = 'false'
 
+    # SRM update interval option
+    if system.isOptSet('srm_dump_ingame') and system.getOptBoolean('srm_dump_ingame') == True:
+        retroarchConfig['autosave_interval'] = '10' # default RA autosave interval of 10 seconds
+    else:
+        retroarchConfig['autosave_interval'] = '0'  # disable autosave interval
+
     if system.isOptSet('incrementalsavestates') and not system.getOptBoolean('incrementalsavestates'):
         retroarchConfig['savestate_auto_index'] = 'false'
         retroarchConfig['savestate_max_keep'] = '50'
