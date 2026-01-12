@@ -821,11 +821,9 @@ def createLibretroConfig(generator: Generator, system: Emulator, controllers: Co
 
     # SRM update interval option
     if system.isOptSet('srm_update_interval') and system.getOptString('srm_update_interval') != "":
-        srmFileUpdateIntervalMinutes = int(system.config['srm_update_interval'])
-        srmFileUpdateIntervalSeconds = srmFileUpdateIntervalMinutes * 60
-        retroarchConfig['autosave_interval'] = str(srmFileUpdateIntervalSeconds)
+        retroarchConfig['autosave_interval'] = str(int(system.config['srm_update_interval']))
     else:
-        retroarchConfig['autosave_interval'] = '0'  # Disabled by default
+        retroarchConfig['autosave_interval'] = '60'  # 1 minute by defeault
 
     if system.isOptSet('incrementalsavestates') and not system.getOptBoolean('incrementalsavestates'):
         retroarchConfig['savestate_auto_index'] = 'false'
