@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# batteryplus will forcefully exit a hook script that take too long to protect itself from stalling
+# fire and forget
+
+(
+
+    BATTERYSAVER_VAR_FOLDER="/var/run/battery-saver"
+    BATTERYSAVER_VAR_FILE="$BATTERYSAVER_VAR_FOLDER/00batterysaver-chargingbypass.pause"
+
+    KEY_CHARGING_BYPASS="system.batterysaver.chargingbypass"
+
+    pause() {
+        mkdir -p $BATTERYSAVER_VAR_FOLDER
+        touch $BATTERYSAVER_VAR_FILE
+    }
+
+    unpause() {
+        if [ -n $BATTERYSAVER_VAR_FILE ]; then
+            rm $BATTERYSAVER_VAR_FILE
+        fi
+    }
+
+    # If device is discharging, remove the batterysaver unpause and exit.
+    if [ "$1" = "Discharging" ]; then
+        unpause
+        exit 0
+    fi
+
+    # If charging bypass is disabled, unpause and exit.
+    CHARGING_BYPASS=$(knulli-settings-get $KEY_CHARGING_BYPASS)
+
+    if [[ ! -n $CHARGING_BYPASS ]] || [[ $CHARGING_BYPASS -eq 0 ]]; then
+        unpause
+        exit 0
+    fi
+
+    # The device is not discharging and the bypass is enabled, so we need to pause.
+    pause
+) >/dev/null 2>&1 &
+
+exit 0
