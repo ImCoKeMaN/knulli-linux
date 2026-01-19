@@ -1,7 +1,7 @@
 #!/bin/bash
 # Helper for BatteryPlus:
 #  - Updates /tmp/battery.status
-#  - Runs /etc/batteryplus/state.d/* with the given state argument
+#  - Runs /etc/batteryplus/state.d/* with the given state argument (second arg -f forces a state change even if it didn't change)
 #
 # Intended usage (udev):
 #   SUBSYSTEM=="power_supply", ACTION=="change", RUN+="/usr/bin/batteryplus-state change"
@@ -74,7 +74,6 @@ fi
 if [ -z $2 ] || [ $2 != "-f" ]; then
     if [ "$old_state" = "$OUT_STATE" ]; then
         # No change, don't touch file or run hooks
-        echo "I escape!"
         exit 0
     fi
 fi
