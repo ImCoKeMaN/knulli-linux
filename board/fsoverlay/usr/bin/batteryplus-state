@@ -71,9 +71,12 @@ if [ -f "$STATUS_FILE" ]; then
     read -r old_state < "$STATUS_FILE" 2>/dev/null || old_state=""
 fi
 
-if [ "$old_state" = "$OUT_STATE" ]; then
-    # No change, don't touch file or run hooks
-    exit 0
+if [ -z $2 ] || [ $2 != "-f" ]; then
+    if [ "$old_state" = "$OUT_STATE" ]; then
+        # No change, don't touch file or run hooks
+        echo "I escape!"
+        exit 0
+    fi
 fi
 
 # Very short debounce using timestamp since flock does not work with udev rules (they just queue)
