@@ -1,15 +1,16 @@
 #!/bin/sh
 
-BOARD=$(cat /boot/boot/knulli.board)
+BIN="/usr/bin/trimui_inputd"
 
-case $1 in
+[ -f "$BIN" ] || exit 0
+
+case "$1" in
     start)
-		trimui_inputd &
-	;;
+        "$BIN" &
+        ;;
     stop)
-		killall -9 trimui_inputd
-	;;
+        killall -9 trimui_inputd 2>/dev/null || true
+        ;;
 esac
 
 exit 0
-

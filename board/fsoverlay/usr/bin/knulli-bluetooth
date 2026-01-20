@@ -17,6 +17,12 @@ do_help() {
     echo "$1 disconnect <device address>" >&2
 }
 
+is_device_trusted() {
+  addr="$1"
+  [ -z "$addr" ] && return 1
+  bluetoothctl info "$addr" 2>/dev/null | grep -q "Trusted: yes"
+}
+
 stop_bt_agent() {
   NPID="$(cat /var/run/bluetooth-agent.pid 2>/dev/null)"
   [ -n "$NPID" ] && kill -12 "$NPID" 2>/dev/null
@@ -78,7 +84,7 @@ do_devlist() {
 
 
     NPID="$(cat /var/run/bluetooth-agent.pid 2>/dev/null)"
-    [ -n "$NPID" ] && trap "kill -12 $NPID; rm -f /var/run/bt_listing /var/run/bt_device" 2 3
+    [ -n "$NPID" ] && trap "stop_bt_agent" 2 3
 
     [ -n "$NPID" ] && kill -10 "$NPID" 2>/dev/null
     # ok, not 10 lines should happen during this instant (between kill and tail)
@@ -90,6 +96,9 @@ do_devlist() {
 do_stopdevlist() {
     KPID="$(cat /var/run/bt_listing.pid 2>/dev/null)"
     [ -n "$KPID" ] && kill -15 "$KPID" 2>/dev/null
+    rm -f /var/run/bt_listing.pid
+
+    stop_bt_agent
 }
 
 do_trust() {
@@ -134,6 +143,16 @@ do_trust() {
         fi
 
         # Success
+        if [ "$TRUSTDEV" != "input" ]; then
+            if is_device_trusted "$TRUSTDEV"; then
+                stop_bt_agent
+                do_save
+                echo "Trusted $TRUSTDEV"
+                sleep 1.5 # for toast notification
+                return 0
+            fi
+        fi
+
         if [ "$TRUSTDEV" = "input" ]; then
             CUR_TRUSTED="$(
             find /var/lib/bluetooth/ -type f -name info \

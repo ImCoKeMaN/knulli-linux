@@ -12,9 +12,12 @@ import os
 import logging
 import signal
 import subprocess
+import sys
 from gi.repository import GLib
 
 AGENT_INTERFACE = 'org.bluez.Agent1'
+
+mainloop = None
 
 gadapter = None
 gdiscovering = False
@@ -406,8 +409,16 @@ def refresh_audio_on_connect(properties):
   for i in range(100):
     sinks = subprocess.check_output(["pactl", "list", "short", "sinks"], encoding='utf-8')
     if "bluez_" in sinks:
-      current_output = subprocess.check_output(["knulli-audio", "get"], encoding='utf-8').strip()
-      subprocess.run(["knulli-audio", "set", current_output])
+      sink_name = ""
+      for line in sinks.splitlines():
+        if "bluez_" in line:
+          sink_name = line.split()[1]
+          break
+
+      time.sleep(0.5)
+      subprocess.run(["knulli-audio", "set", sink_name])
+      subprocess.run(["pactl", "set-sink-mute", sink_name, "0"])
+
       logging.info("Bluetooth audio sink detected: proceeding with audio refresh.")
       return
     time.sleep(0.1)
@@ -427,8 +438,9 @@ class Agent(dbus.service.Object):
 
   @dbus.service.method(AGENT_INTERFACE, in_signature="", out_signature="")
   def Release(self):
+    global mainloop
     logging.info("agent: Release")
-    if self.exit_on_release:
+    if self.exit_on_release and mainloop is not None:
       mainloop.quit()
 
   @dbus.service.method(AGENT_INTERFACE, in_signature="os", out_signature="")
@@ -470,6 +482,7 @@ class Agent(dbus.service.Object):
 
 def do_main_loop(dev_id):
   global gadapter
+  global mainloop
 
   # adapter
   try:

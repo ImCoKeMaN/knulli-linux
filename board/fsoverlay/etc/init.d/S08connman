@@ -102,7 +102,7 @@ knulli_wifi_configure() {
 		IPv6=off
 	_EOF_
     else
-        rm "${settings_file}" 2>/dev/null
+        rm -f "${settings_file}" 2>/dev/null
     fi
 }
 
@@ -113,6 +113,8 @@ wifi_configure_all() {
 }
 
 wifi_enable() {
+    rfkill unblock wlan >/dev/null 2>&1 || true
+
     settingsCountry="$(/usr/bin/knulli-settings-get -f "$KNULLICONF" wifi.country)"
     [ -n "$settingsCountry" ] && /usr/sbin/iw reg set "$settingsCountry"
 
@@ -124,28 +126,34 @@ wifi_disable() {
     connmanctl disable wifi 2>/dev/null
 }
 
-wifi_check_connected() {
-    # Loop over all managed wifi interfaces (excluding p2p)
-    for iface in $(iw dev 2>/dev/null | awk '
+wifi_list_managed_ifaces() {
+    iw dev 2>/dev/null | awk '
         /Interface/ {iface=$2}
-        /type managed/ {
-            if (iface !~ /^p2p/) print iface
-        }
-    '); do
-        if iw dev "$iface" link 2>/dev/null | grep -q "Connected to"; then
-            return 0
-        fi
-    done
+        /type managed/ { if (iface !~ /^p2p/) print iface }
+    '
+}
 
-    # no connection if we got to this point
+wifi_ready() {
+    for iface in $(wifi_list_managed_ifaces); do
+        iw dev "$iface" link 2>/dev/null | grep -q "Connected to" || continue
+        ip -4 addr show dev "$iface" 2>/dev/null | grep -q "inet " && return 0
+    done
+    return 1
+}
+
+wait_for_wlan() {
+    for i in $(seq 1 20); do
+        [ -n "$(wifi_list_managed_ifaces)" ] && return 0
+        sleep 0.25
+    done
     return 1
 }
 
 wifi_retry() {
-    timeout=10
+    timeout=15
     while [ $timeout -gt 0 ]; do
         # Any managed wifi interface connected yet?
-        if wifi_check_connected; then
+        if wifi_ready; then
             return 0
         fi
 
@@ -155,7 +163,7 @@ wifi_retry() {
 
     printf "wifi failed to connect on first try... Retrying...\n" >&2
     wifi_disable
-    sleep 1
+    sleep 0.5
     wifi_enable
 }
 
@@ -173,6 +181,9 @@ do_start() {
     done
 
     if [ "$settingsWlan" = "1" ]; then
+        if ! wait_for_wlan; then
+            echo "connman: no wlan interface detected..." >&2
+        fi
         wifi_enable
         if [ "$1" = "retry" ]; then
             wifi_retry &
@@ -203,7 +214,7 @@ do_status() {
         return 1
     fi
 
-    if ping -q -c1 -W1 8.8.8.8 >/dev/null 2>&1; then
+    if fping -c1 -t1000 8.8.8.8 >/dev/null 2>&1; then
         echo "connman: internet online."
         return 0
     else

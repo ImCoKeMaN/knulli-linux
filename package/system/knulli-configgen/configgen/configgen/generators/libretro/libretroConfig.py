@@ -5,7 +5,6 @@ import json
 import logging
 import subprocess
 import socket
-import time
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
@@ -85,52 +84,27 @@ systemNetplayModes = {'host', 'client', 'spectator'}
 coreForceSlangShaders = { 'mupen64plus-next' }
 
 def connected_to_internet() -> bool:
-    wifi_enabled = (subprocess.check_output(["knulli-settings-get", "wifi.enabled"],text=True).strip() == "1")
+    cmd = ["/usr/bin/knulli-internet-check", "cheevos"]
 
-    if not wifi_enabled:
-        return False
-
-    for host in ("one.one.one.one", "dns.google"):
-            try:
-                rc = subprocess.run(
-                    ["timeout", "1", "ping", "-c", "1", "-t", "255", host],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    check=False,
-                ).returncode
-
-                if rc == 0:
-                    eslog.debug(f"Ping to {host} ok")
-                    return True
-                else:
-                    eslog.debug(f"Ping to {host} failed")
-
-            except Exception as e:
-                eslog.debug(f"Ping to {host} raised {e}")
-
-    eslog.debug("Ping failed... Trying DNS fallback")
-
-    old_timeout = socket.getdefaulttimeout()
     try:
-        # use DNS timeout only inside this function
-        socket.setdefaulttimeout(1.0)
+        rc = subprocess.run(
+            cmd,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        ).returncode
 
-        for attempt in range(20):
-            try:
-                socket.gethostbyname("retroachievements.org")
-                eslog.debug("DNS RA success")
-                return True
-            except Exception as e:
-                eslog.debug(
-                    f"DNS RA lookup failed"
-                )
-                time.sleep(0.25)
+        if rc == 0:
+            eslog.debug("retroachievements.org reachable")
+            return True
+        else:
+            eslog.debug("retroachievements.org unreachable")
+            return False
 
-        eslog.error("DNS RA failed after several retries")
+    except Exception as e:
+        eslog.debug(f"internet-check failed: {e}")
+        eslog.debug("retroachievements.org unreachable")
         return False
-
-    finally:
-        socket.setdefaulttimeout(old_timeout)
 
 def writeLibretroConfig(generator: Generator, retroconfig: UnixSettings, system: Emulator, controllers: ControllerMapping, metadata: Mapping[str, str], guns: GunMapping, wheels: DeviceInfoMapping, rom: Path, bezel: str | None, shaderBezel: bool, gameResolution: Resolution, gfxBackend: str) -> None:
     writeLibretroConfigToFile(retroconfig, createLibretroConfig(generator, system, controllers, metadata, guns, wheels, rom, bezel, shaderBezel, gameResolution, gfxBackend))
@@ -844,6 +818,12 @@ def createLibretroConfig(generator: Generator, system: Emulator, controllers: Co
     else:
         retroarchConfig['savestate_auto_save'] = 'false'
         retroarchConfig['savestate_auto_load'] = 'false'
+
+    # SRM update interval option
+    if system.isOptSet('srm_dump_ingame') and system.getOptBoolean('srm_dump_ingame') == True:
+        retroarchConfig['autosave_interval'] = '10' # default RA autosave interval of 10 seconds
+    else:
+        retroarchConfig['autosave_interval'] = '0'  # disable autosave interval
 
     if system.isOptSet('incrementalsavestates') and not system.getOptBoolean('incrementalsavestates'):
         retroarchConfig['savestate_auto_index'] = 'false'

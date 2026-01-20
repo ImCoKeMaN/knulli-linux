@@ -40,10 +40,12 @@ neogeocd:
   shader: crt/crt-lottes-fast
 mame:
   shader: crt/crt-lottes-fast
-fba:
+fbneo:
   shader: crt/crt-lottes-fast
 naomi:
   shader: crt/crt-lottes-fast
+naomi2:
+  shader: crt/crt-lottes-fast  
 atomiswave:
   shader: crt/crt-lottes-fast
 #

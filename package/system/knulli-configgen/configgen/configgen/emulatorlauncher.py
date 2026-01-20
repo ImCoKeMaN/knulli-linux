@@ -254,7 +254,7 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: str, romConfigur
     return exitCode
 
 def getHudBezel(system: Emulator, generator: Generator, rom: str, gameResolution: Resolution, bordersSize: str | None, bordersRatio: str | None):
-    if generator.supportsInternalBezels():
+    if generator.supportsInternalBezels() or not generator.supportsExternalBezels():
         eslog.debug(f"skipping bezels for emulator {system.config['emulator']}")
         return None
     # no good reason for a bezel
@@ -309,6 +309,10 @@ def getHudBezel(system: Emulator, generator: Generator, rom: str, gameResolution
     screen_ratio = gameResolution["width"] / gameResolution["height"]
     bezel_ratio  = bezel_width / bezel_height
 
+    if (bezel_width == gameResolution["width"] and bezel_height == gameResolution["height"]):
+        eslog.debug("game resolution equals bezel size - no bezel applied")
+        return None
+
     # the screen and bezel ratio must be approximatly the same
     if bordersSize is None:
         if abs(screen_ratio - bezel_ratio) > max_ratio_delta:
@@ -330,6 +334,7 @@ def getHudBezel(system: Emulator, generator: Generator, rom: str, gameResolution
 
     ## the bezel left and right cover must be maximum
     ingame_ratio = generator.getInGameRatio(system.config, gameResolution, rom)
+    eslog.debug(f"ingame ratio: {ingame_ratio}")
     img_height = bezel_height
     img_width  = img_height * ingame_ratio
 
@@ -465,6 +470,8 @@ def getHudConfig(system: Emulator, systemName: str, emulator: str, core: str, ro
         configstr += f"position={hud_position}\nbackground_alpha=0\nlegacy_layout=false\nfont_size=32\nimage_max_width=200\nimage=%THUMBNAIL%\ncustom_text=%GAMENAME%\ncustom_text=%SYSTEMNAME%\ncustom_text=%EMULATORCORE%"
     elif mode == "custom" and system.isOptSet('hud_custom') and system.config["hud_custom"] != "" :
         configstr += system.config["hud_custom"].replace("\\n", "\n")
+    elif mode == "bat":
+        configstr += f"position={hud_position}\nlegacy_layout=false\nhud_compact\nwidth=38\nfps=0\nframe_timing=0\ncpu_stats=0\ngpu_stats=0\nexec=sh -c 'IFS= read -r b < /tmp/battery.percent; printf \"%s%%\" \"$b\"'\nfont_size=38\ntext_outline_thickness=0.7\nalpha=0.9\nbackground_alpha=0\nfont_file=/usr/share/fonts/dejavu/DejaVuSansMono.ttf"
     else:
         configstr = configstr + "background_alpha=0\n" # hide the background
 

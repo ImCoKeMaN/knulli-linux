@@ -7,6 +7,7 @@ from ... import Command
 from ...batoceraPaths import BIOS, CACHE, CONFIGS, SAVES, SCREENSHOTS, ensure_parents_and_open, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ...utils.configparser import CaseSensitiveConfigParser
+from ...utils.videoMode import getCurrentResolution
 from ..Generator import Generator
 
 if TYPE_CHECKING:
@@ -27,8 +28,11 @@ class ScummVMGenerator(Generator):
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
         rom_path = Path(rom)
 
-        # crete /userdata/bios/scummvm/extra folder if it doesn't exist
+        # create /userdata/bios/scummvm/extra folder if it doesn't exist
         mkdir_if_not_exists(scummExtra)
+
+        # create /userdata/screenshots folder if it doesn't exist
+        mkdir_if_not_exists(SCREENSHOTS)
 
         # create / modify scummvm config file as needed
         scummConfig = CaseSensitiveConfigParser()
@@ -83,7 +87,7 @@ class ScummVMGenerator(Generator):
         if system.isOptSet("scumm_scale"):
             commandArray.append(f"--scale-factor={system.config['scumm_scale']}")
         else:
-            commandArray.append("--scale-factor=3")
+            commandArray.append("--scale-factor=1")
 
         # sclaer mode
         if system.isOptSet("scumm_scaler_mode"):
@@ -95,7 +99,7 @@ class ScummVMGenerator(Generator):
         if system.isOptSet("scumm_stretch"):
             commandArray.append(f"--stretch-mode={system.config['scumm_stretch']}")
         else:
-            commandArray.append("--stretch-mode=center")
+            commandArray.append("--stretch-mode=fit")
 
         # renderer
         if system.isOptSet("scumm_renderer"):
@@ -129,6 +133,12 @@ class ScummVMGenerator(Generator):
         )
 
     def getInGameRatio(self, config, gameResolution, rom):
-        if ("scumm_stretch" in config and config["scumm_stretch"] == "fit_force_aspect") or ("scumm_stretch" in config and config["scumm_stretch"] == "pixel-perfect"):
-            return 4/3
-        return 16/9
+        if ("scumm_stretch" in config and config["scumm_stretch"] == "stretch"):
+            resolutionObj = getCurrentResolution()
+            aspectRatio = resolutionObj["width"] / resolutionObj["height"]
+            return aspectRatio
+        # Not sure if this is entirely correct, but ScummVM games are mostly 4:3 unless they have been stretched
+        return 4/3
+    
+    def supportsExternalBezels(self) -> bool:
+        return False

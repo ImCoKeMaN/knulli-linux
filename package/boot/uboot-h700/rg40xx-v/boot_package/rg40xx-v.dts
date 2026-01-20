@@ -5,7 +5,7 @@
 	interrupt-parent = <0x01>;
 	#address-cells = <0x02>;
 	#size-cells = <0x02>;
-	model = "Anbernic RG40XX-H";
+	model = "Anbernic RG40XX-V";
 	compatible = "allwinner,h616", "arm,sun50iw9p1";
 
 	clocks {
@@ -4617,7 +4617,7 @@
 			#address-cells = <0x01>;
 			#size-cells = <0x00>;
 			poll-interval = <0x14>;
-			label = "Anbernic RG40XX-H Controller";
+			label = "Anbernic RG40XX-V Controller";
 			amux-en-gpios = <0x4b 0x08 0x00 0x01 0x02 0x01 0x01>;
 			A0_gpio = <0x4b 0x08 0x01 0x01 0x02 0x01 0x00>;
 			A1_gpio = <0x4b 0x08 0x02 0x01 0x02 0x01 0x00>;
