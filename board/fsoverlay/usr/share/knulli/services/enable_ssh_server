@@ -7,7 +7,6 @@ case "$1" in
                 knulli-settings-set system.ssh.enabled 1
                 ;;
         stop)
-                # code here is executed on-the-fly
                 echo -n "Disabling SSH Server"
                 knulli-settings-set system.ssh.enabled 0
                 ;;
