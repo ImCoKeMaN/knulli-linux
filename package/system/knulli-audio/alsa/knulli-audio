@@ -36,10 +36,17 @@ case "${ACTION}" in
         MODE="$2"
         case "${MODE}" in
             auto)
-                BT_SINK=$(LANG=C pactl list short sinks | grep bluez_output | awk '{print $2}' | head -n1)
+                BT_SINK=$(LANG=C pactl list short sinks | awk '$2 ~ /^bluez_/ { print $2; exit }')
                 if [ -n "$BT_SINK" ]; then
                     MODE="$BT_SINK"
                     LANG=C pactl set-default-sink "${MODE}" || exit 1
+
+                    # Workaround to some race coniditons for BT sinks
+                    for _ in 1 2 3 4 5; do
+                        LANG=C pactl list short sinks | awk '{print $2}' | grep -qx "${MODE}" && break
+                        sleep 0.2
+                    done
+                    LANG=C pactl set-sink-mute "${MODE}" 0 >/dev/null 2>&1 || true
                 else
                     ARCH=$(cat /usr/share/knulli/knulli.arch)
                     BOARD=$(cat /boot/boot/knulli.board)
