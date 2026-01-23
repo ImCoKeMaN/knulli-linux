@@ -5,7 +5,7 @@
 ################################################################################
 # Version.: Commits on Dec 8, 2025
 MALI_G57_SUNXI_VERSION = main
-MALI_G57_SUNXI_SITE = https://github.com/knulli-cfw/mali-g57-sunxis.git
+MALI_G57_SUNXI_SITE = https://github.com/knulli-cfw/mali-g57-sunxi-drivers.git
 MALI_G57_SUNXI_SITE_METHOD = git
 
 MALI_G57_SUNXI_LICENSE = Propietary
