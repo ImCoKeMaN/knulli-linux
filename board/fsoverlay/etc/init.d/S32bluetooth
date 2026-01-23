@@ -20,7 +20,7 @@ case "$1" in
             /usr/bin/knulli-settings-set -f /etc/bluetooth/input.conf ClassicBondedOnly true
         fi
 
-        if [ "$BOARD" = "a527" ]; then
+        if [ "$ARCH" = "a527" ]; then
             echo 1 > /proc/bluetooth/sleep/btwrite
         fi
 
