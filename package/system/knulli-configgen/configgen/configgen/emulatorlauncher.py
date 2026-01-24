@@ -212,7 +212,7 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: str, romConfigur
                 if (system.isOptSet('hud') and system.config['hud'] != "" and system.config['hud'] != "none") or hud_bezel is not None:
                     gameinfos = extractGameInfosFromXml(args.gameinfoxml)
                     cmd.env["MANGOHUD_DLSYM"] = "1"
-                    hudconfig = getHudConfig(system, args.systemname, system.config['emulator'], effectiveCore, rom, gameinfos, hud_bezel)
+                    hudconfig = getHudConfig(system, args.systemname, system.config['emulator'], effectiveCore, rom, gameinfos, hud_bezel, gameResolution)
                     hud_config_file = Path('/var/run/hud.config')
                     with hud_config_file.open('w') as f:
                         f.write(hudconfig)
@@ -433,7 +433,21 @@ def hudConfig_protectStr(string: str | Path | None) -> str:
         return ""
     return str(string)
 
-def getHudConfig(system: Emulator, systemName: str, emulator: str, core: str, rom: str, gameinfos: Mapping[str, str], bezel: Path | None) -> str:
+def getHudConfig(system: Emulator, systemName: str, emulator: str, core: str, rom: str, gameinfos: Mapping[str, str], bezel: Path | None, gameResolution: Resolution) -> str:
+    def bat_layout(res: Resolution) -> tuple[int, int]:
+        try:
+            w = int(res.get("width", 0))
+            h = int(res.get("height", 0))
+        except Exception:
+            return (36, 40)
+
+        if w <= 0 or h <= 0:
+            return (36, 40)
+
+        if h >= 1080 or w >= 1920:
+            return (66, 78) # large resolution
+        return (36, 40) # small resolution
+
     configstr = ""
 
     if bezel != "" and bezel != "none" and bezel is not None:
@@ -471,7 +485,8 @@ def getHudConfig(system: Emulator, systemName: str, emulator: str, core: str, ro
     elif mode == "custom" and system.isOptSet('hud_custom') and system.config["hud_custom"] != "" :
         configstr += system.config["hud_custom"].replace("\\n", "\n")
     elif mode == "bat":
-        configstr += f"position={hud_position}\nlegacy_layout=false\nhud_compact\nwidth=38\nfps=0\nframe_timing=0\ncpu_stats=0\ngpu_stats=0\nexec=sh -c 'IFS= read -r b < /tmp/battery.percent; printf \"%s%%\" \"$b\"'\nfont_size=38\ntext_outline_thickness=0.7\nalpha=0.9\nbackground_alpha=0\nfont_file=/usr/share/fonts/dejavu/DejaVuSansMono.ttf"
+        batt_font, batt_width = bat_layout(gameResolution)
+        configstr += f"position={hud_position}\nlegacy_layout=false\nhud_compact\nwidth={batt_width}\nfps=0\nframe_timing=0\ncpu_stats=0\ngpu_stats=0\nexec=sh -c 'IFS= read -r b < /tmp/battery.percent; printf \"%s%%\" \"$b\"'\nfont_size={batt_font}\ntext_outline_thickness=0.7\nalpha=0.9\nbackground_alpha=0\nfont_file=/usr/share/fonts/dejavu/DejaVuSansMono.ttf"
     else:
         configstr = configstr + "background_alpha=0\n" # hide the background
 
