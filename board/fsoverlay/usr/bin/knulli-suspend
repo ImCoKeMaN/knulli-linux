@@ -52,7 +52,7 @@ arm_rtcs() {
 }
 
 check_auto_shutdown() {
-  [ -r "$WAKE_TIME" ] || return 0
+  [ -f "$WAKE_TIME" ] || return 0
   read -r recorded < "$WAKE_TIME" 2>/dev/null || recorded=""
   rm -f "$WAKE_TIME"
   [ -n "$recorded" ] || return 0
