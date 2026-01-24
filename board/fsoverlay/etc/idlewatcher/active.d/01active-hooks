@@ -35,7 +35,7 @@ do_active() {
             [[ "${AGGRESSIVE:-0}" == "1" ]] && undo_aggressive
 
             knulli-audio setSystemVolume unmute
-            knulli-brightness dim
+            knulli-brightness undim
         ;;
         dispoff)
             [[ "${AGGRESSIVE:-0}" == "1" ]] && undo_aggressive

@@ -162,18 +162,25 @@ then
         PERCENT=$(get_percent "$ABS")
 
         if [ -e "${VALPATH}" ]; then
-            # RESTORE (always restore when we have a saved value)
-            read -r PERCENT_SAVED < "$VALPATH"
-            RESTORE_ABS=$(percent_to_abs "$PERCENT_SAVED")
-            animate_brightness "$ABS" "$RESTORE_ABS"
-            rm -f "${VALPATH}"
-        else
-            # DIM (only save/animate if we’re above 1%)
-            if [ "$PERCENT" -gt 1 ]; then
-                echo "${PERCENT}" > "${VALPATH}"
-                animate_brightness "$ABS" "$XMIN"
-            fi
+            exit 0
         fi
+
+        if [ "$PERCENT" -gt 1 ]; then
+            echo "${PERCENT}" > "${VALPATH}"
+            animate_brightness "$ABS" "$XMIN"
+        fi
+        exit 0
+   elif [ "${1}" = "undim" ]; then
+        ABS=$(bl_get)
+
+        if [ ! -e "${VALPATH}" ]; then
+            exit 0
+        fi
+
+        read -r PERCENT_SAVED < "$VALPATH"
+        RESTORE_ABS=$(percent_to_abs "$PERCENT_SAVED")
+        animate_brightness "$ABS" "$RESTORE_ABS"
+        rm -f "${VALPATH}"
         exit 0
     else
         if [ "$1" -eq 1 ]; then
