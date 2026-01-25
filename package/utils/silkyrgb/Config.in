@@ -1,0 +1,9 @@
+config BR2_PACKAGE_SILKYRGB
+    bool "silkyrgb"
+	select BR2_PACKAGE_PYTHON3
+    depends on !BR2_STATIC_LIBS
+    help
+      SilkyRGB by doughno
+      
+      https://github.com/chrizzo-hb/silky-rgb
+
