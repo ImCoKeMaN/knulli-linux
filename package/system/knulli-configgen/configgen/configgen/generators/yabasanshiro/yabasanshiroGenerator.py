@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 eslog = logging.getLogger(__name__)
 
 YABA_KEYMAP: Final = HOME / ".yabasanshiro" / "keymapv2.json"
+YABA_SAVES: Final = SAVES / "saturn" / "yabasanshiro-sa"
 YABA_BIOS: Final = BIOS / "saturn_bios.bin"
 
 UNBOUND = {"id": -1, "type": "", "value": -999}
@@ -37,6 +38,64 @@ ES_TO_YABA = {
     "joystick1left": "analogx",
     "joystick1up": "analogy",
 }
+
+# Temp fix for rk3566
+def ensure_libmali_symlink() -> bool:
+    libdir = Path("/usr/lib")
+    link = libdir / "libmali.so.0"
+
+    def _target_exists(p: Path) -> bool:
+        try:
+            p.resolve(strict=True)
+            return True
+        except Exception:
+            return False
+
+    # If it exists and isn't a symlink, leave it alone.
+    if link.exists() and not link.is_symlink():
+        return True
+
+    # If it is a symlink, ensure target exists.
+    if link.is_symlink():
+        if _target_exists(link):
+            return True
+        # remove broken link if needed so we can recreate
+        try:
+            link.unlink()
+        except Exception as e:
+            eslog.warning("libmali: failed to remove broken symlink %s: %s", link, e)
+            return False
+
+    # Prefer "libMali.so*" then "libmali.so*".
+    candidates: list[Path] = []
+
+    for pattern in ("libMali.so*", "libmali.so*"):
+        for p in libdir.glob(pattern):
+            # we want a real file.
+            if p.name == link.name:
+                continue
+            try:
+                if p.is_file() and not p.is_symlink():
+                    candidates.append(p)
+            except Exception:
+                continue
+
+    if not candidates:
+        eslog.warning("libmali: no Mali library candidates found in %s", libdir)
+        return False
+
+    # Prefer the latest version
+    candidates.sort(key=lambda p: p.name)
+    target = candidates[-1]
+
+    try:
+        link.symlink_to(target)
+        eslog.info("libmali: created symlink %s -> %s", link, target)
+    except Exception as e:
+        eslog.warning("libmali: failed to create symlink %s -> %s: %s", link, target, e)
+        return False
+
+    return _target_exists(link)
 
 def generateYabaKeymap(playersControllers: ControllerMapping):
     store = {}
@@ -98,6 +157,9 @@ def generateYabaKeymap(playersControllers: ControllerMapping):
 
 class YabasanshiroGenerator(Generator):
 
+    def supportsExternalBezels(self) -> bool:
+        return False
+
     def getHotkeysContext(self) -> HotkeysContext:
         return {
             "name": "yabasanshiro",
@@ -105,6 +167,11 @@ class YabasanshiroGenerator(Generator):
         }
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
+        # temp fix for rk3566
+        ensure_libmali_symlink()
+
+        YABA_SAVES.mkdir(parents=True, exist_ok=True)
+
         generateYabaKeymap(playersControllers)
 
         commandArray = ["yabasanshiro", "-r", "3", "-a", "-i", rom]
