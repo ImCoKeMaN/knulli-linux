@@ -596,7 +596,8 @@ libretro:
               "On":   "true"
               "Off":  "false"
     lightgun_map:
-        group: ADVANCED OPTIONS
+        order: 99
+        group: CONTROLS
         prompt:      CONTROLLER TO LIGHT GUN
         description: Map controller inputs to light gun inputs.
         choices:
@@ -2091,6 +2092,11 @@ libretro:
                     "Keyboard":  3
                     "Mouse":     2
                     "Light Gun": 4
+            reicast_dsp:
+                group: ADVANCED OPTIONS
+                prompt: DIGITAL SIGNAL PROCESSOR
+                description: Enable the Dreamcast DSP for more accurate audio. Only recommended for fast systems.
+                preset: switchauto
       systems:
             atomiswave:
                 cfeatures:
@@ -2249,6 +2255,11 @@ libretro:
                     "Keyboard":  3
                     "Mouse":     2
                     "Light Gun": 4
+            reicast_dsp:
+                group: ADVANCED OPTIONS
+                prompt: DIGITAL SIGNAL PROCESSOR
+                description: Enable the Dreamcast DSP for more accurate audio. Only recommended for fast systems.
+                preset: switchauto
       systems:
             atomiswave:
                 cfeatures:
