@@ -112,48 +112,46 @@ wifi_configure_all() {
     done
 }
 
-wifi_enable() {
-    rfkill unblock wlan >/dev/null 2>&1 || true
-
-    settingsCountry="$(/usr/bin/knulli-settings-get -f "$KNULLICONF" wifi.country)"
-    [ -n "$settingsCountry" ] && /usr/sbin/iw reg set "$settingsCountry"
-
-    connmanctl enable wifi 2>/dev/null
-    connmanctl scan wifi 2>/dev/null
-}
-
-wifi_disable() {
-    connmanctl disable wifi 2>/dev/null
-}
-
-wifi_list_managed_ifaces() {
-    iw dev 2>/dev/null | awk '
-        /Interface/ {iface=$2}
-        /type managed/ { if (iface !~ /^p2p/) print iface }
+wifi_powered() {
+    connmanctl technologies 2>/dev/null | awk '
+        $0 ~ /Type = wifi/ {inwifi=1; next}
+        infwifi && $0 ~ /Type = / {inwifi=0}
+        infwifi && $0 ~ /Powered = True/ {ok=1}
+        END { exit(ok ? 0 : 1) }
     '
 }
 
-wifi_ready() {
-    for iface in $(wifi_list_managed_ifaces); do
-        iw dev "$iface" link 2>/dev/null | grep -q "Connected to" || continue
-        ip -4 addr show dev "$iface" 2>/dev/null | grep -q "inet " && return 0
-    done
-    return 1
+do_ping() {
+    if ping -q -c1 -W1 8.8.8.8 >/dev/null 2>&1; then
+        return 0
+    else
+        return 1
+    fi
 }
 
-wait_for_wlan() {
-    for i in $(seq 1 20); do
-        [ -n "$(wifi_list_managed_ifaces)" ] && return 0
-        sleep 0.25
+wifi_check_connected() {
+    # Loop over all managed wifi interfaces (excluding p2p)
+    for iface in $(iw dev 2>/dev/null | awk '
+        /Interface/ {iface=$2}
+        /type managed/ {
+            if (iface !~ /^p2p/) print iface
+        }
+    '); do
+        if iw dev "$iface" link 2>/dev/null | grep -q "Connected to"; then
+            do_ping && return 0
+            return 1
+        fi
     done
+
+    # no connection if we got to this point
     return 1
 }
 
 wifi_retry() {
-    timeout=15
+    timeout=10
     while [ $timeout -gt 0 ]; do
         # Any managed wifi interface connected yet?
-        if wifi_ready; then
+        if wifi_check_connected; then
             return 0
         fi
 
@@ -165,6 +163,25 @@ wifi_retry() {
     wifi_disable
     sleep 0.5
     wifi_enable
+}
+
+wifi_enable() {
+    settingsCountry="$(/usr/bin/knulli-settings-get -f "$KNULLICONF" wifi.country)"
+    [ -n "$settingsCountry" ] && /usr/sbin/iw reg set "$settingsCountry"
+
+    connmanctl enable wifi 2>/dev/null
+
+    # Wait briefly for wifi to be enabled (1s)
+    for i in 1 2 3 4; do
+        wifi_powered && break
+        sleep 0.25
+    done
+
+    connmanctl scan wifi 2>/dev/null
+}
+
+wifi_disable() {
+    connmanctl disable wifi 2>/dev/null
 }
 
 do_start() {
@@ -181,13 +198,8 @@ do_start() {
     done
 
     if [ "$settingsWlan" = "1" ]; then
-        if ! wait_for_wlan; then
-            echo "connman: no wlan interface detected..." >&2
-        fi
         wifi_enable
-        if [ "$1" = "retry" ]; then
-            wifi_retry &
-        fi
+        wifi_retry
     else
         wifi_disable
     fi
@@ -203,29 +215,9 @@ do_stop() {
     printf "done."
 }
 
-do_status() {
-    if ! pidof connmand >/dev/null 2>&1; then
-        echo "connman: not running."
-        return 2
-    fi
-
-    if ! ip route show default 2>/dev/null | grep -q '^default'; then
-        echo "connman: no network route."
-        return 1
-    fi
-
-    if fping -c1 -t1000 8.8.8.8 >/dev/null 2>&1; then
-        echo "connman: internet online."
-        return 0
-    else
-        echo "connman: network up, but no internet."
-        return 1
-    fi
-}
-
 case "$1" in
     start)
-        do_start retry
+        do_start
         ;;
     stop)
         do_stop
@@ -234,9 +226,6 @@ case "$1" in
         do_stop
         sleep 0.5
         do_start
-        ;;
-    status)
-        do_status
         ;;
     *)
         echo "usage: $0 {start|stop|restart|reload|status}"
