@@ -2,7 +2,7 @@
 
 CT="/sys/class/disp/disp/attr/color_temperature"
 
-TEMP_RANGE=100
+TEMP_RANGE=150
 
 is_int() {
     case "$1" in
