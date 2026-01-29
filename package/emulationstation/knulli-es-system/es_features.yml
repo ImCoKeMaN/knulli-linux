@@ -13296,6 +13296,42 @@ fba2x:
 
 yabasanshiro:
   cfeatures:
+    yaba_res:
+      prompt: RENDERING RESOLUTION
+      description: Increase the rendering resolution. Makes 3D objects clearer.
+      choices:
+        "native":             0
+        "original(default)":  3
+        "2x":                 2
+        "4x":                 1
+        "720p":               4
+        "1080p":              5
+    yaba_ratio:
+      prompt: ASPECT RATIO
+      description: Forces specific aspect ratio.
+      choices:
+        "original":               0
+        "4:3(default)":           1
+        "16:9":                   2
+        "Full Screen(Stretch)":   3
+    yaba_rotate:
+      prompt: ROTATE SCREEN
+      description: Rotates the screen.
+      preset: switchauto
+    yaba_rotate_res:
+      prompt: ROTATE SCREEN RESOLUTION
+      description: Increase the rendering resolution when screen is rotated. Makes 3D objects clearer.
+      choices:
+        "native":             4
+        "original(default)":  0
+        "2x":                 1
+        "4x":                 1
+        "720p":               2
+        "1080p":              3
+    yaba_compute_shader:
+      prompt: USE COMPUTE SHADER
+      description: Improves visual fidelity for games that use RBG effects. Can cause issues in some games.
+      preset: switchauto
     yaba_bios_hle:
       prompt: HLE BIOS
       description: Use internal emulated BIOS. May affect compatibility with some games.
