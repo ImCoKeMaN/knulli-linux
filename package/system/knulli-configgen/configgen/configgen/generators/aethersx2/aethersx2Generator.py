@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
     from ...Emulator import Emulator
     from ...input import Input
-    from ...types import DeviceInfoMapping, GunMapping, HotkeysContext
+    from ...types import HotkeysContext
 
 eslog = logging.getLogger(__name__)
 
@@ -36,12 +36,6 @@ _AETHERSX2_CONFIG: Final = Path("/userdata/system/.config/aethersx2")
 _AETHERSX2_BIOS: Final = BIOS / "ps2"
 
 class Aethersx2Generator(Generator):
-
-    wheelTypeMapping = {
-        "DrivingForce":    "0",
-        "DrivingForcePro": "1",
-        "GTForce":         "3"
-    }
 
     def getHotkeysContext(self) -> HotkeysContext:
         return {
@@ -60,30 +54,6 @@ class Aethersx2Generator(Generator):
             if p.exists():
                 return p
 
-    @staticmethod
-    def isPlayingWithWheel(system, wheels):
-        return system.isOptSet('use_wheels') and system.getOptBoolean('use_wheels') and len(wheels) > 0
-
-    @staticmethod
-    def useEmulatorWheels(playingWithWheel, wheel_type):
-        if playingWithWheel is False:
-            return False
-        # the virtual type is the virtual wheel that use a physical wheel to manipulate the pad
-        return wheel_type != "Virtual"
-
-    @staticmethod
-    def getWheelType(metadata, playingWithWheel, config):
-        wheel_type = "Virtual"
-        if playingWithWheel is False:
-            return wheel_type
-        if "wheel_type" in metadata:
-            wheel_type = metadata["wheel_type"]
-        if "pcsx2_wheel_type" in config:
-            wheel_type = config["pcsx2_wheel_type"]
-        if wheel_type not in Aethersx2Generator.wheelTypeMapping:
-            wheel_type = "Virtual"
-        return wheel_type
-
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
         pcsx2Patches = _AETHERSX2_BIOS / "patches.zip"
 
@@ -95,11 +65,9 @@ class Aethersx2Generator(Generator):
             if file_path.exists():
                 file_path.unlink()
 
-        playingWithWheel = Aethersx2Generator.isPlayingWithWheel(system, wheels)
-
         # Config files
         configureReg(_AETHERSX2_CONFIG)
-        configureINI(_AETHERSX2_CONFIG, _AETHERSX2_BIOS, system, rom, playersControllers, metadata, guns, wheels, playingWithWheel)
+        configureINI(_AETHERSX2_CONFIG, _AETHERSX2_BIOS, system, rom, playersControllers)
         configureAudio(_AETHERSX2_CONFIG)
 
         # write our own game_controller_db.txt file before launching the game
@@ -120,22 +88,12 @@ class Aethersx2Generator(Generator):
             "LD_LIBRARY_PATH": str(_AETHERSX2_LIB_DIR)
         }
 
-        # wheels won't work correctly when SDL_GAMECONTROLLERCONFIG is set. excluding wheels from SDL_GAMECONTROLLERCONFIG doesn't fix too.
-        # wheel metadata
-        if not Aethersx2Generator.useEmulatorWheels(playingWithWheel, Aethersx2Generator.getWheelType(metadata, playingWithWheel, system.config)):
-            envcmd["SDL_GAMECONTROLLERCONFIG"] = generate_sdl_game_controller_config(playersControllers)
+        envcmd["SDL_GAMECONTROLLERCONFIG"] = generate_sdl_game_controller_config(playersControllers)
 
         # ensure we have the patches.zip file to avoid message.
         mkdir_if_not_exists(pcsx2Patches.parent)
         if not pcsx2Patches.exists():
             shutil.copy(DATAINIT_DIR / "bios" / "ps2" / "patches.zip", pcsx2Patches)
-
-        # state_slot option
-        if system.isOptSet('state_filename'):
-            commandArray.extend(["-statefile", system.config['state_filename']])
-
-        if system.isOptSet('state_slot'):
-            commandArray.extend(["-stateindex", str(system.config['state_slot'])])
 
         # Ensure we have the required lib
         try:
@@ -209,7 +167,7 @@ def configureAudio(config_directory: Path) -> None:
     f.write("HostApi=alsa\n")
     f.close()
 
-def configureINI(config_directory: Path, bios_directory: Path, system: Emulator, rom: str, controllers: ControllerMapping, metadata: Mapping[str, str], guns: GunMapping, wheels: DeviceInfoMapping, playingWithWheel: bool) -> None:
+def configureINI(config_directory: Path, bios_directory: Path, system: Emulator, rom: str, controllers: ControllerMapping):
     configFileName = config_directory / 'inis' / "PCSX2.ini"
 
     mkdir_if_not_exists(configFileName.parent)
@@ -290,62 +248,6 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
         pcsx2INIConfig.set("EmuCore", "EnableNoInterlacingPatches", system.config["pcsx2_interlacing_patches"])
     else:
         pcsx2INIConfig.set("EmuCore", "EnableNoInterlacingPatches", "false")
-
-    ## [Achievements]
-    if not pcsx2INIConfig.has_section("Achievements"):
-        pcsx2INIConfig.add_section("Achievements")
-    pcsx2INIConfig.set("Achievements", "Enabled", "false")
-    if system.isOptSet('retroachievements') and system.getOptBoolean('retroachievements') == True:
-        headers   = {"Content-type": "text/plain", "User-Agent": "Batocera.linux"}
-        login_url = "https://retroachievements.org/"
-        username  = system.config.get('retroachievements.username', "")
-        password  = system.config.get('retroachievements.password', "")
-        hardcore  = system.config.get('retroachievements.hardcore', "")
-        indicator = system.config.get('retroachievements.challenge_indicators', "")
-        presence  = system.config.get('retroachievements.richpresence', "")
-        leaderbd  = system.config.get('retroachievements.leaderboards', "")
-        login_cmd = f"dorequest.php?r=login&u={username}&p={password}"
-        try:
-                cnx = httplib2.Http()
-        except:
-                eslog.error("ERROR: Unable to connect to " + login_url)
-        try:
-                res, rout = cnx.request(login_url + login_cmd, method="GET", body=None, headers=headers)
-                if (res.status != 200):
-                    eslog.warning(f"ERROR: RetroAchievements.org responded with #{res.status} [{res.reason}] {rout}")
-                    pcsx2INIConfig.set("Cheevos", "Enabled",  "false")
-                else:
-                    parsedout = json.loads(rout.decode('utf-8'))
-                    if not parsedout['Success']:
-                        eslog.warning(f"ERROR: RetroAchievements login failed with ({str(parsedout)})")
-                    token = parsedout['Token']
-                    pcsx2INIConfig.set("Achievements", "Enabled", "true")
-                    pcsx2INIConfig.set("Achievements", "Username", username)
-                    pcsx2INIConfig.set("Achievements", "Token", token)
-                    pcsx2INIConfig.set("Achievements", "LoginTimestamp", str(int(time.time())))
-                    if hardcore == '1':
-                        pcsx2INIConfig.set("Achievements", "ChallengeMode", "true")
-                    else:
-                        pcsx2INIConfig.set("Achievements", "ChallengeMode", "false")
-                    if indicator == '1':
-                        pcsx2INIConfig.set("Achievements", "PrimedIndicators", "true")
-                    else:
-                        pcsx2INIConfig.set("Achievements", "PrimedIndicators", "false")
-                    if presence == '1':
-                        pcsx2INIConfig.set("Achievements", "RichPresence", "true")
-                    else:
-                        pcsx2INIConfig.set("Achievements", "RichPresence", "false")
-                    if leaderbd == '1':
-                        pcsx2INIConfig.set("Achievements", "Leaderboards", "true")
-                    else:
-                        pcsx2INIConfig.set("Achievements", "Leaderboards", "false")
-        except:
-                eslog.error("ERROR: setting RetroAchievements parameters")
-    # set other settings
-    pcsx2INIConfig.set("Achievements", "TestMode", "false")
-    pcsx2INIConfig.set("Achievements", "UnofficialTestMode", "false")
-    pcsx2INIConfig.set("Achievements", "Notifications", "true")
-    pcsx2INIConfig.set("Achievements", "SoundEffects", "true")
 
     ## [Filenames]
     if not pcsx2INIConfig.has_section("Filenames"):
@@ -541,186 +443,6 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
     pcsx2INIConfig.set("Hotkeys", "ToggleTurbo", "Keyboard/Tab")
     pcsx2INIConfig.set("Hotkeys", "HoldTurbo", "Keyboard/Period")
 
-    # clean gun sections
-    if pcsx2INIConfig.has_section("USB1") and pcsx2INIConfig.has_option("USB1", "Type") and pcsx2INIConfig.get("USB1", "Type") == "guncon2":
-        pcsx2INIConfig.remove_option("USB1", "Type")
-    if pcsx2INIConfig.has_section("USB2") and pcsx2INIConfig.has_option("USB2", "Type") and pcsx2INIConfig.get("USB2", "Type") == "guncon2":
-        pcsx2INIConfig.remove_option("USB2", "Type")
-    if pcsx2INIConfig.has_section("USB1") and pcsx2INIConfig.has_option("USB1", "guncon2_Start"):
-        pcsx2INIConfig.remove_option("USB1", "guncon2_Start")
-    if pcsx2INIConfig.has_section("USB2") and pcsx2INIConfig.has_option("USB2", "guncon2_Start"):
-        pcsx2INIConfig.remove_option("USB2", "guncon2_Start")
-    if pcsx2INIConfig.has_section("USB1") and pcsx2INIConfig.has_option("USB1", "guncon2_C"):
-        pcsx2INIConfig.remove_option("USB1", "guncon2_C")
-    if pcsx2INIConfig.has_section("USB2") and pcsx2INIConfig.has_option("USB2", "guncon2_C"):
-        pcsx2INIConfig.remove_option("USB2", "guncon2_C")
-    if pcsx2INIConfig.has_section("USB1") and pcsx2INIConfig.has_option("USB1", "guncon2_numdevice"):
-        pcsx2INIConfig.remove_option("USB1", "guncon2_numdevice")
-    if pcsx2INIConfig.has_section("USB2") and pcsx2INIConfig.has_option("USB2", "guncon2_numdevice"):
-        pcsx2INIConfig.remove_option("USB2", "guncon2_numdevice")
-
-    # clean wheel sections
-    if pcsx2INIConfig.has_section("USB1") and pcsx2INIConfig.has_option("USB1", "Type") and pcsx2INIConfig.get("USB1", "Type") == "Pad" and pcsx2INIConfig.has_option("USB1", "Pad_subtype") and pcsx2INIConfig.get("USB1", "Pad_subtype") == "1":
-        pcsx2INIConfig.remove_option("USB1", "Type")
-    if pcsx2INIConfig.has_section("USB2") and pcsx2INIConfig.has_option("USB2", "Type") and pcsx2INIConfig.get("USB2", "Type") == "Pad" and pcsx2INIConfig.has_option("USB2", "Pad_subtype") and pcsx2INIConfig.get("USB2", "Pad_subtype") == "1":
-        pcsx2INIConfig.remove_option("USB2", "Type")
-    ###
-
-    # guns
-    if system.isOptSet('use_guns') and system.getOptBoolean('use_guns') and len(guns) > 0:
-        gun1onport2 = len(guns) == 1 and "gun_gun1port" in metadata and metadata["gun_gun1port"] == "2"
-        pedalsKeys = {1: "c", 2: "v", 3: "b", 4: "n"}
-
-        if len(guns) >= 1 and not gun1onport2:
-            if not pcsx2INIConfig.has_section("USB1"):
-                pcsx2INIConfig.add_section("USB1")
-            pcsx2INIConfig.set("USB1", "Type", "guncon2")
-            nc = 1
-            for controller, pad in sorted(controllers.items()):
-                if nc == 1 and not gun1onport2:
-                    if "start" in pad.inputs:
-                        pcsx2INIConfig.set("USB1", "guncon2_Start", "SDL-{}/{}".format(pad.index, "Start"))
-                nc = nc + 1
-
-            ### find a keyboard key to simulate the action of the player (always like button 2) ; search in knulli.conf, else default config
-            if "controllers.pedals1" in system.config:
-                pedalkey = system.config["controllers.pedals1"]
-            else:
-                pedalkey = pedalsKeys[1]
-            pcsx2INIConfig.set("USB1", "guncon2_C", "Keyboard/"+pedalkey.upper())
-            ###
-        if len(guns) >= 2 or gun1onport2:
-            if not pcsx2INIConfig.has_section("USB2"):
-                pcsx2INIConfig.add_section("USB2")
-            pcsx2INIConfig.set("USB2", "Type", "guncon2")
-            nc = 1
-            for controller, pad in sorted(controllers.items()):
-                if nc == 2 or gun1onport2:
-                    if "start" in pad.inputs:
-                        pcsx2INIConfig.set("USB2", "guncon2_Start", "SDL-{}/{}".format(pad.index, "Start"))
-                nc = nc + 1
-            ### find a keyboard key to simulate the action of the player (always like button 2) ; search in knulli.conf, else default config
-            if "controllers.pedals2" in system.config:
-                pedalkey = system.config["controllers.pedals2"]
-            else:
-                pedalkey = pedalsKeys[2]
-            pcsx2INIConfig.set("USB2", "guncon2_C", "Keyboard/"+pedalkey.upper())
-            ###
-            if gun1onport2:
-                pcsx2INIConfig.set("USB2", "guncon2_numdevice", "0")
-    # Gun crosshairs - one player only, PCSX2 can't distinguish both crosshair for some reason
-    if pcsx2INIConfig.has_section("USB1"):
-        if system.isOptSet('pcsx2_crosshairs') and system.config["pcsx2_crosshairs"] == "1":
-            pcsx2INIConfig.set("USB1", "guncon2_cursor_path", str(config_directory / "crosshairs" / "Blue.png"))
-        else:
-            pcsx2INIConfig.set("USB1", "guncon2_cursor_path", "")
-    if pcsx2INIConfig.has_section("USB2"):
-        if system.isOptSet('pcsx2_crosshairs') and system.config["pcsx2_crosshairs"] == "1":
-            pcsx2INIConfig.set("USB2", "guncon2_cursor_path", str(config_directory / "crosshairs" / "Red.png"))
-        else:
-            pcsx2INIConfig.set("USB2", "guncon2_cursor_path", "")
-    # hack for the fog bug for guns (time crisis - crisis zone)
-    fog_files = [
-        config_directory / "textures" / "SCES-52530" / "replacements" / "c321d53987f3986d-eadd4df7c9d76527-00005dd4.png",
-        config_directory / "textures" / "SLUS-20927" / "replacements" / "c321d53987f3986d-eadd4df7c9d76527-00005dd4.png"
-    ]
-    texture_dir = config_directory / "textures"
-    # copy textures if necessary to PCSX2 config folder
-    if system.isOptSet("pcsx2_crisis_fog") and system.config["pcsx2_crisis_fog"] == "true":
-        for file_path in fog_files:
-            parent_directory_name = file_path.parent.parent.name
-            file_name = file_path.name
-            texture_directory_path = texture_dir / parent_directory_name / "replacements"
-            texture_directory_path.mkdir(parents=True, exist_ok=True)
-
-            destination_file_path = texture_directory_path / file_name
-
-            shutil.copyfile(file_path, destination_file_path)
-        # set texture replacement on regardless of previous setting
-        pcsx2INIConfig.set("EmuCore/GS", "LoadTextureReplacements", "true")
-    else:
-        for file_path in fog_files:
-            parent_directory_name = file_path.parent.parent.name
-            file_name = file_path.name
-            texture_directory_path = texture_dir / parent_directory_name / "replacements"
-            target_file_path = texture_directory_path / file_name
-
-            if target_file_path.is_file():
-                target_file_path.unlink()
-
-    # wheels
-    wtype = Aethersx2Generator.getWheelType(metadata, playingWithWheel, system.config)
-    eslog.info("PS2 wheel type is {}".format(wtype));
-    if Aethersx2Generator.useEmulatorWheels(playingWithWheel, wtype):
-        if len(wheels) >= 1:
-            wheelMapping = {
-                "DrivingForcePro": {
-                    "up":       "Pad_DPadUp",
-                    "down":     "Pad_DPadDown",
-                    "left":     "Pad_DPadLeft",
-                    "right":    "Pad_DPadRight",
-                    "start":    "Pad_Start",
-                    "select":   "Pad_Select",
-                    "a":        "Pad_Circle",
-                    "b":        "Pad_Cross",
-                    "x":        "Pad_Triangle",
-                    "y":        "Pad_Square",
-                    "pageup":   "Pad_L1",
-                    "pagedown": "Pad_R1"
-                },
-                "DrivingForce": {
-                    "up":       "Pad_DPadUp",
-                    "down":     "Pad_DPadDown",
-                    "left":     "Pad_DPadLeft",
-                    "right":    "Pad_DPadRight",
-                    "start":    "Pad_Start",
-                    "select":   "Pad_Select",
-                    "a":        "Pad_Circle",
-                    "b":        "Pad_Cross",
-                    "x":        "Pad_Triangle",
-                    "y":        "Pad_Square",
-                    "pageup":   "Pad_L1",
-                    "pagedown": "Pad_R1"
-                },
-                "GTForce": {
-                    "a":        "Pad_Y",
-                    "b":        "Pad_B",
-                    "x":        "Pad_X",
-                    "y":        "Pad_A",
-                    "pageup":   "Pad_MenuDown",
-                    "pagedown": "Pad_MenuUp"
-                }
-            }
-
-            usbx = 1
-            for controller, pad in sorted(controllers.items()):
-                if pad.device_path in wheels:
-                    if not pcsx2INIConfig.has_section("USB{}".format(usbx)):
-                        pcsx2INIConfig.add_section("USB{}".format(usbx))
-                    pcsx2INIConfig.set("USB{}".format(usbx), "Type", "Pad")
-
-                    wheel_type = Aethersx2Generator.getWheelType(metadata, playingWithWheel, system.config)
-                    pcsx2INIConfig.set("USB{}".format(usbx), "Pad_subtype", Aethersx2Generator.wheelTypeMapping[wheel_type])
-
-                    if pad.physical_device_path is not None: # ffb on the real wheel
-                        pcsx2INIConfig.set("USB{}".format(usbx), "Pad_FFDevice", "SDL-{}".format(pad.physical_index))
-                    else:
-                        pcsx2INIConfig.set("USB{}".format(usbx), "Pad_FFDevice", "SDL-{}".format(pad.index))
-
-                    for i in pad.inputs:
-                        if i in wheelMapping[wheel_type]:
-                            pcsx2INIConfig.set("USB{}".format(usbx), wheelMapping[wheel_type][i], "SDL-{}/{}".format(pad.index, input2wheel(pad.inputs[i])))
-                    # wheel
-                    if "joystick1left" in pad.inputs:
-                        pcsx2INIConfig.set("USB{}".format(usbx), "Pad_SteeringLeft",  "SDL-{}/{}".format(pad.index, input2wheel(pad.inputs["joystick1left"])))
-                        pcsx2INIConfig.set("USB{}".format(usbx), "Pad_SteeringRight", "SDL-{}/{}".format(pad.index, input2wheel(pad.inputs["joystick1left"], True)))
-                    # pedals
-                    if "l2" in pad.inputs:
-                        pcsx2INIConfig.set("USB{}".format(usbx), "Pad_Brake",    "SDL-{}/{}".format(pad.index, input2wheel(pad.inputs["l2"], None)))
-                    if "r2" in pad.inputs:
-                        pcsx2INIConfig.set("USB{}".format(usbx), "Pad_Throttle", "SDL-{}/{}".format(pad.index, input2wheel(pad.inputs["r2"], None)))
-                    usbx = usbx + 1
-
     ## [Pad]
     if not pcsx2INIConfig.has_section("Pad"):
         pcsx2INIConfig.add_section("Pad")
@@ -829,26 +551,3 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
     with configFileName.open('w') as configfile:
         pcsx2INIConfig.write(configfile)
 
-def input2wheel(input: Input, reversedAxis: bool | None = False) -> str | None:
-    if input.type == "button":
-        pcsx2_magic_button_offset = 21 # PCSX2/SDLInputSource.cpp : const u32 button = ev->button + std::size(s_sdl_button_names)
-        return "Button{}".format(int(input.id) + pcsx2_magic_button_offset)
-    if input.type == "hat":
-        dir = "unknown"
-        if input.value == '1':
-            dir = "North"
-        elif input.value == '2':
-            dir = "East"
-        elif input.value == '4':
-            dir = "South"
-        elif input.value == '8':
-            dir = "West"
-        return "Hat{}{}".format(input.id, dir)
-    if input.type == "axis":
-        pcsx2_magic_axis_offset = 6 # PCSX2/SDLInputSource.cpp : const u32 axis = ev->axis + std::size(s_sdl_axis_names);
-        if reversedAxis is None:
-            return "{}Axis{}~".format("Full", int(input.id)+pcsx2_magic_axis_offset)
-        dir = "-"
-        if reversedAxis:
-            dir = "+"
-        return "{}Axis{}".format(dir, int(input.id)+pcsx2_magic_axis_offset)

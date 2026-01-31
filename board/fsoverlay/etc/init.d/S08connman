@@ -5,8 +5,6 @@ KNULLICONF="/userdata/system/knulli.conf"
 DEFAULTCONF="/usr/share/knulli/datainit/system/knulli.conf"
 BOOTCONF="/boot/knulli-boot.conf"
 
-HAS_SAVED_SSID=0
-
 # if /userdata is not yet available
 if ! [ -f "$KNULLICONF" ]; then
     # use the boot version of the file
@@ -54,14 +52,9 @@ knulli_wifi_configure() {
     [ "$X" = ".hidden" ] && { settings_name=hidden_AP; settings_hide=true; }
     [ "$X" = ".adhoc" ] && { settings_name=adhoc_AP; settings_priority=0; }
 
-    settings_ssid_orig="$(/usr/bin/knulli-settings-get -f "$KNULLICONF" wifi${X}.ssid)"
-    settings_ssid="$settings_ssid_orig"
+    settings_ssid="$(/usr/bin/knulli-settings-get -f "$KNULLICONF" wifi${X}.ssid)"
     settings_key="$(/usr/bin/knulli-settings-get -f "$KNULLICONF" wifi${X}.key)"
     settings_file="/var/lib/connman/knulli_wifi${X}.config"
-
-    if [ -n "$settings_ssid_orig" ] && [ "$X" != ".adhoc" ]; then
-        HAS_SAVED_SSID=1
-    fi
 
     # Add default adhoc values if missing
     if [ "$X" = ".adhoc" ]; then
@@ -114,63 +107,39 @@ knulli_wifi_configure() {
 }
 
 wifi_configure_all() {
-    HAS_SAVED_SSID=0
     for i in 1 2 3 .hidden .adhoc; do
         knulli_wifi_configure "$i"
     done
 }
 
-wifi_powered() {
-    connmanctl technologies 2>/dev/null | awk '
-        $0 ~ /Type = wifi/ {inwifi=1; next}
-        infwifi && $0 ~ /Type = / {inwifi=0}
-        infwifi && $0 ~ /Powered = True/ {ok=1}
-        END { exit(ok ? 0 : 1) }
-    '
+connman_ready() {
+    connmanctl state 2>/dev/null | grep -qE '^[[:space:]]*State[[:space:]]*='
 }
 
-do_ping() {
-    if ping -q -c1 -W1 8.8.8.8 >/dev/null 2>&1; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-wifi_check_connected() {
-    # Loop over all managed wifi interfaces (excluding p2p)
-    for iface in $(iw dev 2>/dev/null | awk '
-        /Interface/ {iface=$2}
-        /type managed/ {
-            if (iface !~ /^p2p/) print iface
-        }
-    '); do
-        if iw dev "$iface" link 2>/dev/null | grep -q "Connected to"; then
-            do_ping && return 0
-            return 1
-        fi
+wait_wifi_iface() {
+    for i in $(seq 1 40); do
+        iw dev 2>/dev/null | awk '/Interface/ {print $2; exit}' | grep -q . && return 0
+        sleep 0.1
     done
-
-    # no connection if we got to this point
     return 1
 }
 
-wifi_retry() {
-    timeout=10
-    while [ $timeout -gt 0 ]; do
-        # Any managed wifi interface connected yet?
-        if wifi_check_connected; then
-            return 0
-        fi
-
-        sleep 1
-        timeout=$((timeout - 1))
+wait_connman_ready() {
+    for i in $(seq 1 80); do
+        connman_ready && return 0
+        sleep 0.1
     done
+    echo "ERROR: connmanctl never became ready..." >&2
+    return 1
+}
 
-    printf "wifi failed to connect on first try... Retrying...\n" >&2
-    wifi_disable
-    sleep 0.5
-    wifi_enable
+wifi_powered() {
+    connmanctl technologies 2>/dev/null | awk '
+        $0 ~ /Type = wifi/ {inwifi=1; next}
+        inwifi && $0 ~ /Type = / {inwifi=0}
+        inwifi && $0 ~ /Powered = True/ {ok=1}
+        END { exit(ok ? 0 : 1) }
+    '
 }
 
 wifi_enable() {
@@ -178,6 +147,8 @@ wifi_enable() {
     [ -n "$settingsCountry" ] && /usr/sbin/iw reg set "$settingsCountry"
 
     connmanctl enable wifi 2>/dev/null
+
+    wait_wifi_iface >/dev/null 2>&1 || true
 
     # Wait briefly for wifi to be enabled (1s)
     for i in 1 2 3 4; do
@@ -198,18 +169,10 @@ do_start() {
     printf "Starting connman: "
     start-stop-daemon -S -q -m -b -p /var/run/connmand.pid --exec /usr/sbin/connmand -- -n -r 2>/dev/null
 
-    for i in $(seq 1 20); do
-        if connmanctl state 2>/dev/null | grep -qE '^[ ]*State[ ]='; then
-            break
-        fi
-        sleep 0.25
-    done
+    wait_connman_ready >/dev/null 2>&1 || true
 
     if [ "$settingsWlan" = "1" ]; then
         wifi_enable
-        if [ "$HAS_SAVED_SSID" = "1" ]; then
-            wifi_check_connected || wifi_retry
-        fi
     else
         wifi_disable
     fi
