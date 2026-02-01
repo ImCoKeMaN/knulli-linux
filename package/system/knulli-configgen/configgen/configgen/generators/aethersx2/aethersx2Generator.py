@@ -76,11 +76,6 @@ class Aethersx2Generator(Generator):
 
         commandArray = [str(_AETHERSX2_BIN)] if rom == "config" else [str(_AETHERSX2_BIN), "-batch", rom]
 
-
-        with Path("/proc/cpuinfo").open() as cpuinfo:
-            if not re.search(r'^flags\s*:.*\ssse4_1\W', cpuinfo.read(), re.MULTILINE):
-                eslog.warning("CPU does not support SSE4.1 which is required by pcsx2.  The emulator will likely crash with SIGILL (illegal instruction).")
-
         # use their modified shaderc library
         envcmd = {
             "QT_PLUGIN_PATH": "/usr/lib/qt6/plugins:/usr/lib64/qt6/plugins",
@@ -229,25 +224,81 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
     pcsx2INIConfig.set("EmuCore", "EnableDiscordPresence", "false")
 
     # Fastboot
-    if system.isOptSet('pcsx2_fastboot') and system.config['pcsx2_fastboot'] == '0':
+    if system.isOptSet('aethersx2_fastboot') and system.config['aethersx2_fastboot'] == '0':
         pcsx2INIConfig.set("EmuCore", "EnableFastBoot", "true")
     else:
         pcsx2INIConfig.set("EmuCore", "EnableFastBoot", "false")
     # Cheats
-    if system.isOptSet('pcsx2_cheats'):
-        pcsx2INIConfig.set("EmuCore", "EnableCheats", system.config['pcsx2_cheats'])
+    if system.isOptSet('aethersx2_cheats'):
+        pcsx2INIConfig.set("EmuCore", "EnableCheats", system.config['aethersx2_cheats'])
     else:
         pcsx2INIConfig.set("EmuCore", "EnableCheats", "false")
     # Widescreen Patches
-    if system.isOptSet('pcsx2_EnableWideScreenPatches'):
-        pcsx2INIConfig.set("EmuCore", "EnableWideScreenPatches", system.config["pcsx2_EnableWideScreenPatches"])
+    if system.isOptSet('aethersx2_EnableWideScreenPatches'):
+        pcsx2INIConfig.set("EmuCore", "EnableWideScreenPatches", system.config["aethersx2_EnableWideScreenPatches"])
     else:
         pcsx2INIConfig.set("EmuCore", "EnableWideScreenPatches", "false")
     # No-interlacing Patches
-    if system.isOptSet('pcsx2_interlacing_patches'):
-        pcsx2INIConfig.set("EmuCore", "EnableNoInterlacingPatches", system.config["pcsx2_interlacing_patches"])
+    if system.isOptSet('aethersx2_interlacing_patches'):
+        pcsx2INIConfig.set("EmuCore", "EnableNoInterlacingPatches", system.config["aethersx2_interlacing_patches"])
     else:
         pcsx2INIConfig.set("EmuCore", "EnableNoInterlacingPatches", "false")
+
+    ## [Achievements]
+    if not pcsx2INIConfig.has_section("Achievements"):
+        pcsx2INIConfig.add_section("Achievements")
+    pcsx2INIConfig.set("Achievements", "Enabled", "false")
+    if system.isOptSet('retroachievements') and system.getOptBoolean('retroachievements') == True:
+        headers   = {"Content-type": "text/plain", "User-Agent": "Batocera.linux"}
+        login_url = "https://retroachievements.org/"
+        username  = system.config.get('retroachievements.username', "")
+        password  = system.config.get('retroachievements.password', "")
+        hardcore  = system.config.get('retroachievements.hardcore', "")
+        indicator = system.config.get('retroachievements.challenge_indicators', "")
+        presence  = system.config.get('retroachievements.richpresence', "")
+        leaderbd  = system.config.get('retroachievements.leaderboards', "")
+        login_cmd = f"dorequest.php?r=login&u={username}&p={password}"
+        try:
+                cnx = httplib2.Http()
+        except:
+                eslog.error("ERROR: Unable to connect to " + login_url)
+        try:
+                res, rout = cnx.request(login_url + login_cmd, method="GET", body=None, headers=headers)
+                if (res.status != 200):
+                    eslog.warning(f"ERROR: RetroAchievements.org responded with #{res.status} [{res.reason}] {rout}")
+                    pcsx2INIConfig.set("Cheevos", "Enabled",  "false")
+                else:
+                    parsedout = json.loads(rout.decode('utf-8'))
+                    if not parsedout['Success']:
+                        eslog.warning(f"ERROR: RetroAchievements login failed with ({str(parsedout)})")
+                    token = parsedout['Token']
+                    pcsx2INIConfig.set("Achievements", "Enabled", "true")
+                    pcsx2INIConfig.set("Achievements", "Username", username)
+                    pcsx2INIConfig.set("Achievements", "Token", token)
+                    pcsx2INIConfig.set("Achievements", "LoginTimestamp", str(int(time.time())))
+                    if hardcore == '1':
+                        pcsx2INIConfig.set("Achievements", "ChallengeMode", "true")
+                    else:
+                        pcsx2INIConfig.set("Achievements", "ChallengeMode", "false")
+                    if indicator == '1':
+                        pcsx2INIConfig.set("Achievements", "PrimedIndicators", "true")
+                    else:
+                        pcsx2INIConfig.set("Achievements", "PrimedIndicators", "false")
+                    if presence == '1':
+                        pcsx2INIConfig.set("Achievements", "RichPresence", "true")
+                    else:
+                        pcsx2INIConfig.set("Achievements", "RichPresence", "false")
+                    if leaderbd == '1':
+                        pcsx2INIConfig.set("Achievements", "Leaderboards", "true")
+                    else:
+                        pcsx2INIConfig.set("Achievements", "Leaderboards", "false")
+        except:
+                eslog.error("ERROR: setting RetroAchievements parameters")
+    # set other settings
+    pcsx2INIConfig.set("Achievements", "TestMode", "false")
+    pcsx2INIConfig.set("Achievements", "UnofficialTestMode", "false")
+    pcsx2INIConfig.set("Achievements", "Notifications", "true")
+    pcsx2INIConfig.set("Achievements", "SoundEffects", "true")
 
     ## [Filenames]
     if not pcsx2INIConfig.has_section("Filenames"):
@@ -265,11 +316,11 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
             eslog.debug("Vulkan driver is available on the system.")
             renderer = "12"  # Default to OpenGL
 
-            if system.isOptSet("pcsx2_gfxbackend"):
-                if system.config["pcsx2_gfxbackend"] == "13":
+            if system.isOptSet("aethersx2_gfxbackend"):
+                if system.config["aethersx2_gfxbackend"] == "13":
                     eslog.debug("User selected Software! Man you must have a fast CPU!")
                     renderer = "13"
-                elif system.config["pcsx2_gfxbackend"] == "14":
+                elif system.config["aethersx2_gfxbackend"] == "14":
                     eslog.debug("User selected Vulkan")
                     renderer = "14"
                     try:
@@ -303,105 +354,100 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
         eslog.debug("Error checking for Vulkan driver: {}".format(e))
 
     # Ratio
-    if system.isOptSet('pcsx2_ratio'):
-        pcsx2INIConfig.set("EmuCore/GS", "AspectRatio", system.config["pcsx2_ratio"])
+    if system.isOptSet('aethersx2_ratio'):
+        pcsx2INIConfig.set("EmuCore/GS", "AspectRatio", system.config["aethersx2_ratio"])
     else:
         pcsx2INIConfig.set("EmuCore/GS", "AspectRatio", "Auto 4:3/3:2")
     # Vsync
-    if system.isOptSet('pcsx2_vsync'):
-        pcsx2INIConfig.set("EmuCore/GS","VsyncEnable", system.config["pcsx2_vsync"])
+    if system.isOptSet('aethersx2_vsync'):
+        pcsx2INIConfig.set("EmuCore/GS","VsyncEnable", system.config["aethersx2_vsync"])
     else:
         pcsx2INIConfig.set("EmuCore/GS","VsyncEnable", "0")
     # Resolution
-    if system.isOptSet('pcsx2_resolution'):
-        pcsx2INIConfig.set("EmuCore/GS", "upscale_multiplier", system.config["pcsx2_resolution"])
+    if system.isOptSet('aethersx2_resolution'):
+        pcsx2INIConfig.set("EmuCore/GS", "upscale_multiplier", system.config["aethersx2_resolution"])
     else:
         pcsx2INIConfig.set("EmuCore/GS", "upscale_multiplier", "1")
     # FXAA
-    if system.isOptSet('pcsx2_fxaa'):
-        pcsx2INIConfig.set("EmuCore/GS", "fxaa", system.config["pcsx2_fxaa"])
+    if system.isOptSet('aethersx2_fxaa'):
+        pcsx2INIConfig.set("EmuCore/GS", "fxaa", system.config["aethersx2_fxaa"])
     else:
         pcsx2INIConfig.set("EmuCore/GS", "fxaa", "false")
     # FMV Ratio
-    if system.isOptSet('pcsx2_fmv_ratio'):
-        pcsx2INIConfig.set("EmuCore/GS", "FMVAspectRatioSwitch", system.config["pcsx2_fmv_ratio"])
+    if system.isOptSet('aethersx2_fmv_ratio'):
+        pcsx2INIConfig.set("EmuCore/GS", "FMVAspectRatioSwitch", system.config["aethersx2_fmv_ratio"])
     else:
         pcsx2INIConfig.set("EmuCore/GS", "FMVAspectRatioSwitch", "Auto 4:3/3:2")
     # Mipmapping
-    if system.isOptSet('pcsx2_mipmapping'):
-        pcsx2INIConfig.set("EmuCore/GS", "mipmap_hw", system.config["pcsx2_mipmapping"])
+    if system.isOptSet('aethersx2_mipmapping'):
+        pcsx2INIConfig.set("EmuCore/GS", "mipmap_hw", system.config["aethersx2_mipmapping"])
     else:
         pcsx2INIConfig.set("EmuCore/GS", "mipmap_hw", "-1")
     # Trilinear Filtering
-    if system.isOptSet('pcsx2_trilinear_filtering'):
-        pcsx2INIConfig.set("EmuCore/GS", "TriFilter", system.config["pcsx2_trilinear_filtering"])
+    if system.isOptSet('aethersx2_trilinear_filtering'):
+        pcsx2INIConfig.set("EmuCore/GS", "TriFilter", system.config["aethersx2_trilinear_filtering"])
     else:
         pcsx2INIConfig.set("EmuCore/GS", "TriFilter", "-1")
     # Anisotropic Filtering
-    if system.isOptSet('pcsx2_anisotropic_filtering'):
-        pcsx2INIConfig.set("EmuCore/GS", "MaxAnisotropy", system.config["pcsx2_anisotropic_filtering"])
+    if system.isOptSet('aethersx2_anisotropic_filtering'):
+        pcsx2INIConfig.set("EmuCore/GS", "MaxAnisotropy", system.config["aethersx2_anisotropic_filtering"])
     else:
         pcsx2INIConfig.set("EmuCore/GS", "MaxAnisotropy", "0")
     # Dithering
-    if system.isOptSet('pcsx2_dithering'):
-        pcsx2INIConfig.set("EmuCore/GS", "dithering_ps2", system.config["pcsx2_dithering"])
+    if system.isOptSet('aethersx2_dithering'):
+        pcsx2INIConfig.set("EmuCore/GS", "dithering_ps2", system.config["aethersx2_dithering"])
     else:
         pcsx2INIConfig.set("EmuCore/GS", "dithering_ps2", "2")
     # Texture Preloading
-    if system.isOptSet('pcsx2_texture_loading'):
-        pcsx2INIConfig.set("EmuCore/GS", "texture_preloading", system.config["pcsx2_texture_loading"])
+    if system.isOptSet('aethersx2_texture_loading'):
+        pcsx2INIConfig.set("EmuCore/GS", "texture_preloading", system.config["aethersx2_texture_loading"])
     else:
         pcsx2INIConfig.set("EmuCore/GS", "texture_preloading", "2")
     # Deinterlacing
-    if system.isOptSet('pcsx2_deinterlacing'):
-        pcsx2INIConfig.set("EmuCore/GS", "deinterlace_mode", system.config["pcsx2_deinterlacing"])
+    if system.isOptSet('aethersx2_deinterlacing'):
+        pcsx2INIConfig.set("EmuCore/GS", "deinterlace_mode", system.config["aethersx2_deinterlacing"])
     else:
         pcsx2INIConfig.set("EmuCore/GS", "deinterlace_mode", "0")
     # Anti-Blur
-    if system.isOptSet('pcsx2_blur'):
-        pcsx2INIConfig.set("EmuCore/GS", "pcrtc_antiblur", system.config["pcsx2_blur"])
+    if system.isOptSet('aethersx2_blur'):
+        pcsx2INIConfig.set("EmuCore/GS", "pcrtc_antiblur", system.config["aethersx2_blur"])
     else:
         pcsx2INIConfig.set("EmuCore/GS", "pcrtc_antiblur", "true")
     # Integer Scaling
-    if system.isOptSet('pcsx2_scaling'):
-        pcsx2INIConfig.set("EmuCore/GS", "IntegerScaling", system.config["pcsx2_scaling"])
+    if system.isOptSet('aethersx2_scaling'):
+        pcsx2INIConfig.set("EmuCore/GS", "IntegerScaling", system.config["aethersx2_scaling"])
     else:
         pcsx2INIConfig.set("EmuCore/GS", "IntegerScaling", "false")
     # Blending Accuracy
-    if system.isOptSet('pcsx2_blending'):
-        pcsx2INIConfig.set("EmuCore/GS", "accurate_blending_unit", system.config["pcsx2_blending"])
+    if system.isOptSet('aethersx2_blending'):
+        pcsx2INIConfig.set("EmuCore/GS", "accurate_blending_unit", system.config["aethersx2_blending"])
     else:
         pcsx2INIConfig.set("EmuCore/GS", "accurate_blending_unit", "1")
     # Texture Filtering
-    if system.isOptSet('pcsx2_texture_filtering'):
-        pcsx2INIConfig.set("EmuCore/GS", "filter", system.config["pcsx2_texture_filtering"])
+    if system.isOptSet('aethersx2_texture_filtering'):
+        pcsx2INIConfig.set("EmuCore/GS", "filter", system.config["aethersx2_texture_filtering"])
     else:
         pcsx2INIConfig.set("EmuCore/GS", "filter", "2")
     # Bilinear Filtering
-    if system.isOptSet('pcsx2_bilinear_filtering'):
-        pcsx2INIConfig.set("EmuCore/GS", "linear_present_mode", system.config["pcsx2_bilinear_filtering"])
+    if system.isOptSet('aethersx2_bilinear_filtering'):
+        pcsx2INIConfig.set("EmuCore/GS", "linear_present_mode", system.config["aethersx2_bilinear_filtering"])
     else:
         pcsx2INIConfig.set("EmuCore/GS", "linear_present_mode", "1")
     # Load Texture Replacements
-    if system.isOptSet('pcsx2_texture_replacements'):
-        pcsx2INIConfig.set("EmuCore/GS", "LoadTextureReplacements", system.config["pcsx2_texture_replacements"])
+    if system.isOptSet('aethersx2_texture_replacements'):
+        pcsx2INIConfig.set("EmuCore/GS", "LoadTextureReplacements", system.config["aethersx2_texture_replacements"])
     else:
         pcsx2INIConfig.set("EmuCore/GS", "LoadTextureReplacements", "false")
     # OSD messages
-    if system.isOptSet('pcsx2_osd_messages'):
-        pcsx2INIConfig.set("EmuCore/GS", "OsdShowMessages", system.config["pcsx2_osd_messages"])
+    if system.isOptSet('aethersx2_osd_messages'):
+        pcsx2INIConfig.set("EmuCore/GS", "OsdShowMessages", system.config["aethersx2_osd_messages"])
     else:
         pcsx2INIConfig.set("EmuCore/GS", "OsdShowMessages", "true")
     # TV Shader
-    if system.isOptSet('pcsx2_shaderset'):
-        pcsx2INIConfig.set("EmuCore", "TVShader", system.config["pcsx2_shaderset"])
+    if system.isOptSet('aethersx2_shaderset'):
+        pcsx2INIConfig.set("EmuCore/GS", "TVShader", system.config["aethersx2_shaderset"])
     else:
-        pcsx2INIConfig.set("EmuCore", "TVShader", "0")
-
-    if system.isOptSet('incrementalsavestates') and not system.getOptBoolean('incrementalsavestates'):
-        pcsx2INIConfig.set("EmuCore", "AutoIncrementSlot", "false")
-    else:
-        pcsx2INIConfig.set("EmuCore", "AutoIncrementSlot", "true")
+        pcsx2INIConfig.set("EmuCore/GS", "TVShader", "0")
 
     if system.isOptSet('autosave') and system.getOptBoolean('autosave') == True:
         pcsx2INIConfig.set("EmuCore", "SaveStateOnShutdown", "true")
@@ -454,10 +500,10 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
     multiTap = 2
     joystick_count = len(controllers)
     eslog.debug("Number of Controllers = {}".format(joystick_count))
-    if system.isOptSet("pcsx2_multitap") and system.config["pcsx2_multitap"] == "4":
+    if system.isOptSet("aethersx2_multitap") and system.config["aethersx2_multitap"] == "4":
         if joystick_count > 2 and joystick_count < 5:
             pcsx2INIConfig.set("Pad", "MultitapPort1", "true")
-            multiTap = int(system.config["pcsx2_multitap"])
+            multiTap = int(system.config["aethersx2_multitap"])
         elif joystick_count > 4:
             pcsx2INIConfig.set("Pad", "MultitapPort1", "true")
             multiTap = 4
@@ -465,11 +511,11 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
         else:
             multiTap = 2
             eslog.debug("*** You have the wrong number of connected controllers for this option ***")
-    elif system.isOptSet("pcsx2_multitap") and system.config["pcsx2_multitap"] == "8":
+    elif system.isOptSet("aethersx2_multitap") and system.config["aethersx2_multitap"] == "8":
         if joystick_count > 4:
             pcsx2INIConfig.set("Pad", "MultitapPort1", "true")
             pcsx2INIConfig.set("Pad", "MultitapPort2", "true")
-            multiTap = int(system.config["pcsx2_multitap"])
+            multiTap = int(system.config["aethersx2_multitap"])
         elif joystick_count > 2 and joystick_count < 5:
             pcsx2INIConfig.set("Pad", "MultitapPort1", "true")
             multiTap = 4
