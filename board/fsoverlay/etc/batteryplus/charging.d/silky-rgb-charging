@@ -8,7 +8,6 @@ fi
 PERCENTAGE=$(knulli-battery-check capacity)
 
 if [ ! -z "$PERCENTAGE" ]; then
-  echo "Charging: $PERCENTAGE%" >> /userdata/rgb-log.txt
   curl -d "$PERCENTAGE Charging" -X POST localhost:1235/update-battery-state
 fi
 

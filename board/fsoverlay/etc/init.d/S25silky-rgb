@@ -5,10 +5,48 @@ if ! knulli-board-capability "rgb"; then
     exit 1
 fi
 
+# Launches Knulli RGB daemon and updates battery status on startup
+start() {
+  nohup knulli-rgb &>/userdata/system/logs/rgbled.log &
+
+  (
+    TIMEOUT=30 # seconds
+    COUNT=0
+    BATTERY_STATE="$(/usr/bin/knulli-battery-check status)"
+    BATTERY_PERCENTAGE="$(knulli-battery-check capacity)"
+
+
+    # Error cases: No state/percentage given.
+    if [ -z "$BATTERY_STATE" ] || [ -z "$BATTERY_PERCENTAGE" ]; then
+      exit 61
+    fi
+
+    # Send CURL post, exit gracefully in success case.
+    update_rgb_battery_status() {
+      RESULT=$(curl --write-out "%{http_code}" -d "$BATTERY_PERCENTAGE $BATTERY_STATE" -X POST "localhost:1235/update-battery-state")
+      if [ ! -z "$RESULT" ] && [ "$RESULT" == "200" ]; then
+        exit 0
+      fi
+    }
+
+    # In case REST API is not up yet, retry a couple if times
+    while [ "$COUNT" -lt "$TIMEOUT" ]; do
+      update_rgb_battery_status
+      sleep 1
+      COUNT=$((COUNT+1))
+    done
+
+    # If this point was reached, the timer expired.
+    exit 62
+
+  ) >/dev/null 2>&1 &
+
+}
+
 case "$1" in
   start)
   # Code in here will only be executed on start.
-    nohup knulli-rgb &>/userdata/system/logs/rgbled.log &
+    start
     ;;
   stop)
     # Code in here will only be executed on shutdown.
@@ -18,7 +56,7 @@ case "$1" in
     # Code in here will only be executed on shutdown.
     curl -s "http://localhost:1235/kill"
     sleep 1
-    nohup knulli-rgb &>/userdata/system/logs/rgbled.log &
+    start
     ;;
   *)
     # Code in here will be executed in all other conditions.
