@@ -1,14 +1,15 @@
-#!/bin/bash
+#!/bin/sh
 
 # We only want to run the script if the board has RGB capability
 if ! knulli-board-capability "rgb"; then
     exit 1
 fi
 
+STATE=$1
 PERCENTAGE=$(knulli-battery-check capacity)
 
-if [ ! -z "$PERCENTAGE" ] && [ ! -z "$1" ]; then
-  curl -d "$PERCENTAGE $1" -X POST localhost:1235/update-battery-state
+if [ -n "$PERCENTAGE" ] && [ -n "$STATE" ]; then
+  curl -d "$PERCENTAGE $STATE" -X POST localhost:1235/update-battery-state >/dev/null 2>&1
 fi
 
 exit 0
