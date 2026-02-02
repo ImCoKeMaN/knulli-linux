@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# We only want to run the script if the board has RGB capability
+if ! knulli-board-capability "rgb"; then
+    exit 1
+fi
+
 # batteryplus will forcefully exit a hook script that take too long to protect itself from stalling
 # fire and forget
 (

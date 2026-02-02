@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# We only want to run the script if the board has RGB capability
+if ! knulli-board-capability "rgb"; then
+    exit 1
+fi
+
 PERCENTAGE=$(knulli-battery-check capacity)
 
 if [ ! -z "$PERCENTAGE" ]; then
