@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# batteryplus will forcefully exit a hook script that take too long to protect itself from stalling
+# fire and forget
+(
+  TIMEOUT=30 # seconds
+  COUNT=0
+  MODE=$1
+  PERCENTAGE=$(knulli-battery-check capacity)
+
+  # Error cases: No state/percentage given.
+  if [ -z "$MODE" ] || [ -z "$PERCENTAGE" ]; then
+    exit 61
+  fi
+
+  # Send CURL post, exit gracefully in success case.
+  update_rgb_battery_status() {
+    RESULT=$(curl --write-out "%{http_code}" -d "$PERCENTAGE $MODE" -X POST "localhost:1235/update-battery-state")
+    if [ ! -z "$RESULT" ] && [ "$RESULT" == "200" ]; then
+      exit 0
+    fi
+  }
+
+  # In case REST API is not up yet, retry a couple if times
+  while [ "$COUNT" -lt "$TIMEOUT" ]; do
+    update_rgb_battery_status
+    sleep 1
+    COUNT=$((COUNT+1))
+  done
+
+  # If this point was reached, the timer expired.
+  exit 62
+
+) >/dev/null 2>&1 &
+
+
+exit 0
