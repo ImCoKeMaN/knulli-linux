@@ -9,7 +9,7 @@ KEY_LED_RETRO_ACHIEVEMENTS="led.retroachievements"
 EFFECT_ON=1
 
 # Check batocera.conf for retroachievement effect setting
-LED_RETRO_ACHIEVEMENTS=$(batocera-settings-get $KEY_LED_RETRO_ACHIEVEMENTS)
+LED_RETRO_ACHIEVEMENTS=$(knulli-settings-get $KEY_LED_RETRO_ACHIEVEMENTS)
 
 # Let the LED daemon run the rainbow animation if retroachievement effect is turned on
 if [ $LED_RETRO_ACHIEVEMENTS -eq $EFFECT_ON ]; then
