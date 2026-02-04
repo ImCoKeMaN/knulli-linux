@@ -8,7 +8,6 @@ fi
 PCT=$1
 
 if [ -n "$PCT" ]; then
-  echo "PCT = $PCT"
   if [ "$PCT" == "100" ]; then
     curl -d "$PCT Full" -X POST localhost:1235/update-battery-state >/dev/null 2>&1
   else
