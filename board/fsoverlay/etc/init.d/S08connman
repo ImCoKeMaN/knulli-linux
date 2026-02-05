@@ -5,6 +5,9 @@ KNULLICONF="/userdata/system/knulli.conf"
 DEFAULTCONF="/usr/share/knulli/datainit/system/knulli.conf"
 BOOTCONF="/boot/knulli-boot.conf"
 
+# This is needed in case an overlay is saved which results in udev rule accumulating wlan entries
+rm -f /etc/udev/rules.d/70-persistent-net.rules 2>/dev/null
+
 # if /userdata is not yet available
 if ! [ -f "$KNULLICONF" ]; then
     # use the boot version of the file
