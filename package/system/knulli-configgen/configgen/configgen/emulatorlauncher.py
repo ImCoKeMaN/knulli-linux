@@ -444,9 +444,16 @@ def getHudConfig(system: Emulator, systemName: str, emulator: str, core: str, ro
         if w <= 0 or h <= 0:
             return (36, 40)
 
+        # Large
         if h >= 1080 or w >= 1920:
-            return (66, 78) # large resolution
-        return (36, 40) # small resolution
+            return (66, 78)
+
+        # Medium
+        if h >= 720 or w >= 1280:
+            return (50, 56)
+
+        # Small
+        return (36, 40)
 
     configstr = ""
 
