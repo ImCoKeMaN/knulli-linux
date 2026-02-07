@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# requires restart for changes to take effect
+case "$1" in
+        start)
+                echo -n "Enabling SSH Server"
+                knulli-settings-set system.ssh.enabled 1
+                ;;
+        stop)
+                echo -n "Disabling SSH Server"
+                knulli-settings-set system.ssh.enabled 0
+                ;;
+        *)
+                # other conditions
+                echo "Usage: $0 {start|stop}"
+                ;;
+esac
+
+exit 0
