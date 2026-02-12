@@ -2,7 +2,7 @@ config BR2_PACKAGE_AETHERSX2
     bool "aethersx2"
     depends on BR2_aarch64
     select BR2_PACKAGE_LIBFUSE
-    depends on BR2_PACKAGE_QT6
+    select BR2_PACKAGE_QT6
     help
       AetherSX2 - ARM PS2 Emulator (Standalone AppImage)
       
