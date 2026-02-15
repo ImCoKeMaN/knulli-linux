@@ -1589,6 +1589,18 @@ def generateCoreSettings(coreSettings: UnixSettings, system: Emulator, rom: Path
         else:
             coreSettings.save('mgba_gb_model', '"Autodetect"')
 
+    if (system.config['core'] == 'gpsp'):
+        # Color correction
+        if system.isOptSet('color_correction') and system.getOptBoolean('color_correction') == True:
+            coreSettings.save('gpsp_color_correction', '"enabled"')
+        else:
+            coreSettings.save('gpsp_color_correction', '"disabled"')
+        # Frame mixing
+        if system.isOptSet('interframe_blending') and system.getOptBoolean('interframe_blending') == False:
+            coreSettings.save('gpsp_frame_mixing', '"disabled"')
+        else:
+            coreSettings.save('gpsp_frame_mixing', '"enabled"')
+            
     if (system.config['core'] == 'vba-m'):
         # GB / GBC / GBA: Auto select fine hardware mode
         # Emulator AUTO mode not working fine
@@ -1642,7 +1654,17 @@ def generateCoreSettings(coreSettings: UnixSettings, system: Emulator, rom: Path
                 coreSettings.save('vbam_tilt_sensitivity', '"' + system.config['tilt_sensitivity'] + '"')
             else:
                 coreSettings.save('vbam_tilt_sensitivity', '"10"')
-
+            # GBA: Color correction
+            if system.isOptSet('color_correction') and system.getOptBoolean('color_correction') == True:
+                coreSettings.save('vbam_lcdfilter', '"enabled"')
+            else:
+                coreSettings.save('vbam_lcdfilter', '"disabled"')
+            # GBA: Interframe blending
+            if system.isOptSet('interframe_blending'):
+                coreSettings.save('vbam_interframeblending', '"' + system.config['interframe_blending'] + '"')
+            else:
+                coreSettings.save('vbam_interframeblending', '"smart"')
+            
     # Nintendo NES / Famicom Disk System
     if (system.config['core'] == 'nestopia'):
         # gun
