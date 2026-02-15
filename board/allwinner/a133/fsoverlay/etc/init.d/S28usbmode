@@ -8,11 +8,11 @@ GADGET=/sys/kernel/config/usb_gadget/g1
 
 case "$1" in
   start)
-    # usbmode=$(/usr/bin/knulli-settings-get system.usbmode)
-    # if [ -z "$usbmode" ] || [ "$usbmode" = "off" ]; then
-    #   "$0" stop
-    #   exit 1
-    # fi
+    usbmode=$(/usr/bin/knulli-settings-get system.usbmode)
+    if [ -z "$usbmode" ] || [ "$usbmode" = "off" ]; then
+      "$0" stop
+      exit 1
+    fi
 
     # UDC: get the first available UDC device
     UDC=$(ls /sys/class/udc | head -n 1)
@@ -72,7 +72,7 @@ case "$1" in
     # exit 0
     # fi
 
-    # if [ "$usbmode" = "adb" ]; then
+    if [ "$usbmode" = "adb" ]; then
       printf "Starting adb daemon: "
 
       mount -t configfs none /sys/kernel/config
@@ -106,7 +106,7 @@ case "$1" in
       sleep 2
       echo "$UDC" > $GADGET/UDC
       [ $? = 0 ] && echo "OK" || echo "FAIL"
-    # fi
+    fi
     ;;
   stop)
     printf "Stopping usb-gadget: "

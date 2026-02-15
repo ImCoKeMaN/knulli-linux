@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# We need to load the mali driver before progressbar can work
+insmod /lib/modules/5.15.147/mali_kbase.ko
+
 # Start the progress bar
 /usr/bin/progressbar &
 

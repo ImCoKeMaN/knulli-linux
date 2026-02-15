@@ -1,0 +1,12 @@
+#!/bin/sh
+# We need to set the initial state at boot so state.d hook scripts work
+
+[ "$1" = "start" ] || exit 0
+
+BATTERY_STATE="$(/usr/bin/knulli-battery-check status)"
+
+[ -n "$BATTERY_STATE" ] || exit 0
+
+/usr/bin/batteryplus-state "$BATTERY_STATE" -f
+
+exit 0

@@ -36,10 +36,17 @@ case "${ACTION}" in
         MODE="$2"
         case "${MODE}" in
             auto)
-                BT_SINK=$(LANG=C pactl list short sinks | grep bluez_output | awk '{print $2}' | head -n1)
+                BT_SINK=$(LANG=C pactl list short sinks | awk '$2 ~ /^bluez_/ { print $2; exit }')
                 if [ -n "$BT_SINK" ]; then
                     MODE="$BT_SINK"
                     LANG=C pactl set-default-sink "${MODE}" || exit 1
+
+                    # Workaround to some race coniditons for BT sinks
+                    for _ in 1 2 3 4 5; do
+                        LANG=C pactl list short sinks | awk '{print $2}' | grep -qx "${MODE}" && break
+                        sleep 0.2
+                    done
+                    LANG=C pactl set-sink-mute "${MODE}" 0 >/dev/null 2>&1 || true
                 else
                     ARCH=$(cat /usr/share/knulli/knulli.arch)
                     BOARD=$(cat /boot/boot/knulli.board)
@@ -84,11 +91,13 @@ case "${ACTION}" in
                         "a133")
                             MODE=alsa_output._sys_devices_platform_soc_sndcodec_sound_card0.playback.0.0
                             amixer -c 0 sset 'HpSpeaker' on
+                            amixer -c 0 sset 'Headphone' on
                             amixer -c 0 sset Headphone "$(knulli-settings-get audio.headphone || echo 0)"
-                            amixer -c 0 sset 'MIC1 gain volume' 0
-                            amixer -c 0 sset 'MIC2 gain volume' 0
                             amixer -c 0 sset 'ADC volume' 0
                             amixer -c 0 sset 'LINEOUT volume' 0
+
+                            amixer -c 0 sset 'DAC Swap' Off # Fixes reversed audio channels
+
                             LANG=C pactl set-default-sink "${MODE}" || exit 1
                             ;;
                         "a527")
@@ -124,6 +133,11 @@ case "${ACTION}" in
                             # Needed for audio resume after suspend
                             amixer -c 0 sset 'Resume Path' 'ON'
                             LANG=C pactl set-default-sink "${MODE}" || exit 1
+                            ;;
+                        "sm8250")
+                            # boost max volume a bit
+                            amixer -c 0 sset 'WSA_RX0 Digital' 112
+                            amixer -c 0 sset 'WSA_RX1 Digital' 112
                             ;;
                         *)
                             # do nothing!

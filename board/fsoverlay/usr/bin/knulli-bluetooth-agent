@@ -12,9 +12,12 @@ import os
 import logging
 import signal
 import subprocess
+import sys
 from gi.repository import GLib
 
 AGENT_INTERFACE = 'org.bluez.Agent1'
+
+mainloop = None
 
 gadapter = None
 gdiscovering = False
@@ -299,7 +302,6 @@ def properties_changed(interface, changed, invalidated, path):
   if "Paired" in changed and changed["Paired"] == True:
     # ok, do as in simple-agent, trust and connect
     connect_device(path, gdevices[path]["Address"], gdevices[path], True, getBluetoothWantedAddr())
-    refresh_audio_on_connect(gdevices[path])
     return
 
   # ok, it is now connected, what else ?
@@ -314,8 +316,6 @@ def properties_changed(interface, changed, invalidated, path):
 
   if "Address" in gdevices[path]:
     connect_device(path, gdevices[path]["Address"], gdevices[path], False, getBluetoothWantedAddr())
-
-  refresh_audio_on_connect(gdevices[path])
 
 def merge2dicts(d1, d2):
   res = d1.copy()
@@ -408,6 +408,7 @@ def refresh_audio_on_connect(properties):
     if "bluez_" in sinks:
       current_output = subprocess.check_output(["knulli-audio", "get"], encoding='utf-8').strip()
       subprocess.run(["knulli-audio", "set", current_output])
+
       logging.info("Bluetooth audio sink detected: proceeding with audio refresh.")
       return
     time.sleep(0.1)
@@ -427,8 +428,9 @@ class Agent(dbus.service.Object):
 
   @dbus.service.method(AGENT_INTERFACE, in_signature="", out_signature="")
   def Release(self):
+    global mainloop
     logging.info("agent: Release")
-    if self.exit_on_release:
+    if self.exit_on_release and mainloop is not None:
       mainloop.quit()
 
   @dbus.service.method(AGENT_INTERFACE, in_signature="os", out_signature="")
@@ -470,6 +472,7 @@ class Agent(dbus.service.Object):
 
 def do_main_loop(dev_id):
   global gadapter
+  global mainloop
 
   # adapter
   try:

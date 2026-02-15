@@ -1,11 +1,28 @@
 #!/bin/sh
 
+WAKE_TIME="/var/run/rtc-wake.epoch"
+
 case "$1" in
     suspend)
         knulli-brightness dispoff
         knulli-audio setSystemVolume mute
         ;;
     resume|thaw)
+        # Mirrored from knulli-suspend so we know if on resume it's within the auto shutdown window
+        if [ -e "$WAKE_TIME" ]; then
+            read -r recorded < "$WAKE_TIME" 2>/dev/null || recorded=""
+            if [ -n "$recorded" ]; then
+                now=$(date +%s)
+                diff=$(( now - recorded ))
+                [ "$diff" -lt 0 ] && diff=$(( -diff ))
+
+                if [ "$diff" -le 10 ]; then
+                # Resuming only to auto-shutdown
+                exit 0
+                fi
+            fi
+        fi
+
         knulli-brightness dispon
         knulli-audio setSystemVolume unmute
         ;;

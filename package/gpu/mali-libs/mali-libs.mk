@@ -4,8 +4,10 @@
 #
 ################################################################################
 
-MALI_LIBS_VERSION = master
-MALI_LIBS_SITE = https://github.com/knulli-cfw/libmali.git
+MALI_LIBS_VERSION = 5a4d5c16d51fdd8659af9072eaf6b83c52b1cd86
+#MALI_LIBS_VERSION = master
+#MALI_LIBS_SITE = https://github.com/knulli-cfw/libmali.git
+MALI_LIBS_SITE = https://github.com/ROCKNIX/libmali.git
 MALI_LIBS_SITE_METHOD = git
 MALI_LIBS_LICENSE = Proprietary
 MALI_LIBS_LICENSE_FILES = END_USER_LICENCE_AGREEMENT.txt
@@ -37,7 +39,7 @@ MALI_LIBS_VERSION_GPU = g6p0
 else
 # Default to G52 (covers RK3566/RK3568)
 MALI_LIBS_GPU = bifrost-g52
-MALI_LIBS_VERSION_GPU = g2p0
+MALI_LIBS_VERSION_GPU = g13p0
 endif
 
 ifeq ($(BR2_aarch64),y)
@@ -46,7 +48,7 @@ else
 MALI_LIBS_ARCH = arm-linux-gnueabihf
 endif
 
-MALI_LIBS_SO_NAME = libmali-$(MALI_LIBS_GPU)-$(MALI_LIBS_VERSION_GPU)-gbm.so
+MALI_LIBS_SO_NAME = libmali-$(MALI_LIBS_GPU)-$(MALI_LIBS_VERSION_GPU)-wayland-gbm.so
 
 define MALI_LIBS_INSTALL_STAGING_CMDS
     # Install library
@@ -67,7 +69,7 @@ define MALI_LIBS_INSTALL_STAGING_CMDS
     # Create symlinks for GBM
     ln -sf libmali.so.1 $(STAGING_DIR)/usr/lib/libgbm.so.1
     ln -sf libgbm.so.1 $(STAGING_DIR)/usr/lib/libgbm.so
-    
+
     # Install headers - copy all subdirectories from include/
     cp -r $(@D)/include/* $(STAGING_DIR)/usr/include/
     
@@ -123,6 +125,7 @@ define MALI_LIBS_INSTALL_STAGING_CMDS
         echo 'Libs: -L$${libdir} -lGLESv2'; \
         echo 'Cflags: -I$${includedir}'; \
     ) > $(STAGING_DIR)/usr/lib/pkgconfig/glesv2.pc
+
 endef
 
 define MALI_LIBS_INSTALL_TARGET_CMDS

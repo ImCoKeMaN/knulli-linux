@@ -2,6 +2,10 @@
 # fan-control — simple fan control daemon
 # Mode is determined at startup: quiet | normal | performance
 
+if ! knulli-board-capability "fan"; then
+    exit 1
+fi
+
 SHUTDOWN_FLAG="/var/run/shutdown.flag"
 LOCK_FILE="/var/run/fan-control.lock"
 
@@ -39,7 +43,9 @@ OFF_COUNT=0
 RELATCH_EVERY=5
 LOOP_COUNT=0
 
-MODE="${1:-normal}"
+MODE="${1:-$(/usr/bin/knulli-settings-get system.fan)}"
+MODE="${MODE:-normal}"
+
 case "$MODE" in
     quiet|normal|performance) ;;
     *)
@@ -190,7 +196,7 @@ pick_hottest_temp_file || TEMP_FILE=""
         performance)    FIXED="$FAN_MAX" ;;
     esac
     echo "$FIXED" > "$FAN_STATE"
-    sleep infinity # So daemon controller sees it as still running
+    while :; do sleep 3600; done # So daemon controller sees it as still running
 }
 
 LAST="0"

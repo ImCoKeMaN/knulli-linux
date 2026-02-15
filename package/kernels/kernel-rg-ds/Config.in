@@ -1,0 +1,5 @@
+config BR2_PACKAGE_KERNEL_RG_DS
+    bool "kernel-rg-ds"
+    select BR2_PACKAGE_EXTRA_FIRMWARES
+    help
+      BSP kernel RG DS (RK3568 based device)
