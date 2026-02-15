@@ -2651,6 +2651,19 @@ libretro:
     gpsp:
       features: [cheevos]
       shared: [rewind, autosave]
+      cfeatures:
+          color_correction:
+            group: ADVANCED OPTIONS
+            prompt:      COLOR CORRECTION
+            description: Simulates the color display of the original hardware.
+            choices:
+                preset: switchauto
+        interframe_blending:
+            group: ADVANCED OPTIONS
+            prompt:      INTERFRAME BLENDING
+            description: Simulates the LCD ghosting used for transparency effects on the original hardware.
+            choices:
+                preset: switchauto
     handy:
       features: [netplay, cheevos]
       shared: [rewind, autosave]
@@ -6345,6 +6358,20 @@ libretro:
                             "110": 110
                             "115": 115
                             "120": 120
+                    color_correction:
+                        group: ADVANCED OPTIONS
+                        prompt:      COLOR CORRECTION
+                        description: Simulates the color display of the original hardware.
+                        choices:
+                            preset: switchauto
+                    interframe_blending:
+                        group: ADVANCED OPTIONS
+                        prompt:      INTERFRAME BLENDING
+                        description: Simulates the LCD ghosting used for transparency effects on the original hardware.
+                        choices:
+                            "Off":             disabled
+                            "Smart":           smart
+                            "Motion Blur":     motion blur
     vecx:
       features: [cheevos]
       shared: [rewind, autosave]
