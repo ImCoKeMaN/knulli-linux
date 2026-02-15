@@ -952,7 +952,18 @@ def generateCoreSettings(coreSettings: UnixSettings, system: Emulator, rom: Path
             coreSettings.save('pce_nospritelimit', '"' + system.config['pce_nospritelimit'] + '"')
         else:
             coreSettings.save('pce_nospritelimit', '"enabled"')
-
+        # Set pce color palette
+        if system.config['core'] == 'pce':
+            if system.isOptSet('pce_palette'):
+                coreSettings.save('pce_palette', '"' + system.config['pce_palette'] + '"')
+            else:
+                coreSettings.save('pce_palette', '"Composite"')
+        else:
+            if system.isOptSet('pce_fast_palette'):
+                coreSettings.save('pce_fast_palette', '"' + system.config['pce_fast_palette'] + '"')
+            else:
+                coreSettings.save('pce_fast_palette', '"Composite"')
+                
     # Nec PC-8800
     if system.config['core'] == 'quasi88':
         # PC Model
@@ -1041,7 +1052,11 @@ def generateCoreSettings(coreSettings: UnixSettings, system: Emulator, rom: Path
             coreSettings.save('sgx_nospritelimit', '"' + system.config['sgx_nospritelimit'] + '"')
         else:
             coreSettings.save('sgx_nospritelimit', '"enabled"')
-
+        if system.isOptSet('sgx_palette'):
+            coreSettings.save('sgx_palette', '"' + system.config['sgx_palette'] + '"')
+        else:
+            coreSettings.save('sgx_palette', '"Composite"')
+            
     # Nec PC-FX
     if (system.config['core'] == 'pcfx'):
         # Remove 16-sprites-per-scanline hardware limit
