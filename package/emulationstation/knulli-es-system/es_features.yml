@@ -4222,6 +4222,13 @@ libretro:
                 choices:
                     "Off":        disabled
                     "On":         enabled
+            sgx_palette:
+                prompt: COLOR PALETTE
+                group: ADVANCED OPTIONS
+                description: Color palette to apply.
+                choices:
+                    "RGB":          RGB
+                    "Composite":    Composite
     mednafen_wswan:
       features: [netplay, cheevos]
       shared: [rewind, autosave]
@@ -5082,6 +5089,13 @@ libretro:
                 choices:
                     "PCE Joypad": 1
                     "PCE Mouse":  2
+            pce_palette:
+                prompt: COLOR PALETTE
+                group: ADVANCED OPTIONS
+                description: Color palette to apply.
+                choices:
+                    "RGB":          RGB
+                    "Composite":    Composite
     pce_fast:
       features: [netplay, cheevos]
       shared: [rewind, autosave]
@@ -5097,6 +5111,13 @@ libretro:
                 choices:
                     "PCE Joypad": 1
                     "PCE Mouse":  2
+            pce_fast_palette:
+                prompt: COLOR PALETTE
+                group: ADVANCED OPTIONS
+                description: Color palette to apply.
+                choices:
+                    "RGB":          RGB
+                    "Composite":    Composite
     pcfx:
       features: [netplay, cheevos]
       shared: [rewind, autosave]
