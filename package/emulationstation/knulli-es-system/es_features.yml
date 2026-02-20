@@ -2658,7 +2658,7 @@ libretro:
             description: Simulates the color display of the original hardware.
             choices:
                 preset: switchauto
-        interframe_blending:
+          interframe_blending:
             group: ADVANCED OPTIONS
             prompt:      INTERFRAME BLENDING
             description: Simulates the LCD ghosting used for transparency effects on the original hardware.
