@@ -1,0 +1,5 @@
+#reference "/userdata/shaders/shaders_glsl/handheld/simpletex_lcd_720p+gba-color.glslp"
+GRID_BIAS = "0.700000"
+DARKEN_GRID = "0.200000"
+DARKEN_COLOUR = "0.150000"
+BACKGROUND_INTENSITY = "0.700000"
