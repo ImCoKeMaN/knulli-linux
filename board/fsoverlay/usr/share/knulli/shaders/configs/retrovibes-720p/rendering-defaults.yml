@@ -1,1 +1,77 @@
-
+default:
+  shader: presets/retro_vibes_720p/generic_crt
+  
+psx:
+  shader: presets/retro_vibes_720p/psx
+snes: 
+  shader: /usr/share/knulli/shaders/crt/crt-blurPi
+nes:
+  shader: /usr/share/knulli/shaders/crt/crt-blurPi
+megadrive:
+  shader: presets/retro_vibes_720p/megadrive
+segacd:
+  shader: presets/retro_vibes_720p/megadrive
+sega32x:
+  shader: presets/retro_vibes_720p/megadrive
+gamegear:
+  shader: presets/retro_vibes_720p/generic_lcd1x
+pokemini:
+  shader: none
+gb: 
+  shader: presets/retro_vibes_720p/gb
+gbc:
+  shader: presets/retro_vibes_720p/generic_lcd3x
+gba:
+  shader: presets/retro_vibes_720p/gba
+virtualboy: 
+  shader: none
+nds:
+  shader: none
+psp:
+  shader: /usr/share/knulli/shaders/sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
+lynx:
+  shader: presets/retro_vibes_720p/lynx
+gamate:
+  shader: /usr/share/knulli/shaders/handheld/dot
+gmaster:
+  shader: presets/retro_vibes_720p/generic_lcd3x
+supervision:
+  shader: /usr/share/knulli/shaders/sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
+megaduck: 
+  shader: presets/retro_vibes_720p/generic_lcd3x
+gamecom:
+  shader: presets/retro_vibes_720p/generic_lcd3x
+ngpc:
+  shader: presets/retro_vibes_720p/ngpc
+ngp:
+  shader: presets/retro_vibes_720p/generic_lcd1x
+wswan:
+  shader: presets/retro_vibes_720p/generic_lcd1x
+wswanc:
+  shader: presets/retro_vibes_720p/wswanc
+gp32:
+  shader: presets/retro_vibes_720p/generic_lcd3x
+arduboy:
+  shader: /usr/share/knulli/shaders/sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
+lowresnx:
+  shader: presets/retro_vibes_720p/generic_lcd1x
+lutro:
+  shader: none
+pico8:
+  shader: none
+tic80:
+  shader: /usr/share/knulli/shaders/sharp-shimmerless/shaders_glsl/sharp-shimmerless
+uzebox:
+  shader: /usr/share/knulli/shaders/sharp-shimmerless/shaders_glsl/sharp-shimmerless
+vircon32:
+  shader: none
+scummvm:
+  shader: none
+zmachine:
+  shader: none
+gameandwatch:
+  shader: none
+lcdgames:
+  shader: none  
+gamepock:
+  shader: presets/retro_vibes_480p/generic_lcd3x
