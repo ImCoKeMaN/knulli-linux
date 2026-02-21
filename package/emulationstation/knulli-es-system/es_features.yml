@@ -13636,11 +13636,11 @@ azahar:
       prompt: SCREEN PROPORTION
       description: Determines the proportion of the larger screen relative to the smaller one.
       choices:
-        "2":    2
-        "3":    3
-        "4 (Default)":   4
-        "5":    5
-        "6":    6
+        "2":            2
+        "3":            3
+        "4 (Default)":  4
+        "5":            5
+        "6":            6
     azahar_resolution_factor:
       submenu: GRAPHICS
       prompt: RENDERING RESOLUTION
