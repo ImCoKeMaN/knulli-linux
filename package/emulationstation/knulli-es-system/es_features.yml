@@ -13634,7 +13634,7 @@ azahar:
         "Hybrid Screen Bottom":  5-true
     azahar_large_screen_proportion:
       prompt: SCREEN PROPORTION
-      description: Determines the proportion of the larger screen relative to the other.
+      description: Determines the proportion of the larger screen relative to the smaller one.
       choices:
         "2":    2
         "3":    3
