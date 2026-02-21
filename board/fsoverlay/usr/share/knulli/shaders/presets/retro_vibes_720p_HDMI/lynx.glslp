@@ -1,1 +1,1 @@
-#reference "/usr/share/knulli/shaders/handheld/sameboy-lcd.glslp"
+#reference "../../handheld/sameboy-lcd.glslp"

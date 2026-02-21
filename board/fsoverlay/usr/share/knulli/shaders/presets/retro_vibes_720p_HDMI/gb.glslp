@@ -1,3 +1,4 @@
-#reference "/userdata/shaders/presets/pixel_transparency/pixel_transparency-lcd1x.glslp"
+#reference "../pixel_transparency/pixel_transparency-lcd1x.glslp"
 PT_SHADOW_OFFSET_X = "1.000000"
 PT_SHADOW_OFFSET_Y = "1.000000"
+PT_SHADOW_ENABLE = "0.000000"

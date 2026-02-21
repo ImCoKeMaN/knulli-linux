@@ -1,6 +1,7 @@
-#reference "/userdata/shaders/presets/pixel_transparency/pixel_transparency-simpletex_lcd.glslp"
+#reference "../pixel_transparency/pixel_transparency-simpletex_lcd.glslp"
 DARKEN_GRID = "0.200000"
 DARKEN_COLOUR = "0.100000"
 BACKGROUND_INTENSITY = "0.800000"
 PT_SHADOW_OFFSET_X = "1.000000"
 PT_SHADOW_OFFSET_Y = "1.000000"
+PT_SHADOW_ENABLE = "0.000000"
