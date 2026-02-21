@@ -4,9 +4,9 @@ default:
 psx:
   shader: presets/retro_vibes_720p_HDMI/psx
 snes: 
-  shader: /usr/share/knulli/shaders/crt/crt-blurPi
+  shader: crt/crt-blurPi
 nes:
-  shader: /usr/share/knulli/shaders/crt/crt-blurPi
+  shader: crt/crt-blurPi
 megadrive:
   shader: presets/retro_vibes_720p_HDMI/megadrive
 segacd:
@@ -28,15 +28,15 @@ virtualboy:
 nds:
   shader: none
 psp:
-  shader: /usr/share/knulli/shaders/sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
 lynx:
   shader: presets/retro_vibes_720p_HDMI/lynx
 gamate:
-  shader: /usr/share/knulli/shaders/handheld/dot
+  shader: handheld/dot
 gmaster:
   shader: presets/retro_vibes_720p_HDMI/generic_lcd3x
 supervision:
-  shader: /usr/share/knulli/shaders/sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
 megaduck: 
   shader: presets/retro_vibes_720p_HDMI/generic_lcd3x
 gamecom:
@@ -52,7 +52,7 @@ wswanc:
 gp32:
   shader: presets/retro_vibes_720p_HDMI/generic_lcd3x
 arduboy:
-  shader: /usr/share/knulli/shaders/sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
 lowresnx:
   shader: presets/retro_vibes_720p_HDMI/generic_lcd1x
 lutro:
@@ -60,9 +60,9 @@ lutro:
 pico8:
   shader: none
 tic80:
-  shader: /usr/share/knulli/shaders/sharp-shimmerless/shaders_glsl/sharp-shimmerless
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless
 uzebox:
-  shader: /usr/share/knulli/shaders/sharp-shimmerless/shaders_glsl/sharp-shimmerless
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless
 vircon32:
   shader: none
 scummvm:
