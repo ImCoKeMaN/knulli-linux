@@ -26,7 +26,7 @@ virtualboy:
 nds:
   shader: none
 psp:
-  shader: /usr/share/knulli/shaders/sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
 lynx:
   shader: presets/retro_vibes_480p/lynx
 gamate:
@@ -34,7 +34,7 @@ gamate:
 gmaster:
   shader: presets/retro_vibes_480p/generic_lcd3x
 supervision:
-  shader: /usr/share/knulli/shaders/sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
 megaduck: 
   shader: presets/retro_vibes_480p/generic_lcd3x
 gamecom:
@@ -50,9 +50,9 @@ wswanc:
 gp32:
   shader: presets/retro_vibes_480p/generic_lcd3x
 arduboy:
-  shader: /usr/share/knulli/shaders/sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
 lowresnx:
-  shader: /usr/share/knulli/shaders/sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
 lutro:
   shader: none
 pico8:
@@ -60,7 +60,7 @@ pico8:
 tic80:
   shader: presets/retro_vibes_480p/generic_lcd3x
 uzebox:
-  shader: /usr/share/knulli/shaders/sharp-shimmerless/shaders_glsl/sharp-shimmerless
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless
 vircon32:
   shader: none
 scummvm:
