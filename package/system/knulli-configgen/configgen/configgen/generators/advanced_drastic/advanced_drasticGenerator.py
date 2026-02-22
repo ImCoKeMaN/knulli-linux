@@ -67,7 +67,7 @@ class Advanced_DrasticGenerator(Generator):
             if os.path.isdir(board_config_src):
                 os.system(f"cp -rv {board_config_src}/* {advanced_drastic_config_dir}/")
 
-        if board_changes or settings_missing:
+        if board_changed or settings_missing:
             #Restore if settings missing
             if settings_missing:
                 os.system(f"cp -rv /usr/share/advanced_drastic/resources/* {advanced_drastic_resources_dir}/")
