@@ -489,7 +489,8 @@ def getHudConfig(system: Emulator, systemName: str, emulator: str, core: str, ro
         configstr += system.config["hud_custom"].replace("\\n", "\n")
     elif mode == "bat":
         batt_font, batt_width = bat_layout(gameResolution)
-        configstr += f"position={hud_position}\nlegacy_layout=false\nhud_compact\nwidth={batt_width}\nfps=0\nframe_timing=0\ncpu_stats=0\ngpu_stats=0\nexec=sh -c 'IFS= read -r b < /tmp/battery.percent; printf \"%s%%\" \"$b\"'\nfont_size={batt_font}\ntext_outline_thickness=0.7\nalpha=0.9\nbackground_alpha=0\nfont_file=/usr/share/fonts/dejavu/DejaVuSansMono.ttf"
+        align = "r" if hud_position in ("top-right", "bottom-right") else "l"
+        configstr += f"position={hud_position}\nlegacy_layout=false\nhud_compact\nwidth={batt_width}\nfps=0\nframe_timing=0\ncpu_stats=0\ngpu_stats=0\nexec=/usr/bin/knulli-battery-hud {align}\nfont_size={batt_font}\ntext_outline_thickness=0.7\nalpha=0.9\nbackground_alpha=0\nfont_file=/usr/share/fonts/dejavu/DejaVuSansMono.ttf"
     else:
         configstr = configstr + "background_alpha=0\n" # hide the background
 
