@@ -310,10 +310,6 @@ def getHudBezel(system: Emulator, generator: Generator, rom: str, gameResolution
     bezel_ratio  = bezel_width / bezel_height
     ingame_ratio = generator.getInGameRatio(system.config, gameResolution, rom)
 
-    if (bezel_ratio == ingame_ratio):
-        eslog.debug("game resolution equals bezel size - no bezel applied")
-        return None
-
     # the screen and bezel ratio must be approximatly the same
     if bordersSize is None:
         if abs(screen_ratio - bezel_ratio) > max_ratio_delta:
