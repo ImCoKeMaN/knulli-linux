@@ -70,12 +70,12 @@ class Advanced_DrasticGenerator(Generator):
         if board_changed or settings_missing:
             #Restore if settings missing
             if settings_missing:
-                os.system(f"cp -rv /usr/share/advanced_drastic/resources/* {advanced_drastic_resources_dir}/")
+                os.system(f"cp -rv /usr/share/advanced_drastic/resources/settings.json {advanced_drastic_resources_dir}/settings.json")
 
             # board config
             board_settings_src = f"/usr/share/advanced_drastic/devices/{board}/resources"
             if os.path.isdir(board_settings_src):
-                os.system(f"cp -rv {board_config_src}/* {advanced_drastic_resources_dir}/")
+                os.system(f"cp -rv {board_settings_src}/settings.json {advanced_drastic_resources_dir}/settings.json")
 
         # Bind mount saves and states locations
         saves_target = os.path.join(advanced_drastic_root, "backup")
