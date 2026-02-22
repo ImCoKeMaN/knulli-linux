@@ -30,6 +30,7 @@ class Advanced_DrasticGenerator(Generator):
         advanced_drastic_root = "/userdata/system/configs/advanced_drastic"
         advanced_drastic_bin = "/userdata/system/configs/advanced_drastic/launch.sh"
         advanced_drastic_conf = "/userdata/system/configs/advanced_drastic/config/drastic.cfg"
+        advanced_drastic_settings = "/userdata/system/configs/advanced_drastic/resources/settings.json"
         advanced_drastic_saves = "/userdata/saves/nds/advanced_drastic/saves"
         advanced_drastic_states = "/userdata/saves/nds/advanced_drastic/states"
 
@@ -49,9 +50,12 @@ class Advanced_DrasticGenerator(Generator):
             os.system(f"cp /boot/boot/knulli.board {advanced_drastic_root}")
 
         advanced_drastic_config_dir = f"{advanced_drastic_root}/config"
+        advanced_drastic_resources_dir = f"{advanced_drastic_root}/resources"
         os.makedirs(advanced_drastic_config_dir, exist_ok=True)
+        os.makedirs(advanced_drastic_resources_dir, exist_ok=True)
 
         config_missing = not os.path.isfile(advanced_drastic_conf)
+        settings_missing = not os.path.isfile(advanced_drastic_settings)
 
         if board_changed or config_missing:
             # Restore if config missing
@@ -62,6 +66,16 @@ class Advanced_DrasticGenerator(Generator):
             board_config_src = f"/usr/share/advanced_drastic/devices/{board}/config"
             if os.path.isdir(board_config_src):
                 os.system(f"cp -rv {board_config_src}/* {advanced_drastic_config_dir}/")
+
+        if board_changes or settings_missing:
+            #Restore if settings missing
+            if settings_missing:
+                os.system(f"cp -rv /usr/share/advanced_drastic/resources/* {advanced_drastic_resources_dir}/")
+
+            # board config
+            board_settings_src = f"/usr/share/advanced_drastic/devices/{board}/resources"
+            if os.path.isdir(board_settings_src):
+                os.system(f"cp -rv {board_config_src}/* {advanced_drastic_resources_dir}/")
 
         # Bind mount saves and states locations
         saves_target = os.path.join(advanced_drastic_root, "backup")
