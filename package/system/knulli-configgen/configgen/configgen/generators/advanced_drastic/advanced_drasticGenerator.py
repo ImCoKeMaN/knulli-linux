@@ -137,6 +137,28 @@ class Advanced_DrasticGenerator(Generator):
         if settings_to_update:
             configureSettings(settings_to_update, advanced_drastic_conf)
 
+        # JSON Settings
+        json_settings_to_update = {}
+
+        if system.isOptSet("adv_drastic_pip"):
+            json_settings_to_update["position"] = int(system.config["adv_drastic_pip"])
+        else:
+            json_settings_to_update["position"] = 1
+
+        if system.isOptSet("adv_drastic_layout"):
+            json_settings_to_update["mode"] = int(system.config["adv_drastic_layout"])
+        else:
+            json_settings_to_update["mode"] = 0
+
+        if system.isOptSet("adv_drastic_blur") and system.getOptBoolean('adv_drastic_blur') == True:
+            json_settings_to_update["pixel_filter"] = 0
+        else:
+            json_settings_to_update["pixel_filter"] = 1
+
+        # Only apply if there are changes detected
+        if json_settings_to_update:
+            configureJsonSettings(json_settings_to_update, advanced_drastic_settings)
+
         os.chdir(advanced_drastic_root)
         commandArray = [advanced_drastic_bin, rom]
         return Command.Command(
@@ -165,6 +187,40 @@ def configureSettings(settings_to_update: dict, config_path: str):
                         file.write(f"{key} = {new_value}\n")
                     else:
                         file.write(line)
+                else:
+                    file.write(line)
+            else:
+                file.write(line)
+
+def configureJsonSettings(settings_to_update: dict, json_path: str):
+    if not os.path.isfile(json_path):
+        return
+
+    with open(json_path, "r", encoding="utf-8") as file:
+        lines = file.readlines()
+
+    with open(json_path, "w", encoding="utf-8") as file:
+        for line in lines:
+            stripped = line.strip()
+
+            if ":" in stripped and stripped.startswith('"'):
+                key_part, value_part = stripped.split(":", 1)
+                key = key_part.strip().strip('"')
+
+                if key in settings_to_update:
+                    new_value = settings_to_update[key]
+
+                    has_comma = value_part.strip().endswith(",")
+
+                    if isinstance(new_value, bool):
+                        literal = "true" if new_value else "false"
+                    elif isinstance(new_value, (int, float)):
+                        literal = str(new_value)
+                    else:
+                        literal = f'"{new_value}"'
+
+                    comma = "," if has_comma else ""
+                    file.write(f'  "{key}":{literal}{comma}\n')
                 else:
                     file.write(line)
             else:
