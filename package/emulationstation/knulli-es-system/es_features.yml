@@ -2657,14 +2657,12 @@ libretro:
             group: ADVANCED OPTIONS
             prompt:      COLOR CORRECTION
             description: Simulates the color display of the original hardware.
-            choices:
-                preset: switchauto
+            preset: switchauto
           interframe_blending:
             group: ADVANCED OPTIONS
             prompt:      INTERFRAME BLENDING
             description: Simulates the LCD ghosting used for transparency effects on the original hardware.
-            choices:
-                preset: switchauto
+            preset: switchauto
     handy:
       features: [netplay, cheevos]
       shared: [rewind, autosave]
@@ -6384,8 +6382,7 @@ libretro:
                         group: ADVANCED OPTIONS
                         prompt:      COLOR CORRECTION
                         description: Simulates the color display of the original hardware.
-                        choices:
-                            preset: switchauto
+                        preset: switchauto
                     interframe_blending:
                         group: ADVANCED OPTIONS
                         prompt:      INTERFRAME BLENDING
