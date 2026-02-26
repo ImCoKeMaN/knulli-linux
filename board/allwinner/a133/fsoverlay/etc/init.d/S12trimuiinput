@@ -1,8 +1,12 @@
 #!/bin/sh
 
 BIN="/usr/bin/trimui_inputd"
-
 [ -f "$BIN" ] || exit 0
+
+BOARD=$(cat /boot/boot/knulli.board)
+if [ "$BOARD" != "trimui-smart-pro" ] && [ "$BOARD" != "trimui-brick" ]; then
+        exit 0
+fi
 
 case "$1" in
     start)
@@ -14,3 +18,4 @@ case "$1" in
 esac
 
 exit 0
+
