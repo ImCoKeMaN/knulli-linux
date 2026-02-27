@@ -81,7 +81,7 @@ case "$ARCH" in
         BOARD_CAPABILITIES[adb]="rg-vita-pro"
         BOARD_CAPABILITIES[hud]="rg-vita-pro"
         BOARD_CAPABILITIES[fan]="rg-vita-pro"
-	;;
+        ;;
     sm8250)
         BOARD_CAPABILITIES[rgb]="rp5"
         BOARD_CAPABILITIES[hdmi]="rp5"
