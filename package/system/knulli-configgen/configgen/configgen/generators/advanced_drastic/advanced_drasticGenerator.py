@@ -145,11 +145,6 @@ class Advanced_DrasticGenerator(Generator):
         else:
             json_settings_to_update["position"] = 1
 
-        if system.isOptSet("adv_drastic_layout"):
-            json_settings_to_update["mode"] = int(system.config["adv_drastic_layout"])
-        else:
-            json_settings_to_update["mode"] = 0
-
         if system.isOptSet("adv_drastic_blur") and system.getOptBoolean('adv_drastic_blur') == True:
             json_settings_to_update["pixel_filter"] = 0
         else:

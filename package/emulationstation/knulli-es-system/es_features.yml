@@ -11647,23 +11647,6 @@ drastic:
 advanced_drastic:
   shared: [powermode, tdp, videomode, bezel, bezel_stretch, hud, hud_corner, bezel.tattoo, bezel.tattoo_corner, bezel.tattoo_file, bezel.resize_tattoo]
   cfeatures:
-        adv_drastic_layout:
-            group:       ADVANCED OPTIONS
-            prompt:      SCREEN LAYOUT
-            description: Select which screen layout mode is used.
-            choices:
-                "PIP Small (Default)":  0
-                "PIP Large":            1
-                "Single (Integer)": 2
-                "Single (Fill)": 3
-                "Dual Vertical (Integer)": 4
-                "Dual Vertical (Fill)": 5
-                "Dual Horizontal (Integer)": 6
-                "Dual Horizontal (Fill)": 7
-                "Dual Horizontal (Big + Small)": 8
-                "Dual Horizontal (Big + Very Small)": 9
-                "Dual Vertical (Big + Small)": 10
-                "Dual Rotated": 11
         adv_drastic_pip:
             group:       ADVANCED OPTIONS
             prompt:      PIP CORNER
