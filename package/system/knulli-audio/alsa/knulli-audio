@@ -136,8 +136,8 @@ case "${ACTION}" in
                             ;;
                         "sm8250")
                             # boost max volume a bit
-                            amixer -c 0 sset 'WSA_RX0 Digital' 112
-                            amixer -c 0 sset 'WSA_RX1 Digital' 112
+                            amixer -c 0 sset 'WSA_RX0 Digital' 104
+                            amixer -c 0 sset 'WSA_RX1 Digital' 104
                             ;;
                         *)
                             # do nothing!
