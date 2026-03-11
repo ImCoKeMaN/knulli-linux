@@ -64,7 +64,7 @@ knulli_wifi_configure() {
         if [ -z "$settings_ssid" ]; then
             default_ssid="$(/usr/bin/knulli-settings-get -f "$DEFAULTCONF" wifi${X}.ssid)"
             if [ -n "$default_ssid" ]; then
-                /usr/bin/knulli-settings-set -f "$KNULLICONF" wifi${X}.ssid "$default_ssid"
+                /usr/bin/knulli-settings-set-queue -f "$KNULLICONF" wifi${X}.ssid "$default_ssid"
                 settings_ssid=$default_ssid
             fi
         fi
@@ -72,7 +72,7 @@ knulli_wifi_configure() {
         if [ -z "$settings_key" ]; then
             default_key="$(/usr/bin/knulli-settings-get -f "$DEFAULTCONF" wifi${X}.key)"
             if [ -n "$default_key" ]; then
-                /usr/bin/knulli-settings-set -f "$KNULLICONF" wifi${X}.key "$default_key"
+                /usr/bin/knulli-settings-set-queue -f "$KNULLICONF" wifi${X}.key "$default_key"
                 settings_key=$default_key
             fi
         fi

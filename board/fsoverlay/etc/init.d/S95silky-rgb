@@ -15,48 +15,56 @@ is_running() {
 }
 
 curl_kill() {
-    curl -fsS --connect-timeout 1 --max-time 2 "http://127.0.0.1:1235/kill" >/dev/null 2>&1
+    curl -fsS --connect-timeout 1 --max-time 1 "http://127.0.0.1:1235/kill" >/dev/null 2>&1
 }
 
-wait_batteryplus_ready() {
-  local timeout=5
-
-  for i in $(seq 1 "$timeout"); do
-    if [ -f /tmp/battery.percent ]; then
-      if grep -Eq '^(100|[0-9]{1,2})$' /tmp/battery.percent; then
-        return 0
-      fi
-    fi
-    sleep 1
-  done
-
-  return 1
+wait_es() {
+    i=0
+    while [ "$i" -lt 50 ]; do
+        [ -f /tmp/emulationstation.ready ] && return 0
+        sleep 0.1
+        i=$((i + 1))
+    done
+    return 1
 }
 
 post_battery_sync() {
-    local TIMEOUT=30
-    local COUNT=0
+    local LOOP_TIMEOUT=10 # 5 seconds
+    local LOOP_COUNT=0
     local BATTERY_STATE
     local BATTERY_PERCENTAGE
+    local A_BRI
+    local BRI
 
-    BATTERY_STATE="$(/usr/bin/knulli-battery-check status 2>/dev/null || true)"
-    BATTERY_PERCENTAGE="$(/usr/bin/knulli-battery-check capacity 2>/dev/null || true)"
+    BATTERY_STATE="$(/usr/bin/knulli-battery-check status 2>/dev/null)"
+    BATTERY_PERCENTAGE="$(/usr/bin/knulli-battery-check capacity 2>/dev/null)"
 
     # Error cases: No state/percentage given.
     [ -n "$BATTERY_STATE" ] && [ -n "$BATTERY_PERCENTAGE" ] || return 61
 
-    while [ "$COUNT" -lt "$TIMEOUT" ]; do
-      # Stop retrying if daemon died
-      is_running || return 63
+    while [ "$LOOP_COUNT" -lt "$LOOP_TIMEOUT" ]; do
+        # Stop retrying if daemon died
+        is_running || return 63
 
-      if curl -fsS --connect-timeout 1 --max-time 1 \
-          -X POST -d "${BATTERY_PERCENTAGE} ${BATTERY_STATE}" \
-          "http://127.0.0.1:1235/update-battery-state" >/dev/null 2>&1; then
-        return 0
-      fi
+        if curl -fsS --connect-timeout 0.1 --max-time 0.25 \
+            -X POST -d "${BATTERY_PERCENTAGE} ${BATTERY_STATE}" \
+            "http://127.0.0.1:1235/update-battery-state" >/dev/null 2>&1; then
 
-      sleep 1
-      COUNT=$((COUNT + 1))
+            A_BRI="$(knulli-settings-get led.brightness.adaptive 2>/dev/null)"
+            if [ "$A_BRI" = "1" ]; then
+                BRI="$(knulli-brightness 2>/dev/null)"
+                if [ -n "$BRI" ]; then
+                    curl -fsS --connect-timeout 0.1 --max-time 0.25 \
+                        -X POST -d "$BRI" \
+                        "http://127.0.0.1:1235/update-screen-state" >/dev/null 2>&1
+                fi
+            fi
+
+            return 0
+        fi
+
+        sleep 0.25
+        LOOP_COUNT=$((LOOP_COUNT + 1))
     done
 
     return 62
@@ -72,15 +80,16 @@ start_daemon() {
 
     DAEMON_ENABLED=$(/usr/bin/knulli-settings-get $DAEMON_ENABLED_KEY)
 
-    if [ ! -z "$DAEMON_ENABLED" ] && [ "$DAEMON_ENABLED" == "0" ]; then
+    if [ -n "$DAEMON_ENABLED" ] && [ "$DAEMON_ENABLED" = "0" ]; then
         echo "$DAEMON_NAME is disabled."
         return 0
     fi
 
+    wait_es
+
     start-stop-daemon --start --quiet --background --make-pidfile --pidfile "$PIDFILE" --exec "$DAEMON" \
         && echo "$DAEMON_NAME started OK" || { echo "$DAEMON_NAME failed to start"; exit 1; }
 
-    wait_batteryplus_ready
     post_battery_sync
 }
 
@@ -93,15 +102,17 @@ stop_daemon() {
         return 0
     fi
 
-    curl_kill || true
+    curl_kill
 
-    for _ in 1 2 3 4; do
+    i=0
+    while [ "$i" -lt 4 ]; do
         is_running || break
         sleep 0.5
+        i=$((i + 1))
     done
 
     if is_running; then
-        start-stop-daemon --stop --quiet --pidfile "$PIDFILE" || true
+        start-stop-daemon --stop --quiet --pidfile "$PIDFILE"
         echo "$DAEMON_NAME force-stopped"
     else
         echo "$DAEMON_NAME stopped"
