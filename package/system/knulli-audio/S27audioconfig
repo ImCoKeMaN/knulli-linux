@@ -73,6 +73,15 @@ try_apply_audioconfig() {
 start_audioconfig() {
     # this script must be started after pipewire and udev, but before es
     # and thus, we let splash before config here while udev is the services taking the most time
+    # Add some retries before starting
+
+    local retries=10
+    while [ $retries -gt 0 ]; do
+        VOLUME=$(/usr/bin/knulli-settings-get-master audio.volume)
+        test -n "${VOLUME}" && break
+        sleep 0.5
+        retries=$((retries - 1))
+    done
 
     # set default device and volume
     DEVICE=$(/usr/bin/knulli-settings-get-master audio.device)
