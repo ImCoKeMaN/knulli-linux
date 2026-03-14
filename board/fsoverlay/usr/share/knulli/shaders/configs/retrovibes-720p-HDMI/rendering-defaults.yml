@@ -1,28 +1,28 @@
 default:
-  shader: presets/retro_vibes_720p_HDMI/generic_crt2
+  shader: presets/retrovibes_720p_HDMI/generic_crt2
   
 psx:
-  shader: presets/retro_vibes_720p_HDMI/psx
+  shader: presets/retrovibes_720p_HDMI/psx
 snes: 
   shader: crt/crt-blurPi
 nes:
   shader: crt/crt-blurPi
 megadrive:
-  shader: presets/retro_vibes_720p_HDMI/megadrive
+  shader: presets/retrovibes_720p_HDMI/megadrive
 segacd:
-  shader: presets/retro_vibes_720p_HDMI/megadrive
+  shader: presets/retrovibes_720p_HDMI/megadrive
 sega32x:
-  shader: presets/retro_vibes_720p_HDMI/megadrive
+  shader: presets/retrovibes_720p_HDMI/megadrive
 gamegear:
-  shader: presets/retro_vibes_720p_HDMI/gamegear
+  shader: presets/retrovibes_720p_HDMI/gamegear
 pokemini:
   shader: none
 gb: 
-  shader: presets/retro_vibes_720p_HDMI/gb
+  shader: presets/retrovibes_720p_HDMI/gb
 gbc:
-  shader: presets/retro_vibes_720p_HDMI/gbc
+  shader: presets/retrovibes_720p_HDMI/gbc
 gba:
-  shader: presets/retro_vibes_720p_HDMI/gba
+  shader: presets/retrovibes_720p_HDMI/gba
 virtualboy: 
   shader: none
 nds:
@@ -30,31 +30,31 @@ nds:
 psp:
   shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
 lynx:
-  shader: presets/retro_vibes_720p_HDMI/lynx
+  shader: presets/retrovibes_720p_HDMI/lynx
 gamate:
   shader: handheld/dot
 gmaster:
-  shader: presets/retro_vibes_720p_HDMI/generic_lcd3x
+  shader: presets/retrovibes_720p_HDMI/generic_lcd3x
 supervision:
   shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
 megaduck: 
-  shader: presets/retro_vibes_720p_HDMI/generic_lcd3x
+  shader: presets/retrovibes_720p_HDMI/generic_lcd3x
 gamecom:
-  shader: presets/retro_vibes_720p_HDMI/generic_lcd3x
+  shader: presets/retrovibes_720p_HDMI/generic_lcd3x
 ngpc:
-  shader: presets/retro_vibes_720p_HDMI/ngpc
+  shader: presets/retrovibes_720p_HDMI/ngpc
 ngp:
-  shader: presets/retro_vibes_720p_HDMI/generic_lcd1x
+  shader: presets/retrovibes_720p_HDMI/generic_lcd1x
 wswan:
-  shader: presets/retro_vibes_720p_HDMI/generic_lcd1x
+  shader: presets/retrovibes_720p_HDMI/generic_lcd1x
 wswanc:
-  shader: presets/retro_vibes_720p_HDMI/wswanc
+  shader: presets/retrovibes_720p_HDMI/wswanc
 gp32:
-  shader: presets/retro_vibes_720p_HDMI/generic_lcd3x
+  shader: presets/retrovibes_720p_HDMI/generic_lcd3x
 arduboy:
   shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
 lowresnx:
-  shader: presets/retro_vibes_720p_HDMI/generic_lcd1x
+  shader: presets/retrovibes_720p_HDMI/generic_lcd1x
 lutro:
   shader: none
 pico8:
@@ -74,4 +74,4 @@ gameandwatch:
 lcdgames:
   shader: none  
 gamepock:
-  shader: presets/retro_vibes_720p_HDMI/generic_lcd3x
+  shader: presets/retrovibes_720p_HDMI/generic_lcd3x

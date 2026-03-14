@@ -1,26 +1,26 @@
 default:
-  shader: presets/retro_vibes_480p/generic_crt2
+  shader: presets/retrovibes_480p/generic_crt2
   
 psx:
-  shader: presets/retro_vibes_480p/psx
+  shader: presets/retrovibes_480p/psx
 snes: 
-  shader: presets/retro_vibes_480p/snes
+  shader: presets/retrovibes_480p/snes
 megadrive:
-  shader: presets/retro_vibes_480p/megadrive
+  shader: presets/retrovibes_480p/megadrive
 segacd:
-  shader: presets/retro_vibes_480p/megadrive
+  shader: presets/retrovibes_480p/megadrive
 sega32x:
-  shader: presets/retro_vibes_480p/megadrive
+  shader: presets/retrovibes_480p/megadrive
 gamegear:
-  shader: presets/retro_vibes_480p/gamegear
+  shader: presets/retrovibes_480p/gamegear
 pokemini:
   shader: none
 gb: 
-  shader: presets/retro_vibes_480p/gb
+  shader: presets/retrovibes_480p/gb
 gbc:
-  shader: presets/retro_vibes_480p/gbc
+  shader: presets/retrovibes_480p/gbc
 gba:
-  shader: presets/retro_vibes_480p/gba
+  shader: presets/retrovibes_480p/gba
 virtualboy: 
   shader: none
 nds:
@@ -28,27 +28,27 @@ nds:
 psp:
   shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
 lynx:
-  shader: presets/retro_vibes_480p/lynx
+  shader: presets/retrovibes_480p/lynx
 gamate:
-  shader: presets/retro_vibes_480p/generic_lcd3x
+  shader: presets/retrovibes_480p/generic_lcd3x
 gmaster:
-  shader: presets/retro_vibes_480p/generic_lcd3x
+  shader: presets/retrovibes_480p/generic_lcd3x
 supervision:
   shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
 megaduck: 
-  shader: presets/retro_vibes_480p/generic_lcd3x
+  shader: presets/retrovibes_480p/generic_lcd3x
 gamecom:
-  shader: presets/retro_vibes_480p/generic_lcd3x
+  shader: presets/retrovibes_480p/generic_lcd3x
 ngpc:
-  shader: presets/retro_vibes_480p/ngpc
+  shader: presets/retrovibes_480p/ngpc
 ngp:
-  shader: presets/retro_vibes_480p/generic_lcd3x
+  shader: presets/retrovibes_480p/generic_lcd3x
 wswan:
-  shader: presets/retro_vibes_480p/generic_lcd3x
+  shader: presets/retrovibes_480p/generic_lcd3x
 wswanc:
-  shader: presets/retro_vibes_480p/generic_lcd3x
+  shader: presets/retrovibes_480p/generic_lcd3x
 gp32:
-  shader: presets/retro_vibes_480p/generic_lcd3x
+  shader: presets/retrovibes_480p/generic_lcd3x
 arduboy:
   shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
 lowresnx:
@@ -58,7 +58,7 @@ lutro:
 pico8:
   shader: none
 tic80:
-  shader: presets/retro_vibes_480p/generic_lcd3x
+  shader: presets/retrovibes_480p/generic_lcd3x
 uzebox:
   shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless
 vircon32:
@@ -72,4 +72,4 @@ gameandwatch:
 lcdgames:
   shader: none  
 gamepock:
-  shader: presets/retro_vibes_480p/generic_lcd3x
+  shader: presets/retrovibes_480p/generic_lcd3x

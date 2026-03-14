@@ -1,28 +1,28 @@
 default:
-  shader: presets/retro_vibes_768p/generic_crt2
+  shader: presets/retrovibes_768p/generic_crt2
   
 psx:
-  shader: presets/retro_vibes_768p/psx
+  shader: presets/retrovibes_768p/psx
 snes: 
   shader: crt/crt-blurPi
 nes:
   shader: crt/crt-blurPi
 megadrive:
-  shader: presets/retro_vibes_768p/megadrive
+  shader: presets/retrovibes_768p/megadrive
 segacd:
-  shader: presets/retro_vibes_768p/megadrive
+  shader: presets/retrovibes_768p/megadrive
 sega32x:
-  shader: presets/retro_vibes_768p/megadrive
+  shader: presets/retrovibes_768p/megadrive
 gamegear:
-  shader: presets/retro_vibes_768p/gamegear
+  shader: presets/retrovibes_768p/gamegear
 pokemini:
   shader: none
 gb: 
-  shader: presets/retro_vibes_768p/gb
+  shader: presets/retrovibes_768p/gb
 gbc:
-  shader: presets/retro_vibes_768p/gbc
+  shader: presets/retrovibes_768p/gbc
 gba:
-  shader: presets/retro_vibes_768p/gba
+  shader: presets/retrovibes_768p/gba
 virtualboy: 
   shader: none
 nds:
@@ -30,31 +30,31 @@ nds:
 psp:
   shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
 lynx:
-  shader: presets/retro_vibes_768p/lynx
+  shader: presets/retrovibes_768p/lynx
 gamate:
   shader: handheld/dot
 gmaster:
-  shader: presets/retro_vibes_768p/generic_lcd3x
+  shader: presets/retrovibes_768p/generic_lcd3x
 supervision:
   shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
 megaduck: 
-  shader: presets/retro_vibes_768p/generic_lcd3x
+  shader: presets/retrovibes_768p/generic_lcd3x
 gamecom:
-  shader: presets/retro_vibes_768p/generic_lcd3x
+  shader: presets/retrovibes_768p/generic_lcd3x
 ngpc:
-  shader: presets/retro_vibes_768p/ngpc
+  shader: presets/retrovibes_768p/ngpc
 ngp:
-  shader: presets/retro_vibes_768p/generic_lcd1x
+  shader: presets/retrovibes_768p/generic_lcd1x
 wswan:
-  shader: presets/retro_vibes_768p/generic_lcd1x
+  shader: presets/retrovibes_768p/generic_lcd1x
 wswanc:
-  shader: presets/retro_vibes_768p/wswanc
+  shader: presets/retrovibes_768p/wswanc
 gp32:
-  shader: presets/retro_vibes_768p/generic_lcd3x
+  shader: presets/retrovibes_768p/generic_lcd3x
 arduboy:
   shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
 lowresnx:
-  shader: presets/retro_vibes_768p/generic_lcd1x
+  shader: presets/retrovibes_768p/generic_lcd1x
 lutro:
   shader: none
 pico8:
@@ -74,4 +74,4 @@ gameandwatch:
 lcdgames:
   shader: none  
 gamepock:
-  shader: presets/retro_vibes_768p/generic_lcd3x
+  shader: presets/retrovibes_768p/generic_lcd3x
