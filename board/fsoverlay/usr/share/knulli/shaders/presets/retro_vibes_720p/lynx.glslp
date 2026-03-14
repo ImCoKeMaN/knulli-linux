@@ -1,4 +1,4 @@
-#reference "../pixel_transparency/pixel_transparency-simpletex_lcd.glslp"
+#reference "../../presets/pixel_transparency/pixel_transparency-simpletex_lcd.glslp"
 GRID_BIAS = "0.500000"
 DARKEN_GRID = "0.550000"
 DARKEN_COLOUR = "0.100000"

@@ -74,4 +74,4 @@ gameandwatch:
 lcdgames:
   shader: none  
 gamepock:
-  shader: presets/retro_vibes_480p/generic_lcd3x
+  shader: presets/retro_vibes_720p_HDMI/generic_lcd3x
