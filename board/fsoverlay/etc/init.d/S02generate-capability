@@ -46,7 +46,6 @@ case "$ARCH" in
         BOARD_CAPABILITIES[rumble]="trimui-smart-pro trimui-brick powkiddy-v90s powkiddy-v20 magicx-zero-28 magicx-zero-40"
         BOARD_CAPABILITIES[adb]="trimui-smart-pro trimui-brick powkiddy-v90s powkiddy-v20 magicx-zero-28 magicx-zero-40"
         BOARD_CAPABILITIES[hud]="trimui-smart-pro trimui-brick powkiddy-v90s powkiddy-v20 magicx-zero-28 magicx-zero-40"
-        BOARD_CAPABILITIES[bezelproject]="trimui-smart-pro"
         BOARD_CAPABILITIES[toggleswitch]="trimui-smart-pro trimui-brick"
         ;;
     rk3128)
@@ -70,8 +69,8 @@ case "$ARCH" in
         BOARD_CAPABILITIES[analogstick]="powkiddy-x55 powkiddy-rgb30"
         BOARD_CAPABILITIES[rumble]="rg-arc-s powkiddy-x55 powkiddy-rgb30"
         BOARD_CAPABILITIES[adb]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip"
-        BOARD_CAPABILITIES[bezelproject]="powkiddy-x55"
-        BOARD_CAPABILITIES[pwrled]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip"
+        BOARD_CAPABILITIES[hud]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip"
+	BOARD_CAPABILITIES[pwrled]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip"
         ;;
     rk3576)
         BOARD_CAPABILITIES[rgb]="rg-vita-pro"
@@ -81,10 +80,9 @@ case "$ARCH" in
         BOARD_CAPABILITIES[analogstick]="rg-vita-pro"
         BOARD_CAPABILITIES[rumble]="rg-vita-pro"
         BOARD_CAPABILITIES[adb]="rg-vita-pro"
-        BOARD_CAPABILITIES[bezelproject]="rg-vita-pro"
         BOARD_CAPABILITIES[hud]="rg-vita-pro"
         BOARD_CAPABILITIES[fan]="rg-vita-pro"
-	;;
+        ;;
     sm8250)
         BOARD_CAPABILITIES[rgb]="rp5"
         BOARD_CAPABILITIES[hdmi]="rp5"
@@ -93,7 +91,6 @@ case "$ARCH" in
         BOARD_CAPABILITIES[analogstick]="rp5"
         BOARD_CAPABILITIES[rumble]="rp5"
         BOARD_CAPABILITIES[adb]="rp5"
-        BOARD_CAPABILITIES[bezelproject]="rp5"
         BOARD_CAPABILITIES[hud]="rp5"
         BOARD_CAPABILITIES[fan]="rp5"
         ;;
@@ -104,7 +101,6 @@ case "$ARCH" in
         BOARD_CAPABILITIES[analogstick]="trimui-smart-pro-s"
         BOARD_CAPABILITIES[rumble]="trimui-smart-pro-s"
         BOARD_CAPABILITIES[adb]="trimui-smart-pro-s"
-        BOARD_CAPABILITIES[bezelproject]="trimui-smart-pro-s"
         BOARD_CAPABILITIES[hud]="trimui-smart-pro-s"
         BOARD_CAPABILITIES[fan]="trimui-smart-pro-s"
         BOARD_CAPABILITIES[toggleswitch]="trimui-smart-pro-s"
