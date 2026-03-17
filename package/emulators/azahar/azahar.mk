@@ -4,8 +4,8 @@
 #
 ################################################################################
 
-AZAHAR_VERSION = AZAHAR_PLUS_2123_A
-AZAHAR_SITE = https://github.com/AzaharPlus/AzaharPlus
+AZAHAR_VERSION = c8d39853c1ebacc5657e51d601713a09404ca8a7
+AZAHAR_SITE = https://github.com/johndoe6345789/azahar_libretro.git
 AZAHAR_SITE_METHOD = git
 AZAHAR_GIT_SUBMODULES = YES
 AZAHAR_LICENSE = GPLv2
@@ -34,17 +34,19 @@ else
     AZAHAR_CONF_OPTS += -DENABLE_SSE42=OFF
 endif
 
-ifeq ($(BR2_PACKAGE_BATOCERA_QT6),y)
-    AZAHAR_DEPENDENCIES += qt6base qt6tools qt6multimedia
-    AZAHAR_CONF_OPTS += -DENABLE_QT=ON
-    AZAHAR_CONF_OPTS += -DENABLE_QT_TRANSLATION=ON
-    AZAHAR_CONF_OPTS += -DENABLE_QT_UPDATE_CHECKER=OFF
-else
+
+# FIXME: set it by platform, but for now disable qt6 support entirely
+#ifeq ($(BR2_PACKAGE_BATOCERA_QT6),y)
+#    AZAHAR_DEPENDENCIES += qt6base qt6tools qt6multimedia
+#    AZAHAR_CONF_OPTS += -DENABLE_QT=ON
+#    AZAHAR_CONF_OPTS += -DENABLE_QT_TRANSLATION=ON
+#    AZAHAR_CONF_OPTS += -DENABLE_QT_UPDATE_CHECKER=OFF
+#else
     AZAHAR_CONF_OPTS += -DENABLE_QT=OFF
     AZAHAR_CONF_OPTS += -DENABLE_SDL2_FRONTEND=ON
-endif
+#endif
 
-ifeq ($(BR2_PACKAGE_BATOCERA_VULKAN),y)
+ifeq ($(BR2_PACKAGE_BATOCERA_VULKAN)$(BR2_PACKAGE_KNULLI_MALI_G57_VULKAN),y)
     AZAHAR_CONF_OPTS += -DENABLE_VULKAN=ON
     AZAHAR_DEPENDENCIES += vulkan-headers vulkan-loader
 else

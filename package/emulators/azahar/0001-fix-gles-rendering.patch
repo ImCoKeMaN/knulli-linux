@@ -1,0 +1,868 @@
+diff -urpN azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_qt/bootmanager.cpp new_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_qt/bootmanager.cpp
+--- azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_qt/bootmanager.cpp	2025-12-17 14:05:42.000000000 +0000
++++ new_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_qt/bootmanager.cpp	2026-03-10 19:15:57.811328974 +0000
+@@ -7,6 +7,7 @@
+ #include <QKeyEvent>
+ #include <QMessageBox>
+ #include <QPainter>
++#include <QTimer>
+ #include <QWindow>
+ #include "citra_qt/bootmanager.h"
+ #include "citra_qt/citra_qt.h"
+@@ -148,11 +149,12 @@ static std::unique_ptr<QOpenGLContext> C
+     if (gles) {
+         format.setRenderableType(QSurfaceFormat::RenderableType::OpenGLES);
+         format.setVersion(3, 2);
++        // OpenGL ES doesn't use core/compatibility profiles - don't set profile
+     } else {
+         format.setRenderableType(QSurfaceFormat::RenderableType::OpenGL);
+         format.setVersion(4, 3);
++        format.setProfile(QSurfaceFormat::CoreProfile);
+     }
+-    format.setProfile(QSurfaceFormat::CoreProfile);
+ 
+     if (Settings::values.renderer_debug) {
+         format.setOption(QSurfaceFormat::FormatOption::DebugContext);
+@@ -205,7 +207,17 @@ public:
+             LOG_ERROR(Frontend, "Unable to create shared OpenGL context");
+         }
+ 
+-        surface = main_surface;
++        // On EGLFS, we must have a valid surface - rendering without one will produce a black screen
++        if (main_surface) {
++            surface = main_surface;
++        } else {
++            // This should not happen - log an error for debugging
++            LOG_ERROR(Frontend, "No surface available for shared context! This will cause rendering issues.");
++            offscreen_surface = std::make_unique<QOffscreenSurface>(nullptr);
++            offscreen_surface->setFormat(context->format());
++            offscreen_surface->create();
++            surface = offscreen_surface.get();
++        }
+     }
+ 
+     ~OpenGLSharedContext() {
+@@ -217,7 +229,9 @@ public:
+     }
+ 
+     void SwapBuffers() override {
+-        context->swapBuffers(surface);
++        if (surface && context) {
++            context->swapBuffers(surface);
++        }
+     }
+ 
+     void MakeCurrent() override {
+@@ -227,7 +241,7 @@ public:
+         // Instead of always just making the context current (which does not have any caching to
+         // check if the underlying context is already current) we can check for the current context
+         // in the thread local data by calling `currentContext()` and checking if its ours.
+-        if (QOpenGLContext::currentContext() != context.get()) {
++        if (surface && context && QOpenGLContext::currentContext() != context.get()) {
+             context->makeCurrent(surface);
+         }
+     }
+@@ -268,12 +282,35 @@ class OpenGLRenderWidget : public Render
+ public:
+     explicit OpenGLRenderWidget(GRenderWindow* parent, Core::System& system_, bool is_secondary)
+         : RenderWidget(parent), system(system_), is_secondary(is_secondary) {
+-        setAttribute(Qt::WA_NativeWindow);
+-        setAttribute(Qt::WA_PaintOnScreen);
+-        if (GetWindowSystemType() == Frontend::WindowSystemType::Wayland) {
+-            setAttribute(Qt::WA_DontCreateNativeAncestors);
++        const auto wsi_type = GetWindowSystemType();
++
++        // EGLFS only supports a single fullscreen OpenGL window. Creating a native child window
++        // with WA_NativeWindow will fail with "EGLFS: OpenGL windows cannot be mixed with others."
++        // On EGLFS, skip native window creation and render directly to the parent window's surface.
++        if (wsi_type != Frontend::WindowSystemType::EGLFS) {
++            setAttribute(Qt::WA_NativeWindow);
++            setAttribute(Qt::WA_PaintOnScreen);
++            if (wsi_type == Frontend::WindowSystemType::Wayland) {
++                setAttribute(Qt::WA_DontCreateNativeAncestors);
++            }
++            windowHandle()->setSurfaceType(QWindow::OpenGLSurface);
++        } else {
++            // On EGLFS, share the parent window's OpenGL surface
++            setAttribute(Qt::WA_PaintOnScreen);
++            setAttribute(Qt::WA_OpaquePaintEvent);
++
++            // On EGLFS, without WA_NativeWindow, Qt doesn't send paint events.
++            // Use a timer to trigger rendering instead.
++            LOG_INFO(Frontend, "EGLFS: Starting presentation timer at 60 FPS");
++            presentation_timer = new QTimer(this);
++            connect(presentation_timer, &QTimer::timeout, this, [this]() {
++                if (isVisible() && system.IsPoweredOn()) {
++                    Present();
++                }
++            });
++            // 60 FPS = 16.67ms per frame
++            presentation_timer->start(16);
+         }
+-        windowHandle()->setSurfaceType(QWindow::OpenGLSurface);
+     }
+ 
+     void SetContext(std::unique_ptr<Frontend::GraphicsContext>&& context_) {
+@@ -281,22 +318,60 @@ public:
+     }
+ 
+     void Present() {
++        static int present_count = 0;
++        static bool logged_skip = false;
++
+         if (!isVisible()) {
++            if (!logged_skip) {
++                LOG_WARNING(Render, "OpenGLRenderWidget not visible, skipping present");
++                logged_skip = true;
++            }
+             return;
+         }
+         if (!system.IsPoweredOn()) {
+             return;
+         }
++        if (!context) {
++            LOG_ERROR(Render, "No OpenGL context in Present()");
++            return;
++        }
++
++        // Log widget geometry and GL state for first few frames
++        if (present_count < 5) {
++            GLint viewport[4];
++            context->MakeCurrent();
++            glGetIntegerv(GL_VIEWPORT, viewport);
++            LOG_INFO(Render, "Present #{}: widget pos({},{}), size({}x{}), parent({}x{}), GL viewport({},{},{},{})",
++                     present_count, x(), y(), width(), height(),
++                     parentWidget() ? parentWidget()->width() : 0,
++                     parentWidget() ? parentWidget()->height() : 0,
++                     viewport[0], viewport[1], viewport[2], viewport[3]);
++            present_count++;
++        }
++
+         context->MakeCurrent();
+         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
++
++        // On EGLFS, explicitly set the viewport to match the widget size
++        if (GetWindowSystemType() == Frontend::WindowSystemType::EGLFS) {
++            glViewport(0, 0, width(), height());
++            glScissor(0, 0, width(), height());
++        }
++
+         system.GPU().Renderer().TryPresent(100, is_secondary);
+         context->SwapBuffers();
+         glFinish();
+     }
+ 
+     void paintEvent(QPaintEvent* event) override {
++        static int paint_count = 0;
++        if (paint_count < 3) {
++            LOG_INFO(Render, "paintEvent called #{}, visible={}, powered={}",
++                     paint_count, isVisible(), system.IsPoweredOn());
++            paint_count++;
++        }
+         Present();
+-        update();
++        update(); // Schedule next repaint - Qt's event loop prevents infinite recursion
+     }
+ 
+     QPaintEngine* paintEngine() const override {
+@@ -307,6 +382,7 @@ private:
+     std::unique_ptr<Frontend::GraphicsContext> context{};
+     Core::System& system;
+     bool is_secondary;
++    QTimer* presentation_timer = nullptr;
+ };
+ #endif
+ 
+@@ -314,16 +390,24 @@ private:
+ class VulkanRenderWidget : public RenderWidget {
+ public:
+     explicit VulkanRenderWidget(GRenderWindow* parent) : RenderWidget(parent) {
+-        setAttribute(Qt::WA_NativeWindow);
+-        setAttribute(Qt::WA_PaintOnScreen);
+-        if (GetWindowSystemType() == Frontend::WindowSystemType::Wayland) {
+-            setAttribute(Qt::WA_DontCreateNativeAncestors);
+-        }
++        const auto wsi_type = GetWindowSystemType();
++
++        // EGLFS only supports a single fullscreen window. Skip native window creation on EGLFS.
++        if (wsi_type != Frontend::WindowSystemType::EGLFS) {
++            setAttribute(Qt::WA_NativeWindow);
++            setAttribute(Qt::WA_PaintOnScreen);
++            if (wsi_type == Frontend::WindowSystemType::Wayland) {
++                setAttribute(Qt::WA_DontCreateNativeAncestors);
++            }
+ #ifdef __APPLE__
+-        windowHandle()->setSurfaceType(QWindow::MetalSurface);
++            windowHandle()->setSurfaceType(QWindow::MetalSurface);
+ #else
+-        windowHandle()->setSurfaceType(QWindow::VulkanSurface);
++            windowHandle()->setSurfaceType(QWindow::VulkanSurface);
+ #endif
++        } else {
++            setAttribute(Qt::WA_PaintOnScreen);
++            setAttribute(Qt::WA_OpaquePaintEvent);
++        }
+     }
+ 
+     QPaintEngine* paintEngine() const override {
+@@ -397,6 +481,8 @@ static Frontend::WindowSystemType GetWin
+     else if (platform_name == QStringLiteral("wayland") ||
+              platform_name == QStringLiteral("wayland-egl"))
+         return Frontend::WindowSystemType::Wayland;
++    else if (platform_name == QStringLiteral("eglfs"))
++        return Frontend::WindowSystemType::EGLFS;
+     else if (platform_name == QStringLiteral("cocoa") || platform_name == QStringLiteral("ios"))
+         return Frontend::WindowSystemType::MacOS;
+ 
+@@ -479,6 +565,14 @@ void GRenderWindow::OnFramebufferSizeCha
+     const qreal pixel_ratio = windowPixelRatio();
+     const u32 width = static_cast<u32>(this->width() * pixel_ratio);
+     const u32 height = static_cast<u32>(this->height() * pixel_ratio);
++
++    static int resize_count = 0;
++    if (resize_count < 5) {
++        LOG_INFO(Frontend, "OnFramebufferSizeChanged #{}: widget({}x{}), pixel_ratio={}, framebuffer({}x{})",
++                 resize_count, this->width(), this->height(), pixel_ratio, width, height);
++        resize_count++;
++    }
++
+     UpdateCurrentFramebufferLayout(width, height);
+ }
+ 
+@@ -682,7 +776,29 @@ bool GRenderWindow::InitRenderTarget() {
+     }
+ 
+     // Update the Window System information with the new render target
+-    window_info = GetWindowSystemInfo(child_widget->windowHandle());
++    // On EGLFS, child_widget doesn't have its own window handle, so use the parent's
++    QWindow* window = child_widget->windowHandle();
++    if (!window) {
++        if (!windowHandle()) {
++            winId(); // Force window creation
++        }
++        window = windowHandle();
++        if (!window) {
++            // Last resort: try top-level window
++            QWidget* top_level = this->window();
++            if (top_level) {
++                top_level->winId();
++                window = top_level->windowHandle();
++            }
++        }
++    }
++
++    if (!window) {
++        LOG_ERROR(Frontend, "Failed to obtain window handle for window system info!");
++        return false;
++    }
++
++    window_info = GetWindowSystemInfo(window);
+ 
+     child_widget->resize(Core::kScreenTopWidth, Core::kScreenTopHeight + Core::kScreenBottomHeight);
+ 
+@@ -744,7 +860,37 @@ bool GRenderWindow::InitializeOpenGL() {
+     // WA_DontShowOnScreen, WA_DeleteOnClose
+     auto child = new OpenGLRenderWidget(this, system, is_secondary);
+     child_widget = child;
+-    child_widget->windowHandle()->create();
++
++    // On EGLFS, child_widget doesn't have its own native window (WA_NativeWindow not set).
++    // Use the parent GRenderWindow's windowHandle instead.
++    QWindow* render_window_handle = child_widget->windowHandle();
++    if (!render_window_handle) {
++        // Ensure parent window handle exists on EGLFS
++        if (!windowHandle()) {
++            // Force creation of the window handle for the parent widget
++            winId(); // Calling winId() forces creation of the native window
++            LOG_INFO(Frontend, "EGLFS: Forced parent window creation via winId()");
++        }
++        render_window_handle = windowHandle();
++        if (!render_window_handle) {
++            // Last resort: try to get top-level window
++            QWidget* top_level = window();
++            if (top_level) {
++                top_level->winId();
++                render_window_handle = top_level->windowHandle();
++                LOG_INFO(Frontend, "EGLFS: Using top-level window handle");
++            }
++        }
++    }
++
++    if (!render_window_handle) {
++        LOG_ERROR(Frontend, "Failed to obtain window handle for OpenGL rendering!");
++        return false;
++    }
++
++    if (render_window_handle) {
++        render_window_handle->create();
++    }
+ 
+     if (!main_context) {
+         main_context = std::make_unique<OpenGLSharedContext>();
+@@ -753,9 +899,11 @@ bool GRenderWindow::InitializeOpenGL() {
+     auto child_context = CreateSharedContext();
+     child->SetContext(std::move(child_context));
+ 
+-    auto format = child_widget->windowHandle()->format();
+-    format.setSwapInterval(Settings::values.use_vsync.GetValue());
+-    child_widget->windowHandle()->setFormat(format);
++    if (render_window_handle) {
++        auto format = render_window_handle->format();
++        format.setSwapInterval(Settings::values.use_vsync.GetValue());
++        render_window_handle->setFormat(format);
++    }
+ 
+     return true;
+ }
+@@ -804,7 +952,10 @@ bool GRenderWindow::LoadOpenGL() {
+ void GRenderWindow::InitializeVulkan() {
+     auto child = new VulkanRenderWidget(this);
+     child_widget = child;
+-    child_widget->windowHandle()->create();
++    // On EGLFS, child_widget might not have its own window handle
++    if (auto window = child_widget->windowHandle()) {
++        window->create();
++    }
+     main_context = std::make_unique<DummyContext>();
+ }
+ #endif
+@@ -835,8 +986,29 @@ std::unique_ptr<Frontend::GraphicsContex
+         auto gl_context = static_cast<OpenGLSharedContext*>(main_context.get());
+         // Bind the shared contexts to the main surface in case the backend wants to take over
+         // presentation
+-        return std::make_unique<OpenGLSharedContext>(gl_context->GetShareContext(),
+-                                                     child_widget->windowHandle());
++        // On EGLFS, child_widget doesn't have its own window handle, so use the parent's
++        QWindow* surface = child_widget->windowHandle();
++        if (!surface) {
++            // Ensure parent window handle exists on EGLFS
++            if (!windowHandle()) {
++                const_cast<GRenderWindow*>(this)->winId(); // Force window creation
++            }
++            surface = windowHandle();
++            if (!surface) {
++                // Last resort: try top-level window
++                QWidget* top_level = window();
++                if (top_level) {
++                    top_level->winId();
++                    surface = top_level->windowHandle();
++                }
++            }
++        }
++
++        if (!surface) {
++            LOG_ERROR(Frontend, "CreateSharedContext: No surface available!");
++        }
++
++        return std::make_unique<OpenGLSharedContext>(gl_context->GetShareContext(), surface);
+     }
+ #endif
+     return std::make_unique<DummyContext>();
+diff -urpN azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/citra_sdl.cpp new_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/citra_sdl.cpp
+--- azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/citra_sdl.cpp	2025-12-17 14:05:42.000000000 +0000
++++ new_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/citra_sdl.cpp	2026-03-10 19:15:57.839328936 +0000
+@@ -349,6 +349,19 @@ void LaunchSdlFrontend(int argc, char**
+ 
+     EmuWindow_SDL2::InitializeSDL2();
+ 
++    // On bare KMS/DRM systems (no windowing system), always use fullscreen
++    // and disable async presentation (requires multi-threaded GL which doesn't work on KMSDRM)
++    const char* video_driver = SDL_GetCurrentVideoDriver();
++    const bool is_bare_drm = video_driver && (
++        std::string(video_driver) == "KMSDRM" ||
++        std::string(video_driver) == "kmsdrm"
++    );
++    if (is_bare_drm) {
++        fullscreen = true;
++        Settings::values.async_presentation = false;
++        LOG_INFO(Frontend, "Bare KMS/DRM detected ({}), forcing fullscreen mode and disabling async presentation", video_driver);
++    }
++
+     const auto create_emu_window = [&](bool fullscreen,
+                                        bool is_secondary) -> std::unique_ptr<EmuWindow_SDL2> {
+         const auto graphics_api = Settings::values.graphics_api.GetValue();
+diff -urpN azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2.cpp new_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2.cpp
+--- azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2.cpp	2025-12-17 14:05:42.000000000 +0000
++++ new_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2.cpp	2026-03-10 19:15:57.836328940 +0000
+@@ -89,23 +89,44 @@ void EmuWindow_SDL2::OnResize() {
+ }
+ 
+ void EmuWindow_SDL2::Fullscreen() {
+-    if (SDL_SetWindowFullscreen(render_window, SDL_WINDOW_FULLSCREEN) == 0) {
+-        return;
++    // Detect if we're running on bare KMS/DRM (no window manager).
++    // On these systems, SDL_SetWindowFullscreen(SDL_WINDOW_FULLSCREEN) tries to change the
++    // display mode via drmModeSetCrtc, which corrupts SDL2's internal CRTC state and
++    // causes "Could not restore CRTC" errors. Use borderless fullscreen instead.
++    const char* video_driver = SDL_GetCurrentVideoDriver();
++
++    LOG_INFO(Frontend, "Fullscreen requested. SDL video driver: {}",
++             video_driver ? video_driver : "(null)");
++
++    const bool is_bare_drm = video_driver && (
++        std::string(video_driver) == "KMSDRM" ||  // SDL 2.0.9+
++        std::string(video_driver) == "kmsdrm"     // case variant
++    );
++
++    if (is_bare_drm) {
++        // On bare KMS/DRM, use borderless fullscreen to avoid CRTC corruption
++        LOG_INFO(Frontend, "Bare KMS/DRM detected - using borderless fullscreen to avoid CRTC errors");
++        if (SDL_SetWindowFullscreen(render_window, SDL_WINDOW_FULLSCREEN_DESKTOP) == 0) {
++            return;
++        }
++        LOG_ERROR(Frontend, "Borderless fullscreen failed: {}", SDL_GetError());
++    } else {
++        // Desktop/windowed systems: try exclusive fullscreen first
++        LOG_INFO(Frontend, "Windowed system - trying exclusive fullscreen");
++        if (SDL_SetWindowFullscreen(render_window, SDL_WINDOW_FULLSCREEN) == 0) {
++            return;
++        }
++        LOG_ERROR(Frontend, "Exclusive fullscreen failed: {}, trying borderless...", SDL_GetError());
++
++        // Fallback to borderless
++        if (SDL_SetWindowFullscreen(render_window, SDL_WINDOW_FULLSCREEN_DESKTOP) == 0) {
++            return;
++        }
++        LOG_ERROR(Frontend, "Borderless fullscreen also failed: {}", SDL_GetError());
+     }
+ 
+-    LOG_ERROR(Frontend, "Fullscreening failed: {}", SDL_GetError());
+-
+-    // Try a different fullscreening method
+-    LOG_INFO(Frontend, "Attempting to use borderless fullscreen...");
+-    if (SDL_SetWindowFullscreen(render_window, SDL_WINDOW_FULLSCREEN_DESKTOP) == 0) {
+-        return;
+-    }
+-
+-    LOG_ERROR(Frontend, "Borderless fullscreening failed: {}", SDL_GetError());
+-
+-    // Fallback algorithm: Maximise window.
+-    // Works on all systems (unless something is seriously wrong), so no fallback for this one.
+-    LOG_INFO(Frontend, "Falling back on a maximised window...");
++    // Final fallback: Maximise window
++    LOG_INFO(Frontend, "Falling back to maximized window...");
+     SDL_MaximizeWindow(render_window);
+ }
+ 
+@@ -122,6 +143,10 @@ void EmuWindow_SDL2::InitializeSDL2() {
+         exit(1);
+     }
+ 
++    const char* video_driver = SDL_GetCurrentVideoDriver();
++    LOG_INFO(Frontend, "SDL2 initialized with video driver: {}",
++             video_driver ? video_driver : "(null)");
++
+     InputCommon::Init();
+     Network::Init();
+ 
+diff -urpN azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2_gl.cpp new_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2_gl.cpp
+--- azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2_gl.cpp	2025-12-17 14:05:42.000000000 +0000
++++ new_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2_gl.cpp	2026-03-10 19:15:57.836328940 +0000
+@@ -3,31 +3,69 @@
+ // Refer to the license.txt file included.
+ 
+ #include <algorithm>
++#include <chrono>
+ #include <cstdlib>
+ #include <string>
++#include <thread>
+ #define SDL_MAIN_HANDLED
+ #include <SDL.h>
+ #include <glad/glad.h>
+ #include "citra_sdl/emu_window/emu_window_sdl2_gl.h"
++#include "common/logging/log.h"
+ #include "common/scm_rev.h"
+ #include "common/settings.h"
+ #include "core/core.h"
+ #include "video_core/gpu.h"
+ #include "video_core/renderer_base.h"
+ 
++// Dummy context that just wraps an existing GL context without creating a new one
++class DummySDLGLContext : public Frontend::GraphicsContext {
++public:
++    DummySDLGLContext(SDL_Window* window, void* existing_context)
++        : window(window), context(existing_context) {
++        LOG_INFO(Frontend, "DummySDLGLContext: Wrapping existing context (single-context mode)");
++    }
++
++    ~DummySDLGLContext() override {
++        // Don't delete - we don't own this context
++    }
++
++    void MakeCurrent() override {
++        SDL_GL_MakeCurrent(window, context);
++    }
++
++    void DoneCurrent() override {
++        SDL_GL_MakeCurrent(window, nullptr);
++    }
++
++private:
++    SDL_Window* window;
++    void* context;
++};
++
+ class SDLGLContext : public Frontend::GraphicsContext {
+ public:
+     using SDL_GLContext = void*;
+ 
+-    SDLGLContext() {
++    // Constructor for KMSDRM: Share the main window instead of creating a hidden one
++    SDLGLContext(SDL_Window* shared_window) : window(shared_window), owns_window(false) {
++        context = SDL_GL_CreateContext(window);
++        LOG_INFO(Frontend, "SDLGLContext: Created shared context on main window (KMSDRM mode)");
++    }
++
++    // Constructor for non-KMSDRM: Create own hidden window
++    SDLGLContext() : owns_window(true) {
+         window = SDL_CreateWindow(NULL, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 0, 0,
+                                   SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
+         context = SDL_GL_CreateContext(window);
++        LOG_INFO(Frontend, "SDLGLContext: Created context with own hidden window");
+     }
+ 
+     ~SDLGLContext() override {
+         SDL_GL_DeleteContext(context);
+-        SDL_DestroyWindow(window);
++        if (owns_window && window) {
++            SDL_DestroyWindow(window);
++        }
+     }
+ 
+     void MakeCurrent() override {
+@@ -41,9 +79,10 @@ public:
+ private:
+     SDL_Window* window;
+     SDL_GLContext context;
++    bool owns_window;
+ };
+ 
+-static SDL_Window* CreateGLWindow(const std::string& window_title, bool gles) {
++static SDL_Window* CreateGLWindow(const std::string& window_title, bool gles, bool fullscreen) {
+     if (gles) {
+         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+@@ -53,12 +92,33 @@ static SDL_Window* CreateGLWindow(const
+         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+     }
++
++    u32 window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI;
++
++    // On bare KMS/DRM, create window as fullscreen from the start to avoid CRTC corruption
++    // Also skip RESIZABLE flag as it's meaningless on bare DRM and can break display output
++    const char* video_driver = SDL_GetCurrentVideoDriver();
++    const bool is_bare_drm = video_driver && (
++        std::string(video_driver) == "KMSDRM" ||
++        std::string(video_driver) == "kmsdrm"
++    );
++
++    if (fullscreen && is_bare_drm) {
++        window_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
++        LOG_INFO(Frontend, "Creating window with FULLSCREEN_DESKTOP flag for KMSDRM (no RESIZABLE)");
++    } else {
++        window_flags |= SDL_WINDOW_RESIZABLE;
++        if (fullscreen) {
++            LOG_INFO(Frontend, "Creating window with RESIZABLE for non-KMSDRM system");
++        }
++    }
++
+     return SDL_CreateWindow(window_title.c_str(),
+                             SDL_WINDOWPOS_UNDEFINED, // x position
+                             SDL_WINDOWPOS_UNDEFINED, // y position
+                             Core::kScreenTopWidth,
+                             Core::kScreenTopHeight + Core::kScreenBottomHeight,
+-                            SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
++                            window_flags);
+ }
+ 
+ EmuWindow_SDL2_GL::EmuWindow_SDL2_GL(Core::System& system_, bool fullscreen, bool is_secondary)
+@@ -70,8 +130,7 @@ EmuWindow_SDL2_GL::EmuWindow_SDL2_GL(Cor
+     SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
+     // Enable context sharing for the shared context
+     SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
+-    // Enable vsync
+-    SDL_GL_SetSwapInterval(1);
++    // NOTE: SDL_GL_SetSwapInterval must be called AFTER creating GL context, not here
+     // Enable debug context
+     if (Settings::values.renderer_debug) {
+         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+@@ -81,10 +140,10 @@ EmuWindow_SDL2_GL::EmuWindow_SDL2_GL(Cor
+                                            Common::g_scm_branch, Common::g_scm_desc);
+ 
+     // First, try to create a context with the requested type.
+-    render_window = CreateGLWindow(window_title, Settings::values.use_gles.GetValue());
++    render_window = CreateGLWindow(window_title, Settings::values.use_gles.GetValue(), fullscreen);
+     if (render_window == nullptr) {
+         // On failure, fall back to context with flipped type.
+-        render_window = CreateGLWindow(window_title, !Settings::values.use_gles.GetValue());
++        render_window = CreateGLWindow(window_title, !Settings::values.use_gles.GetValue(), fullscreen);
+         if (render_window == nullptr) {
+             LOG_CRITICAL(Frontend, "Failed to create SDL2 window: {}", SDL_GetError());
+             exit(1);
+@@ -93,15 +152,49 @@ EmuWindow_SDL2_GL::EmuWindow_SDL2_GL(Cor
+ 
+     strict_context_required = std::strcmp(SDL_GetCurrentVideoDriver(), "wayland") == 0;
+ 
+-    dummy_window = SDL_CreateWindow(NULL, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 0, 0,
+-                                    SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
++    // Check if running on bare KMS/DRM for various compatibility adjustments
++    const char* video_driver = SDL_GetCurrentVideoDriver();
++    const bool is_bare_drm = video_driver && (
++        std::string(video_driver) == "KMSDRM" ||
++        std::string(video_driver) == "kmsdrm"
++    );
++
++    // Skip dummy window on KMSDRM - it can interfere with scanout
++    if (!is_bare_drm) {
++        dummy_window = SDL_CreateWindow(NULL, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 0, 0,
++                                        SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
++        LOG_INFO(Frontend, "Created dummy window for context sharing");
++    } else {
++        dummy_window = nullptr;
++        LOG_INFO(Frontend, "Skipped dummy window creation on KMSDRM");
++    }
+ 
+-    if (fullscreen) {
++    // Only call Fullscreen() if the window wasn't created as fullscreen already
++    if (fullscreen && !is_bare_drm) {
++        // On non-KMSDRM systems, we can safely switch to fullscreen after creation
+         Fullscreen();
+     }
+ 
++    LOG_INFO(Frontend, "Window created. Checking window state before GL context creation...");
++    u32 window_flags = SDL_GetWindowFlags(render_window);
++    LOG_INFO(Frontend, "Window flags: 0x{:08X} (FULLSCREEN=0x{:X}, FULLSCREEN_DESKTOP=0x{:X})",
++             window_flags, SDL_WINDOW_FULLSCREEN, SDL_WINDOW_FULLSCREEN_DESKTOP);
++    LOG_INFO(Frontend, "Window shown: {}, Window fullscreen: {}",
++             (window_flags & SDL_WINDOW_SHOWN) != 0,
++             (window_flags & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_FULLSCREEN_DESKTOP)) != 0);
++
++    // Ensure window is visible
++    SDL_ShowWindow(render_window);
++    SDL_RaiseWindow(render_window);
++    LOG_INFO(Frontend, "Called SDL_ShowWindow and SDL_RaiseWindow");
++
++    LOG_INFO(Frontend, "Creating GL context...");
+     window_context = SDL_GL_CreateContext(render_window);
++    LOG_INFO(Frontend, "GL context created");
++
+     core_context = CreateSharedContext();
++    LOG_INFO(Frontend, "Shared context created");
++
+     last_saved_context = nullptr;
+ 
+     if (window_context == nullptr) {
+@@ -125,9 +218,15 @@ EmuWindow_SDL2_GL::EmuWindow_SDL2_GL(Cor
+         exit(1);
+     }
+ 
++    LOG_INFO(Frontend, "GL functions loaded. Calling OnResize...");
+     OnResize();
++    LOG_INFO(Frontend, "OnResize complete");
++
+     OnMinimalClientAreaChangeRequest(GetActiveConfig().min_client_area_size);
+     SDL_PumpEvents();
++
++    LOG_INFO(Frontend, "Window initialization complete. Final window flags: 0x{:08X}",
++             SDL_GetWindowFlags(render_window));
+ }
+ 
+ EmuWindow_SDL2_GL::~EmuWindow_SDL2_GL() {
+@@ -137,7 +236,19 @@ EmuWindow_SDL2_GL::~EmuWindow_SDL2_GL()
+ }
+ 
+ std::unique_ptr<Frontend::GraphicsContext> EmuWindow_SDL2_GL::CreateSharedContext() const {
+-    return std::make_unique<SDLGLContext>();
++    // On KMSDRM, return a dummy wrapper around the window context instead of creating
++    // a new context. Multiple GL contexts on the same KMSDRM window causes GL state corruption.
++    const char* video_driver = SDL_GetCurrentVideoDriver();
++    const bool is_bare_drm = video_driver && (
++        std::string(video_driver) == "KMSDRM" ||
++        std::string(video_driver) == "kmsdrm"
++    );
++
++    if (is_bare_drm) {
++        return std::make_unique<DummySDLGLContext>(render_window, window_context);
++    } else {
++        return std::make_unique<SDLGLContext>();
++    }
+ }
+ 
+ void EmuWindow_SDL2_GL::MakeCurrent() {
+@@ -157,11 +268,82 @@ void EmuWindow_SDL2_GL::RestoreContext()
+ }
+ 
+ void EmuWindow_SDL2_GL::Present() {
++    LOG_INFO(Frontend, "SDL2 OpenGL Present() started");
++
++    const bool use_synchronous_rendering = !Settings::values.async_presentation.GetValue();
++    LOG_INFO(Frontend, "Present loop running in {} mode",
++             use_synchronous_rendering ? "synchronous" : "async");
++
++    if (use_synchronous_rendering) {
++        // In synchronous mode, rendering and swapping happens in the emulation thread.
++        // This thread just waits until the window is closed.
++        LOG_INFO(Frontend, "Synchronous mode: Present thread waiting for window close");
++        while (IsOpen()) {
++            std::this_thread::sleep_for(std::chrono::milliseconds(100));
++        }
++        LOG_INFO(Frontend, "SDL2 OpenGL Present() exited (synchronous mode)");
++        return;
++    }
++
++    // Async mode: original mailbox-based presentation
++    LOG_INFO(Frontend, "Making GL context current...");
+     SDL_GL_MakeCurrent(render_window, window_context);
++    LOG_INFO(Frontend, "GL context made current");
++
++    LOG_INFO(Frontend, "Setting swap interval to 1...");
+     SDL_GL_SetSwapInterval(1);
++    LOG_INFO(Frontend, "Swap interval set");
++
++    static int frame_count = 0;
+     while (IsOpen()) {
++        // Async mode: get frame from mailbox
+         system.GPU().Renderer().TryPresent(100, is_secondary);
++
++        // Ensure all framebuffers are unbound before swap
++        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
++        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
++        glBindFramebuffer(GL_FRAMEBUFFER, 0);
++
++        // Always flush before swap
++        glFlush();
++
++        if (frame_count == 0) {
++            // Check GL state before first swap
++            GLint draw_fb = 0, read_fb = 0, fb = 0;
++            glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &draw_fb);
++            glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &read_fb);
++            glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fb);
++            GLint viewport[4];
++            glGetIntegerv(GL_VIEWPORT, viewport);
++
++            LOG_INFO(Frontend, "Before first swap: Draw FBO={}, Read FBO={}, FBO={}, Viewport=({},{},{},{})",
++                     draw_fb, read_fb, fb, viewport[0], viewport[1], viewport[2], viewport[3]);
++            LOG_INFO(Frontend, "About to call SDL_GL_SwapWindow for first frame...");
++
++            // Extra finish for first frame debugging
++            glFinish();
++            LOG_INFO(Frontend, "Called glFlush and glFinish");
++        }
++
+         SDL_GL_SwapWindow(render_window);
++
++        if (frame_count == 0) {
++            LOG_INFO(Frontend, "First SDL_GL_SwapWindow completed");
++        }
++
++        if (frame_count < 5) {
++            GLint viewport[4];
++            glGetIntegerv(GL_VIEWPORT, viewport);
++            LOG_INFO(Render, "SDL2 Frame {}: GL viewport({},{},{},{})",
++                     frame_count, viewport[0], viewport[1], viewport[2], viewport[3]);
++            frame_count++;
++        }
+     }
+     SDL_GL_MakeCurrent(render_window, nullptr);
++    LOG_INFO(Frontend, "SDL2 OpenGL Present() exited");
++}
++
++void EmuWindow_SDL2_GL::SwapBuffers() {
++    // This is called from the emulation thread in synchronous rendering mode
++    SDL_GL_SwapWindow(render_window);
+ }
+diff -urpN azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2_gl.h new_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2_gl.h
+--- azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2_gl.h	2025-12-17 14:05:42.000000000 +0000
++++ new_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2_gl.h	2026-03-10 19:15:57.838328937 +0000
+@@ -19,6 +19,7 @@ public:
+     ~EmuWindow_SDL2_GL();
+ 
+     void Present() override;
++    void SwapBuffers() override;  // For synchronous rendering mode
+     std::unique_ptr<GraphicsContext> CreateSharedContext() const override;
+     void MakeCurrent() override;
+     void DoneCurrent() override;
+diff -urpN azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/common/settings.h new_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/common/settings.h
+--- azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/common/settings.h	2025-12-17 14:05:42.000000000 +0000
++++ new_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/common/settings.h	2026-03-10 19:15:57.852328918 +0000
+@@ -496,7 +496,7 @@ struct Values {
+ #endif
+         GraphicsAPI::Software, GraphicsAPI::Vulkan, "graphics_api"};
+     SwitchableSetting<u32> physical_device{0, "physical_device"};
+-    Setting<bool> use_gles{false, "use_gles"};
++    Setting<bool> use_gles{true, "use_gles"};
+     Setting<bool> renderer_debug{false, "renderer_debug"};
+     Setting<bool> dump_command_buffers{false, "dump_command_buffers"};
+     SwitchableSetting<bool> spirv_shader_gen{true, "spirv_shader_gen"};
+diff -urpN azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/core/frontend/emu_window.h new_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/core/frontend/emu_window.h
+--- azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/core/frontend/emu_window.h	2025-12-17 14:05:42.000000000 +0000
++++ new_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/core/frontend/emu_window.h	2026-03-10 19:15:57.872328891 +0000
+@@ -27,6 +27,7 @@ enum class WindowSystemType : u8 {
+     MacOS,
+     X11,
+     Wayland,
++    EGLFS,
+     LibRetro,
+ };
+ 
+diff -urpN azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/video_core/renderer_opengl/renderer_opengl.cpp new_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/video_core/renderer_opengl/renderer_opengl.cpp
+--- azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/video_core/renderer_opengl/renderer_opengl.cpp	2025-12-17 14:05:42.000000000 +0000
++++ new_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/video_core/renderer_opengl/renderer_opengl.cpp	2026-03-10 19:15:57.949328787 +0000
+@@ -103,7 +103,21 @@ void RendererOpenGL::SwapBuffers() {
+     render_window.SwapBuffers();
+ #else
+     const auto& main_layout = render_window.GetFramebufferLayout();
+-    RenderToMailbox(main_layout, render_window.mailbox, false);
++
++    // On KMSDRM, use synchronous rendering without mailbox to avoid multi-threaded GL issues
++    const bool use_synchronous_rendering = !Settings::values.async_presentation.GetValue();
++
++    if (use_synchronous_rendering) {
++        // Synchronous path: render directly to default framebuffer and swap immediately
++        state.draw.draw_framebuffer = 0;
++        state.Apply();
++        DrawScreens(main_layout, false);
++        glFlush();
++        render_window.SwapBuffers();
++    } else {
++        // Async path: use mailbox pattern
++        RenderToMailbox(main_layout, render_window.mailbox, false);
++    }
+ 
+ #ifdef ANDROID
+     // On Android, if secondary_window is defined at all,
+@@ -219,7 +233,9 @@ void RendererOpenGL::RenderToMailbox(con
+ 
+         // wait for the presentation to be done
+         if (frame->present_fence) {
+-            glWaitSync(frame->present_fence, 0, GL_TIMEOUT_IGNORED);
++            // Use GL_SYNC_FLUSH_COMMANDS_BIT so the cross-context fence is properly visible on GLES
++            // drivers (e.g. Mali) that require the consuming context to flush before polling.
++            glClientWaitSync(frame->present_fence, GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
+             glDeleteSync(frame->present_fence);
+             frame->present_fence = nullptr;
+         }
+@@ -877,7 +893,12 @@ void RendererOpenGL::TryPresent(int time
+         LOG_DEBUG(Render_OpenGL, "Reloading present frame");
+         window.mailbox->ReloadPresentFrame(frame, layout.width, layout.height);
+     }
+-    glWaitSync(frame->render_fence, 0, GL_TIMEOUT_IGNORED);
++    // Use a CPU-side wait (glClientWaitSync) rather than a GPU-side wait (glWaitSync) for
++    // cross-context render fence synchronization.  On some GLES drivers (notably Mali Bifrost /
++    // Valhall) glWaitSync on a fence created in a different shared context can stall the GPU
++    // command queue permanently, causing the blit and all subsequent commands to never execute.
++    // glClientWaitSync with GL_SYNC_FLUSH_COMMANDS_BIT is safe and portable across GLES 3.x.
++    glClientWaitSync(frame->render_fence, GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
+     // INTEL workaround.
+     // Normally we could just delete the draw fence here, but due to driver bugs, we can just delete
+     // it on the emulation thread without too much penalty
+@@ -885,6 +906,7 @@ void RendererOpenGL::TryPresent(int time
+     // frame.render_sync = 0;
+ 
+     glBindFramebuffer(GL_READ_FRAMEBUFFER, frame->present.handle);
++    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);  // Explicitly bind to default/window framebuffer
+     glBlitFramebuffer(0, 0, frame->width, frame->height, 0, 0, layout.width, layout.height,
+                       GL_COLOR_BUFFER_BIT, GL_LINEAR);
+ 
