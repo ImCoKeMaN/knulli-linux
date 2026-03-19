@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Initialize vita-pro touchscreen 
+modprobe synaptics_dsx_gesture 

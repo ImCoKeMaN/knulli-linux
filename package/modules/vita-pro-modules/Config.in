@@ -1,0 +1,5 @@
+config BR2_PACKAGE_VITA_PRO_MODULES
+    bool "vita-pro-modules"
+    depends on BR2_LINUX_KERNEL
+    help
+      Precompiled kernel modules for the RG Vita Pro joystick and touchscreen
