@@ -208,13 +208,21 @@ define KNULLI_EMULATIONSTATION_WAYLAND_SWAY
 endef
 
 define KNULLI_EMULATIONSTATION_WAYLAND_LABWC
-        $(INSTALL) -D -m 0755 $(KNULLI_EMULATIONSTATION_SOURCE_PATH)/wayland/sway/04-labwc.sh \
+    mkdir -p $(TARGET_DIR)/usr/share/labwc
+        $(INSTALL) -D -m 0755 $(KNULLI_EMULATIONSTATION_SOURCE_PATH)/wayland/labwc/04-labwc.sh \
             $(TARGET_DIR)/etc/profile.d/04-labwc.sh
-    $(INSTALL) -D -m 0755 $(KNULLI_EMULATIONSTATION_SOURCE_PATH)/wayland/labwc/config \
-            $(TARGET_DIR)/etc/labwc/config
+        $(INSTALL) -D -m 0755 $(KNULLI_EMULATIONSTATION_SOURCE_PATH)/wayland/labwc/rc.xml \
+            $(TARGET_DIR)/usr/share/labwc/rc.xml
+        $(INSTALL) -D -m 0755 $(KNULLI_EMULATIONSTATION_SOURCE_PATH)/wayland/labwc/S14labwc \
+            $(TARGET_DIR)/etc/init.d/S14labwc
+    $(INSTALL) -D -m 0755 $(KNULLI_EMULATIONSTATION_SOURCE_PATH)/wayland/labwc/autostart \
+            $(TARGET_DIR)/usr/share/labwc/autostart
+    $(INSTALL) -D -m 0755 $(KNULLI_EMULATIONSTATION_SOURCE_PATH)/wayland/labwc/autostart_* \
+            $(TARGET_DIR)/usr/share/labwc/
     $(INSTALL) -D -m 0755 $(KNULLI_EMULATIONSTATION_SOURCE_PATH)/wayland/labwc/labwc-launch \
             $(TARGET_DIR)/usr/bin/labwc-launch
 endef
+
 
 define KNULLI_EMULATIONSTATION_BOOT
 	$(INSTALL) -D -m 0755 $(KNULLI_EMULATIONSTATION_SOURCE_PATH)/S31emulationstation \
