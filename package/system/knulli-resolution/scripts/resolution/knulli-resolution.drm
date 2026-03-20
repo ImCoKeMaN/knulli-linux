@@ -75,7 +75,15 @@ f_listModes() {
 f_currentResolution() {
     DRMCONN=$(cat /var/run/drmConn)
     DRMMODE=$(cat /var/run/drmMode)
-    f_listModes "all" | grep -E "^${DRMCONN}\.${DRMMODE}\." | head -1 | sed -e s+"^[^:]*:[^ ]* \([0-9]*x[0-9]*\) .*$"+"\1"+
+    RES=$(f_listModes "all" | grep -E "^${DRMCONN}\.${DRMMODE}\." | head -1 | sed -e s+"^[^:]*:[^ ]* \([0-9]*x[0-9]*\) .*$"+"\1"+)
+    # If display is rotated (width < height), swap to always report landscape
+    W=$(echo "$RES" | cut -d'x' -f1)
+    H=$(echo "$RES" | cut -d'x' -f2)
+    if [ "$W" -lt "$H" ]; then
+        echo "${H}x${W}"
+    else
+        echo "$RES"
+    fi
 }
 
 f_minTomaxResolution() {

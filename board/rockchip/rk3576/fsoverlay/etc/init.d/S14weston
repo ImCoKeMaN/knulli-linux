@@ -3,6 +3,9 @@
 # Starts Weston
 #
 
+. /etc/profile.d/xdg.sh
+. /etc/profile.d/dbus.sh
+
 start() {
     printf 'Starting Weston'
     weston -B drm &
