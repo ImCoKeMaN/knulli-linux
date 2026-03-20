@@ -2212,7 +2212,7 @@ x1:
   manufacturer: Nintendo
   release: 2011
   hardware: portable
-  extensions: [3ds, 3dsx, cxi, axf, elf, app, squashfs]
+  extensions: [3ds, 3dsx, .cci, cxi, axf, elf, app, squashfs]
   emulators:
     azahar:
       azahar: { requireAnyOf: [BR2_PACKAGE_AZAHAR] }
