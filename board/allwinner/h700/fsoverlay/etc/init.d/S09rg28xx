@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ "$1" != "start" ]; then
+    exit 0
+fi
+
+# For the rg28xx, replace the retroarch binary with the rg28xx rotated one
+BOARD=$(cat /boot/boot/knulli.board)
+if [ "$BOARD" = "rg28xx" ]; then
+    cp /usr/bin/retroarch_rg28xx /usr/bin/retroarch
+    sync
+fi
+
+
