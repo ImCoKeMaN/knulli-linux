@@ -31,6 +31,7 @@ _AETHERSX2_BIN: Final = _AETHERSX2_BIN_DIR / "aethersx2"
 _AETHERSX2_BIN_SYMLINK: Final = Path("/usr/bin/aethersx2")
 _AETHERSX2_LIB_DIR: Final = _AETHERSX2_BIN_DIR / "lib"
 _AETHERSX2_LIB_SHIM: Final = _AETHERSX2_LIB_DIR / "libpcap.so.0.8"
+_AETHERSX2_LIB_SHIM_LIBGLX: Final = _AETHERSX2_LIB_DIR / "libGLX.so.0"
 _AETHERSX2_RESOURCES_DIR: Final = _AETHERSX2_BIN_DIR / "resources"
 _AETHERSX2_CONFIG: Final = Path("/userdata/system/.config/aethersx2")
 _AETHERSX2_BIOS: Final = BIOS / "ps2"
@@ -79,6 +80,8 @@ class Aethersx2Generator(Generator):
         # use their modified shaderc library
         envcmd = {
             "QT_PLUGIN_PATH": "/usr/lib/qt6/plugins:/usr/lib64/qt6/plugins",
+            "QT_QPA_PLATFORM": "wayland",
+            "QT_QPA_PLATFORM_PLUGINS_PATH": "/usr/lib/qt6/plugins/platforms",
             "XDG_CONFIG_HOME": "/userdata/system/.config",
             "LD_LIBRARY_PATH": str(_AETHERSX2_LIB_DIR)
         }
@@ -104,6 +107,19 @@ class Aethersx2Generator(Generator):
                     eslog.info("libpcap shim created: %s -> %s", _AETHERSX2_LIB_SHIM, libpcap)
                 else:
                     eslog.error("No libpcap.so.1* found in /usr/lib")
+
+            if _AETHERSX2_LIB_SHIM_LIBGLX.is_symlink() and not _AETHERSX2_LIB_SHIM_LIBGLX.exists():
+                _AETHERSX2_LIB_SHIM_LIBGLX.unlink()
+
+            if not _AETHERSX2_LIB_SHIM_LIBGLX.exists():
+                libglx = Path("/usr/lib/libGLX.so.0")
+                if not libglx.exists():
+                    libmali = Path("/usr/lib/libmali.so.1")
+                    _AETHERSX2_LIB_SHIM_LIBGLX.symlink_to(libmali)
+                    eslog.info("libGLX shim created: %s -> %s", _AETHERSX2_LIB_SHIM_LIBGLX, libmali)
+                else:
+                    eslog.error("No libmali.so.1 found in /usr/lib")
+
         except Exception as e:
             eslog.warning("Failed to ensure libpcap shim: %s", e)
 
@@ -333,7 +349,7 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
         have_vulkan = subprocess.check_output(["/usr/bin/knulli-vulkan", "hasVulkan"], text=True).strip()
         if have_vulkan == "true":
             eslog.debug("Vulkan driver is available on the system.")
-            renderer = "12"  # Default to OpenGL
+            renderer = "14"  # Default to Vulkan
 
             if system.isOptSet("aethersx2_gfxbackend"):
                 if system.config["aethersx2_gfxbackend"] == "13":

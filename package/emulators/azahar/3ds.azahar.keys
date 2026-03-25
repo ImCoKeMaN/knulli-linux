@@ -2,8 +2,8 @@
     "actions_player1": [
         {
            "trigger": ["hotkey", "start"],
-            "type": "key",
-            "target": ["KEY_LEFTCTRL", "KEY_Q"],
+            "type": "exec",
+            "target": "killall -9 azahar",
             "description": "Exit emulator"
         },
         {
@@ -19,7 +19,7 @@
             "description": "Quickload"
         },
         {
-           "trigger": ["hotkey", "r3"],
+           "trigger": ["hotkey", "r2"],
             "type": "key",
             "target": ["KEY_F10"],
             "description": "Swap layout"

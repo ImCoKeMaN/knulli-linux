@@ -482,19 +482,19 @@ class DolphinGenerator(Generator):
             # use the -b 'batch' option for nicer exit
             commandArray = ["dolphin-emu", "-b", "-e", rom]
         else:
-            commandArray = ["dolphin-emu-nogui", "-e", rom]
+            commandArray = ["dolphin-emu-nogui", "-p", "wayland", "-e", rom]
 
         # state_slot option
         if system.isOptSet('state_filename'):
             commandArray.extend(["--save_state", system.config['state_filename']])
 
         return Command.Command(
-            array=commandArray, 
-            env={ 
+            array=commandArray,
+            env={
                 "XDG_CONFIG_HOME": CONFIGS,
                 "XDG_DATA_HOME": SAVES,
                 "XDG_CACHE_HOME": CACHE,
-                "QT_QPA_PLATFORM": "xcb"
+                "QT_QPA_PLATFORM": "wayland"
             }
         )
 

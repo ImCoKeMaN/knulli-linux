@@ -1,0 +1,54 @@
+diff -urpN a/src/citra_sdl/emu_window/emu_window_sdl2.h b/src/citra_sdl/emu_window/emu_window_sdl2.h
+--- a/src/citra_sdl/emu_window/emu_window_sdl2.h	2026-03-23 19:01:56.736896328 +0000
++++ b/src/citra_sdl/emu_window/emu_window_sdl2.h	2026-03-22 18:34:44.837257257 +0000
+@@ -48,8 +48,8 @@ protected:
+     /// Called by PollEvents when a mouse button is pressed or released
+     void OnMouseButton(u32 button, u8 state, s32 x, s32 y);
+
+-    /// Translates pixel position (0..1) to pixel positions
+-    std::pair<unsigned, unsigned> TouchToPixelPos(float touch_x, float touch_y) const;
++    /// Translates normalized touch position (0..1) to pixel positions
++    virtual std::pair<unsigned, unsigned> TouchToPixelPos(float touch_x, float touch_y) const;
+
+     /// Called by PollEvents when a finger starts touching the touchscreen
+     void OnFingerDown(float x, float y);
+diff -urpN a/src/citra_sdl/emu_window/emu_window_sdl2_vk.cpp b/src/citra_sdl/emu_window/emu_window_sdl2_vk.cpp
+--- a/src/citra_sdl/emu_window/emu_window_sdl2_vk.cpp	2026-03-23 19:01:56.736896328 +0000
++++ b/src/citra_sdl/emu_window/emu_window_sdl2_vk.cpp	2026-03-22 18:35:09.749209131 +0000
+@@ -140,6 +140,27 @@ void EmuWindow_SDL2_VK::OnResize() {
+     UpdateCurrentFramebufferLayout(width, height);
+ }
+
++std::pair<unsigned, unsigned> EmuWindow_SDL2_VK::TouchToPixelPos(float touch_x,
++                                                                    float touch_y) const {
++    int w, h;
++    SDL_GetWindowSize(render_window, &w, &h);
++
++    // On Wayland with display rotation the SDL window reports portrait dimensions (h > w), but
++    // OnResize() swaps them so the framebuffer layout uses landscape dimensions. Touch coordinates
++    // must be scaled to match the framebuffer layout, so swap w/h here as well.
++    // This mirrors what GL/EGL naturally provides: SDL_GetWindowSize returns physical (landscape)
++    // dimensions for the GL window, so its TouchToPixelPos already produces landscape coords.
++    if (h > w) {
++        std::swap(w, h);
++    }
++
++    touch_x *= w;
++    touch_y *= h;
++
++    return {static_cast<unsigned>(std::max(std::round(touch_x), 0.0f)),
++            static_cast<unsigned>(std::max(std::round(touch_y), 0.0f))};
++}
++
+ EmuWindow_SDL2_VK::~EmuWindow_SDL2_VK() = default;
+
+ std::unique_ptr<Frontend::GraphicsContext> EmuWindow_SDL2_VK::CreateSharedContext() const {
+diff -urpN a/src/citra_sdl/emu_window/emu_window_sdl2_vk.h b/src/citra_sdl/emu_window/emu_window_sdl2_vk.h
+--- a/src/citra_sdl/emu_window/emu_window_sdl2_vk.h	2026-03-23 19:01:56.736896328 +0000
++++ b/src/citra_sdl/emu_window/emu_window_sdl2_vk.h	2026-03-22 18:34:49.149248778 +0000
+@@ -23,4 +23,5 @@ public:
+     std::unique_ptr<Frontend::GraphicsContext> CreateSharedContext() const override;
+
+     void OnResize() override;
++    std::pair<unsigned, unsigned> TouchToPixelPos(float touch_x, float touch_y) const override;
+ };

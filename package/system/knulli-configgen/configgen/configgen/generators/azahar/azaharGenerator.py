@@ -41,16 +41,17 @@ class AzaharGenerator(Generator):
 
     # Main entry of the module
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
-        AzaharGenerator.writeAZAHARConfig(CONFIGS / "azaharplus-emu" / "qt-config.ini", system, playersControllers)
+        AzaharGenerator.writeAZAHARConfig(CONFIGS / "azahar-emu" / "sdl2-config.ini", system, playersControllers)
 
-        commandArray = ['/usr/bin/azahar', rom]
+        commandArray = ['/usr/bin/azahar', '--fullscreen', rom]
 
         return Command.Command(array=commandArray, env={
             "XDG_CONFIG_HOME": CONFIGS,
             "XDG_DATA_HOME": SAVES / "3ds",
             "XDG_CACHE_HOME": CACHE,
-            "XDG_RUNTIME_DIR": SAVES / "3ds" / "azaharplus-emu",
-            #"QT_QPA_PLATFORM":"xcb",
+            "HOME": SAVES / "3ds" / "azahar-emu",
+            "QT_QPA_PLATFORM":"wayland",
+            "QT_QPA_PLATFORM_PLUGINS_PATH": "/usr/lib/qt6/plugins/platforms",
             "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers),
             "SDL_JOYSTICK_HIDAPI": "0",
             }
@@ -103,18 +104,14 @@ class AzaharGenerator(Generator):
             azaharConfig.add_section("Layout")
         # Screen Layout
         azaharConfig.set("Layout", "custom_layout", "false")
-        azaharConfig.set("Layout", r"custom_layout\default", "false")
         layout_option, swap_screen = system.config.get("azahar_screen_layout", "0-false").split('-')
         azaharConfig.set("Layout", "swap_screen",   swap_screen)
-        azaharConfig.set("Layout", r"swap_screen\default", "false")
         azaharConfig.set("Layout", "layout_option", layout_option)
-        azaharConfig.set("Layout", r"layout_option\default", "false")
 
         if system.isOptSet('azahar_large_screen_proportion'):
             azaharConfig.set("Layout", "large_screen_proportion", system.config["azahar_large_screen_proportion"])
         else:
             azaharConfig.set("Layout", "large_screen_proportion", 4)
-        azaharConfig.set("Layout", r"large_screen_proportion\default", "false")
 
         ## [SYSTEM]
         if not azaharConfig.has_section("System"):
@@ -122,79 +119,60 @@ class AzaharGenerator(Generator):
         # New 3DS Version
         if system.isOptSet('azahar_is_new_3ds') and system.config["azahar_is_new_3ds"] == '1':
             azaharConfig.set("System", "is_new_3ds", "true")
-            azaharConfig.set("System", r"is_new_3ds\default", "false")
         else:
             azaharConfig.set("System", "is_new_3ds", "false")
         # Language
         azaharConfig.set("System", "region_value", str(getAzaharLangFromEnvironment()))
-        azaharConfig.set("System", r"region_value\default", "false")
 
         ## [UI]
         if not azaharConfig.has_section("UI"):
             azaharConfig.add_section("UI")
 
         azaharConfig.set("UI", "saveStateWarning", "false")
-        azaharConfig.set("UI", r"saveStateWarning\default", "false")
 
         # Hotkeys
         azaharConfig.set("UI", r"Shortcuts\Main%20Window\Quick%20Save\KeySeq", "Ctrl+1")
-        azaharConfig.set("UI", r"Shortcuts\Main%20Window\Quick%20Save\KeySeq\default", "false")
 
         azaharConfig.set("UI", r"Shortcuts\Main%20Window\Quick%20Load\KeySeq", "Ctrl+2")
-        azaharConfig.set("UI", r"Shortcuts\Main%20Window\Quick%20Load\KeySeq\default", "false")
 
         # Start Fullscreen
         azaharConfig.set("UI", "fullscreen", "true")
-        azaharConfig.set("UI", r"fullscreen\default", "false")
 
         # Knulli - Defaults
         azaharConfig.set("UI", "displayTitleBars", "false")
-        azaharConfig.set("UI", r"displayTitleBars\default", "false")
         azaharConfig.set("UI", "firstStart", "false")
-        azaharConfig.set("UI", r"firstStart\default", "false")
         azaharConfig.set("UI", "hideInactiveMouse", "true")
-        azaharConfig.set("UI", r"hideInactiveMouse\default", "false")
         azaharConfig.set("UI", "enable_discord_presence", "false")
-        azaharConfig.set("UI", r"enable_discord_presence\default", "false")
 
         # Remove pop-up prompt on start
         azaharConfig.set("UI", "calloutFlags", "1")
-        azaharConfig.set("UI", r"calloutFlags\default", "false")
         # Close without confirmation
         azaharConfig.set("UI", "confirmClose", "false")
-        azaharConfig.set("UI", r"confirmClose\default", "false")
 
         # screenshots
         azaharConfig.set("UI", r"Paths\screenshotPath", "/userdata/screenshots")
-        azaharConfig.set("UI", r"Paths\screenshotPath\default", "false")
 
         ## [MISCELLANEOUS]
         if not azaharConfig.has_section("Miscellaneous"):
             azaharConfig.add_section("Miscellaneous")
         # Don't check for update at start
         azaharConfig.set("Miscellaneous", "check_for_update_on_start", "false")
-        azaharConfig.set("Miscellaneous", r"check_for_update_on_start\default", "false")
 
         ## [RENDERER]
         if not azaharConfig.has_section("Renderer"):
             azaharConfig.add_section("Renderer")
-        # Use Hardware rendering with Hardware Shader by default; give user choice to disable it for some games
-        azaharConfig.set("Renderer", "use_hw_renderer", "true")
-        azaharConfig.set("Renderer", r"use_hw_renderer\default", "false")
-        if system.isOptSet('azahar_use_hw_shader'):
-            azaharConfig.set("Renderer", "use_hw_shader", system.getOptBoolean("azahar_use_hw_shader"))
+        # Use Hardware Shader by default; give user choice to disable it for some games
+        if system.isOptSet('azahar_use_hw_shader') and not system.getOptBoolean("azahar_use_hw_shader"):
+            azaharConfig.set("Renderer", "use_hw_shader", "0")
         else:
-            azaharConfig.set("Renderer", "use_hw_shader", "true")
-        azaharConfig.set("Renderer", r"use_hw_shader\default", "false")
-        azaharConfig.set("Renderer", "use_shader_jit", "true")
-        azaharConfig.set("Renderer", r"use_hw_shader_jit\default", "false")
+            azaharConfig.set("Renderer", "use_hw_shader", "1")
+        azaharConfig.set("Renderer", "use_shader_jit", "1")
 
         # Software, OpenGL (default) or Vulkan
         if system.isOptSet('azahar_graphics_api'):
             azaharConfig.set("Renderer", "graphics_api", system.config["azahar_graphics_api"])
         else:
-            azaharConfig.set("Renderer", "graphics_api", "1")
-        azaharConfig.set("Renderer", r"graphics_api\default", "false")
+            azaharConfig.set("Renderer", "graphics_api", "2") # Default to Vulkan, but it will be set to OpenGL if Vulkan is not available
 
         # Set Vulkan as necessary
         if system.isOptSet("azahar_graphics_api") and system.config["azahar_graphics_api"] == "2" and has_vulkan("hasVulkan"):
@@ -202,66 +180,46 @@ class AzaharGenerator(Generator):
 
         # Use VSYNC
         if system.isOptSet('azahar_use_vsync_new') and system.config["azahar_use_vsync_new"] == '0':
-            azaharConfig.set("Renderer", "use_vsync_new", "false")
+            azaharConfig.set("Renderer", "use_vsync", "0")
         else:
-            azaharConfig.set("Renderer", "use_vsync_new", "true")
-        azaharConfig.set("Renderer", r"use_vsync_new\default", "false")
+            azaharConfig.set("Renderer", "use_vsync", "1")
 
         # Resolution Factor
         if system.isOptSet('azahar_resolution_factor'):
             azaharConfig.set("Renderer", "resolution_factor", system.config["azahar_resolution_factor"])
         else:
             azaharConfig.set("Renderer", "resolution_factor", "1")
-        azaharConfig.set("Renderer", r"resolution_factor\default", "false")
 
-        # Async Shader Compilation
-        if system.isOptSet('azahar_async_shader_compilation') and system.config["azahar_async_shader_compilation"] == '1':
-            azaharConfig.set("Renderer", "async_shader_compilation", "true")
-        else:
-            azaharConfig.set("Renderer", "async_shader_compilation", "false")
-        azaharConfig.set("Renderer", r"async_shader_compilation\default", "false")
-
-        # Use Frame Limit
+        # Frame Limit (0 = unlimited, 100 = default)
         if system.isOptSet('azahar_use_frame_limit') and system.config["azahar_use_frame_limit"] == '0':
-            azaharConfig.set("Renderer", "use_frame_limit", "false")
+            azaharConfig.set("Renderer", "frame_limit", "0")
         else:
-            azaharConfig.set("Renderer", "use_frame_limit", "true")
-        azaharConfig.set("Renderer", r"use_frame_limit\default", "false")
+            azaharConfig.set("Renderer", "frame_limit", "100")
+
+        # Disk Shader Cache (in Renderer for SDL2)
+        if system.isOptSet('azahar_use_disk_shader_cache') and system.config["azahar_use_disk_shader_cache"] == '1':
+            azaharConfig.set("Renderer", "use_disk_shader_cache", "1")
+        else:
+            azaharConfig.set("Renderer", "use_disk_shader_cache", "0")
 
         ## [WEB SERVICE]
         if not azaharConfig.has_section("WebService"):
             azaharConfig.add_section("WebService")
         azaharConfig.set("WebService", "enable_telemetry",  "false")
-        azaharConfig.set("WebService", r"enable_telemetry\default", "false")
 
-        ## [UTILITY]
-        if not azaharConfig.has_section("Utility"):
-            azaharConfig.add_section("Utility")
-        # Disk Shader Cache
-        if system.isOptSet('azahar_use_disk_shader_cache') and system.config["azahar_use_disk_shader_cache"] == '1':
-            azaharConfig.set("Utility", "use_disk_shader_cache", "true")
-        else:
-            azaharConfig.set("Utility", "use_disk_shader_cache", "false")
-        azaharConfig.set("Utility", r"use_disk_shader_cache\default", "false")
-
-        # Custom Textures
+        # Custom Textures (in Layout for SDL2)
         if system.isOptSet('azahar_custom_textures') and system.config["azahar_custom_textures"] != '0':
             tab = system.config["azahar_custom_textures"].split('-')
-            azaharConfig.set("Utility", "custom_textures",  "true")
+            azaharConfig.set("Layout", "custom_textures",  "1")
             if tab[1] == 'normal':
-                azaharConfig.set("Utility", "async_custom_loading", "true")
-                azaharConfig.set("Utility", r"async_custom_loading\default", "false")
-                azaharConfig.set("Utility", "preload_textures", "false")
-                azaharConfig.set("Utility", r"preload_textures\default", "false")
+                azaharConfig.set("Layout", "async_custom_loading", "1")
+                azaharConfig.set("Layout", "preload_textures", "0")
             else:
-                azaharConfig.set("Utility", "async_custom_loading", "false")
-                azaharConfig.set("Utility", r"async_custom_loading\default", "false")
-                azaharConfig.set("Utility", "preload_textures", "true")
-                azaharConfig.set("Utility", r"preload_textures\default", "false")
+                azaharConfig.set("Layout", "async_custom_loading", "0")
+                azaharConfig.set("Layout", "preload_textures", "1")
         else:
-            azaharConfig.set("Utility", "custom_textures",  "false")
-            azaharConfig.set("Utility", "preload_textures", "false")
-        azaharConfig.set("Utility", r"custom_textures\default", "false")
+            azaharConfig.set("Layout", "custom_textures",  "0")
+            azaharConfig.set("Layout", "preload_textures", "0")
 
         ## [CONTROLS]
         if not azaharConfig.has_section("Controls"):
@@ -270,21 +228,15 @@ class AzaharGenerator(Generator):
         # Options required to load the functions when the configuration file is created
         if not azaharConfig.has_option("Controls", r"profiles\size"):
             azaharConfig.set("Controls", "profile", "0")
-            azaharConfig.set("Controls", r"profile\default", "false")
             azaharConfig.set("Controls", r"profiles\1\name", "default")
-            azaharConfig.set("Controls", r"profiles\1\name\default", "false")
             azaharConfig.set("Controls", r"profiles\size", "1")
-            azaharConfig.set("Controls", r"profiles\size\default", "false")
 
         controller = playersControllers.get(1)
         if controller is not None:
             for x in azaharButtons:
-                azaharConfig.set("Controls", f"profiles\\1\\{x}", f'"{AzaharGenerator.setButton(azaharButtons[x], controller.guid, controller.inputs)}"')
-                azaharConfig.set("Controls", f"profiles\\1\\{x}\\default", "false")
+                azaharConfig.set("Controls", f"{x}", AzaharGenerator.setButton(azaharButtons[x], controller.guid, controller.inputs))
             for x in azaharAxis:
-                azaharConfig.set("Controls", f"profiles\\1\\{x}", f'"{AzaharGenerator.setAxis(azaharAxis[x], controller.guid, controller.inputs)}"')
-                azaharConfig.set("Controls", f"profiles\\1\\{x}\\default", "false")
-
+                azaharConfig.set("Controls", f"{x}", AzaharGenerator.setAxis(azaharAxis[x], controller.guid, controller.inputs))
 
         ## Update the configuration file
         with ensure_parents_and_open(azaharConfigFile, 'w') as configfile:
@@ -297,7 +249,7 @@ class AzaharGenerator(Generator):
             input = padInputs[key]
 
             if input.type == "button":
-                return f"button:{input.id},guid:{padGuid},engine:sdl"
+                return f"engine:sdl,guid:{padGuid},button:{input.id}"
             if input.type == "hat":
                 return f"engine:sdl,guid:{padGuid},hat:{input.id},direction:{AzaharGenerator.hatdirectionvalue(input.value)}"
             if input.type == "axis":
@@ -322,7 +274,7 @@ class AzaharGenerator(Generator):
         if inputx is None or inputy is None:
             return ""
 
-        return f"axis_x:{inputx.id},guid:{padGuid},axis_y:{inputy.id},engine:sdl"
+        return f"engine:sdl,guid:{padGuid},axis_x:{inputx.id},axis_y:{inputy.id}"
 
     @staticmethod
     def hatdirectionvalue(value: str) -> str:
