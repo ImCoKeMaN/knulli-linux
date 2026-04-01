@@ -1,0 +1,2 @@
+SUBSYSTEM=="input", ATTRS{name}=="gyro", MODE="0666", ENV{ID_INPUT_JOYSTICK}="0"
+

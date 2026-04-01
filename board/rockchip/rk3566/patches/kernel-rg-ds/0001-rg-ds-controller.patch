@@ -1,0 +1,95 @@
+--- a/drivers/input/joystick/rocknix-singleadc-joypad.c	2026-03-27 21:43:31.316889186 +0000
++++ b/drivers/input/joystick/rocknix-singleadc-joypad.c	2026-03-27 20:46:03.412933516 +0000
+@@ -57,6 +57,9 @@ struct bt_adc {
+ 	int amux_ch;
+ 	/* adc data tuning value([percent), p = positive, n = negative */
+ 	int tuning_p, tuning_n;
++	/* observed physical max raw deflection per direction (0 = disabled) */
++	/* when set, value is normalized to ±max before deadzone processing */
++	int range_p, range_n;
+ };
+ 
+ struct analog_mux {
+@@ -787,6 +790,11 @@ static void joypad_adc_check(struct inpu
+ 			continue;
+ 		}
+ 		adcx->value = adcx->value - adcx->cal;
++		/* Normalize to ±max using observed physical range per direction */
++		if (adcx->value > 0 && adcx->range_p)
++			adcx->value = min(adcx->value * adcx->max / adcx->range_p, adcx->max);
++		else if (adcx->value < 0 && adcx->range_n)
++			adcx->value = max(adcx->value * adcx->max / adcx->range_n, adcx->min);
+ 
+ 		/* Read second joystick axis */
+ 		raw_y = joypad_adc_read(joypad->amux, adcy);
+@@ -800,6 +808,11 @@ static void joypad_adc_check(struct inpu
+ 			continue;
+ 		}
+ 		adcy->value = adcy->value - adcy->cal;
++		/* Normalize to ±max using observed physical range per direction */
++		if (adcy->value > 0 && adcy->range_p)
++			adcy->value = min(adcy->value * adcy->max / adcy->range_p, adcy->max);
++		else if (adcy->value < 0 && adcy->range_n)
++			adcy->value = max(adcy->value * adcy->max / adcy->range_n, adcy->min);
+ 
+ 		/* Debug output every second */
+ 		if (should_debug) {
+@@ -1046,6 +1059,9 @@ static int joypad_adc_setup(struct devic
+ 		}
+ 		adc->invert = false;
+ 
++		adc->range_p = 0;
++		adc->range_n = 0;
++
+ 		switch (nbtn) {
+ 			case 0:
+ 				if (joypad->invert_absrz)
+@@ -1059,6 +1075,8 @@ static int joypad_adc_setup(struct devic
+ 					"abs_rz-n-tuning",
+ 					&adc->tuning_n))
+ 					adc->tuning_n = ADC_TUNING_DEFAULT;
++				device_property_read_u32(dev, "abs_rz-p-range", &adc->range_p);
++				device_property_read_u32(dev, "abs_rz-n-range", &adc->range_n);
+ 				break;
+ 			case 1:
+ 				if (joypad->invert_absz)
+@@ -1072,6 +1090,8 @@ static int joypad_adc_setup(struct devic
+ 					"abs_z-n-tuning",
+ 					&adc->tuning_n))
+ 					adc->tuning_n = ADC_TUNING_DEFAULT;
++				device_property_read_u32(dev, "abs_z-p-range", &adc->range_p);
++				device_property_read_u32(dev, "abs_z-n-range", &adc->range_n);
+ 				break;
+ 			case 2:
+ 				if (joypad->invert_absy)
+@@ -1085,6 +1105,8 @@ static int joypad_adc_setup(struct devic
+ 					"abs_y-n-tuning",
+ 					&adc->tuning_n))
+ 					adc->tuning_n = ADC_TUNING_DEFAULT;
++				device_property_read_u32(dev, "abs_y-p-range", &adc->range_p);
++				device_property_read_u32(dev, "abs_y-n-range", &adc->range_n);
+ 				break;
+ 			case 3:
+ 				if (joypad->invert_absx)
+@@ -1098,6 +1120,8 @@ static int joypad_adc_setup(struct devic
+ 					"abs_x-n-tuning",
+ 					&adc->tuning_n))
+ 					adc->tuning_n = ADC_TUNING_DEFAULT;
++				device_property_read_u32(dev, "abs_x-p-range", &adc->range_p);
++				device_property_read_u32(dev, "abs_x-n-range", &adc->range_n);
+ 				break;
+ 			default :
+ 				dev_err(dev, "%s amux count(%d) error!",
+@@ -1281,8 +1305,10 @@ static int joypad_input_setup(struct dev
+ 			joypad->bt_adc_fuzz, joypad->bt_adc_flat,
+ 			joypad->bt_adc_deadzone);
+ 		dev_info(dev,
+-			"%s : adc tuning_p = %d, adc_tuning_n = %d\n\n",
+-			__func__, adc->tuning_p, adc->tuning_n);
++			"%s : adc tuning_p = %d, adc_tuning_n = %d,"
++			" range_p = %d, range_n = %d\n\n",
++			__func__, adc->tuning_p, adc->tuning_n,
++			adc->range_p, adc->range_n);
+ 	}
+ 
+ 	/*
