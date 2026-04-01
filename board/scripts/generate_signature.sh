@@ -1,21 +1,22 @@
 #!/bin/bash
 
 # Firmware Signature Generator
-# This script generates MD5 signatures for firmware components during build
-
-
-# BOARD_DIR = board specific dir
-# BINARIES_DIR = images dir 
-# BATOCERA_BINARIES_DIR = knulli binaries sub directory
+# This script generates MD5 signatures for firmware components during build.
+#
+# Usage:
+#   generate_signature.sh BOARD_DIR BINARIES_DIR BOOT_DIR
+#
+# BOARD_DIR     - board-specific source directory (e.g. board/rockchip/rk3566/rg-arc-s)
+# BINARIES_DIR  - buildroot images output directory
+# BOOT_DIR      - assembled boot FAT directory (KNULLI_BINARIES_DIR/boot), populated
+#                 by create-boot-script.sh before this script runs
 
 BOARD_DIR=$1
 BINARIES_DIR=$2
-ARCH_DIR=$(basename "$(dirname "$BINARIES_DIR")")
+BOOT_DIR=$3
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-FIRMWARE_DIR="${BOARD_DIR}" 
 SIGNATURE_FILE="${BINARIES_DIR}/firmware.sig"
 
 log_info() {
@@ -24,10 +25,6 @@ log_info() {
 
 log_warn() {
     echo -e "[WARN] $1"
-}
-
-log_error() {
-    echo -e "[ERROR] $1"
 }
 
 # Function to calculate MD5 of a file
@@ -50,17 +47,137 @@ get_file_size() {
     fi
 }
 
-# Main signature generation function
+# Append a single file entry to the signature file.
+# Args: absolute_file_path  relative_path_in_boot_fat  [key_override]
+#   relative_path_in_boot_fat is the path as seen when the FAT is mounted at /boot
+#   (e.g.  "boot/linux"  or  "extlinux/extlinux.conf")
+add_file_entry() {
+    local file="$1"
+    local rel_path="$2"
+    local key_override="$3"
+
+    local md5
+    local size
+    local key
+
+    md5=$(calculate_md5 "$file")
+    size=$(get_file_size "$file")
+    key="${key_override:-$(basename "$file")}"
+
+    echo "${key}_md5=${md5}"   >> "$SIGNATURE_FILE"
+    echo "${key}_size=${size}" >> "$SIGNATURE_FILE"
+    echo "${key}_path=${rel_path}" >> "$SIGNATURE_FILE"
+
+    if [[ "$md5" == "MISSING" ]]; then
+        log_warn "File missing: $file"
+    else
+        log_info "Signed: ${rel_path} (MD5: ${md5:0:8}..., Size: ${size} bytes)"
+    fi
+}
+
+# --- Allwinner BSP signature (h700, a133) ---
+# These boards have pre-built partition images written via dd; they are tracked
+# by filename only (no _path entry needed — the upgrade script has hardcoded
+# dd offsets for each known partition name).
+generate_signature_allwinner_bsp() {
+    local partition_files=(
+        "${BOARD_DIR}/partitions/boot0.img"
+        "${BOARD_DIR}/partitions/boot_package.fex"
+        "${BOARD_DIR}/partitions/boot.img"
+        "${BOARD_DIR}/partitions/env.img"
+    )
+
+    for file in "${partition_files[@]}"; do
+        local md5
+        local size
+        local bn
+        md5=$(calculate_md5 "$file")
+        size=$(get_file_size "$file")
+        bn=$(basename "$file")
+        echo "${bn}_md5=${md5}"   >> "$SIGNATURE_FILE"
+        echo "${bn}_size=${size}" >> "$SIGNATURE_FILE"
+        if [[ "$md5" == "MISSING" ]]; then
+            log_warn "Partition file missing: $file"
+        else
+            log_info "Signed partition: $file (MD5: ${md5:0:8}..., Size: ${size} bytes)"
+        fi
+    done
+
+    # rootfs — no _path entry for backward compatibility; handled specially by the upgrade script
+    local rootfs="${BINARIES_DIR}/rootfs.squashfs"
+    local md5
+    local size
+    md5=$(calculate_md5 "$rootfs")
+    size=$(get_file_size "$rootfs")
+    echo "rootfs.squashfs_md5=${md5}"   >> "$SIGNATURE_FILE"
+    echo "rootfs.squashfs_size=${size}" >> "$SIGNATURE_FILE"
+    log_info "Signed rootfs: (MD5: ${md5:0:8}..., Size: ${size} bytes)"
+}
+
+# --- Simple boot-FAT signature (rk3326, rk3566/rk3568, sm8250, etc.) ---
+# All updateable files live inside the boot FAT partition; no dd writes needed.
+# We scan the assembled boot dir so we hash the exact files that end up on-device
+# (important for rk3326 where the kernel goes through mkimage, and for rk3566
+# where DTBs are renamed from the build output).
+generate_signature_boot_fat() {
+    if [[ -z "$BOOT_DIR" ]]; then
+        log_warn "BOOT_DIR not provided — cannot generate boot-FAT signatures"
+        return 1
+    fi
+
+    # --- rootfs ---
+    # rootfs.squashfs is placed into the boot dir as knulli.update (renamed to
+    # knulli after archiving).  Hash from BINARIES_DIR for consistency; no
+    # _path entry for backward compatibility with the existing rootfs update path.
+    local rootfs="${BINARIES_DIR}/rootfs.squashfs"
+    local md5
+    local size
+    md5=$(calculate_md5 "$rootfs")
+    size=$(get_file_size "$rootfs")
+    echo "rootfs.squashfs_md5=${md5}"   >> "$SIGNATURE_FILE"
+    echo "rootfs.squashfs_size=${size}" >> "$SIGNATURE_FILE"
+    log_info "Signed rootfs: (MD5: ${md5:0:8}..., Size: ${size} bytes)"
+
+    # --- Files in boot/boot/ (kernel, initrd, DTBs) ---
+    # Skip the rootfs file (knulli / knulli.update) and per-device config files
+    # that are not firmware (knulli.board, firmware.sig, autoresize).
+    local skip_pattern="^(knulli|knulli\.update|knulli\.board|firmware\.sig|autoresize)$"
+    if [[ -d "${BOOT_DIR}/boot" ]]; then
+        for f in "${BOOT_DIR}/boot/"*; do
+            [[ -f "$f" ]] || continue
+            local bn
+            bn=$(basename "$f")
+            if echo "$bn" | grep -qE "$skip_pattern"; then
+                continue
+            fi
+            add_file_entry "$f" "boot/${bn}"
+        done
+    fi
+
+    # --- Boot configuration ---
+    # extlinux (RK3326, RK3566)
+    if [[ -f "${BOOT_DIR}/extlinux/extlinux.conf" ]]; then
+        add_file_entry "${BOOT_DIR}/extlinux/extlinux.conf" "extlinux/extlinux.conf"
+    fi
+
+    # GRUB / EFI (SM8250 and other EFI-booting platforms)
+    if [[ -f "${BOOT_DIR}/EFI/BOOT/grub.cfg" ]]; then
+        add_file_entry "${BOOT_DIR}/EFI/BOOT/grub.cfg" "EFI/BOOT/grub.cfg"
+    fi
+
+    # U-Boot script / boot.ini (RK3326 and similar)
+    if [[ -f "${BOOT_DIR}/boot.ini" ]]; then
+        add_file_entry "${BOOT_DIR}/boot.ini" "boot.ini"
+    fi
+}
+
+# --- Main ---
 generate_signature() {
     log_info "Generating firmware signature..."
-    
-    # Create temporary directory for boot partition extraction
-    local temp_dir=$(mktemp -d)
-    trap "rm -rf $temp_dir" EXIT
-    
-    VERSION=$(cat "${BINARIES_DIR}/../target/usr/share/knulli/knulli.version")
 
-    # Start signature file
+    VERSION=$(cat "${BINARIES_DIR}/../target/usr/share/knulli/knulli.version")
+    ARCH=$(cat "${BINARIES_DIR}/../target/usr/share/knulli/knulli.arch" 2>/dev/null || echo "unknown")
+
     cat > "$SIGNATURE_FILE" << EOF
 # Firmware Signature File
 # Generated on: $(date)
@@ -68,45 +185,26 @@ generate_signature() {
 [metadata]
 version="$VERSION"
 board=$(basename "$BOARD_DIR")
+arch=$ARCH
 timestamp=$(date +%s)
 build_date=$(date -Iseconds)
 
 [partitions]
 EOF
 
-    # Calculate signatures for partition files (valid for h700 and a133 boards)
-    local partition_files=(
-        "${FIRMWARE_DIR}/partitions/boot0.img"
-        "${FIRMWARE_DIR}/partitions/boot_package.fex"
-        "${FIRMWARE_DIR}/partitions/boot.img"
-        "${FIRMWARE_DIR}/partitions/env.img"
-        "${BINARIES_DIR}/rootfs.squashfs"
-    )
+    # Detect platform from the board directory path
+    if [[ "$BOARD_DIR" == */allwinner/h700/* ]] || [[ "$BOARD_DIR" == */allwinner/a133/* ]]; then
+        generate_signature_allwinner_bsp
+    else
+        generate_signature_boot_fat
+    fi
 
-    for file in "${partition_files[@]}"; do
-        local md5=$(calculate_md5 "$file")
-        local size=$(get_file_size "$file")
-        local basename=$(basename "$file")
-        
-        echo "${basename}_md5=$md5" >> "$SIGNATURE_FILE"
-        echo "${basename}_size=$size" >> "$SIGNATURE_FILE"
-        
-        if [[ "$md5" == "MISSING" ]]; then
-            log_warn "File missing: $file"
-        else
-            log_info "Signed: $file (MD5: ${md5:0:8}..., Size: $size bytes)"
-        fi
-    done
-    
     log_info "Firmware signature generated: $SIGNATURE_FILE"
 }
 
-# Check if signature file exists
-if [[ -f "$SIGNATURE_FILE" ]]; then
-    rm "$SIGNATURE_FILE" 
-fi
+# Remove stale signature file before regenerating
+[[ -f "$SIGNATURE_FILE" ]] && rm "$SIGNATURE_FILE"
 
-# Run signature generation
 generate_signature
 
 log_info "Signature generation complete!"
