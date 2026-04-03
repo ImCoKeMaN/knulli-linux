@@ -1,6 +1,6 @@
---- a/src/video/kmsdrm/SDL_kmsdrmvideo.c	2026-03-12 03:01:48.233525710 +0000
-+++ b/src/video/kmsdrm/SDL_kmsdrmvideo.c	2026-03-12 03:01:45.308526516 +0000
-@@ -698,24 +698,66 @@ static SDL_bool KMSDRM_VrrPropId(uint32_
+--- sdl2-2.32.8/src/video/kmsdrm/SDL_kmsdrmvideo.c	2026-04-02 17:04:21.082542392 +0000
++++ new_sdl2/src/video/kmsdrm/SDL_kmsdrmvideo.c	2026-04-02 16:50:36.873113861 +0000
+@@ -694,24 +694,78 @@ static SDL_bool KMSDRM_VrrPropId(uint32_
      return SDL_TRUE;
  }
  
@@ -32,8 +32,18 @@
 +    return rotation;
 +}
 +
++static SDL_bool KMSDRM_ConnectorIsInternal(uint32_t connector_type)
++{
++    return (connector_type == DRM_MODE_CONNECTOR_LVDS ||
++            connector_type == DRM_MODE_CONNECTOR_eDP  ||
++            connector_type == DRM_MODE_CONNECTOR_DSI  ||
++            connector_type == DRM_MODE_CONNECTOR_DPI);
++}
++
  static int KMSDRM_ConnectorGetOrientation(uint32_t drm_fd,
-                                           uint32_t output_id)
+-                                          uint32_t output_id)
++                                          uint32_t output_id,
++                                          uint32_t connector_type)
  {
      uint32_t i;
      SDL_bool found = SDL_FALSE;
@@ -55,20 +65,23 @@
          return SDL_clamp(val, 0, 3);
      }
  
-+    /* Read rotation from kernel command line (fbcon=rotate:X). */
-+    fbcon_rotation = KMSDRM_GetFbconRotation();
-+    if (fbcon_rotation >= 0) {
-+        if (props) {
-+            KMSDRM_drmModeFreeObjectProperties(props);
++    /* Read rotation from kernel command line (fbcon=rotate:X).
++       fbcon rotation only applies to the internal panel, not external displays. */
++    if (KMSDRM_ConnectorIsInternal(connector_type)) {
++        fbcon_rotation = KMSDRM_GetFbconRotation();
++        if (fbcon_rotation >= 0) {
++            if (props) {
++                KMSDRM_drmModeFreeObjectProperties(props);
++            }
++            return fbcon_rotation;
 +        }
-+        return fbcon_rotation;
 +    }
 +
 +    /* Fall back to DRM panel orientation property. */
      if (!props) {
          return 0;
      }
-@@ -735,6 +777,8 @@ static int KMSDRM_ConnectorGetOrientatio
+@@ -731,6 +785,8 @@ static int KMSDRM_ConnectorGetOrientatio
          KMSDRM_drmModeFreeProperty(drm_prop);
      }
  
@@ -77,3 +90,12 @@
      /* librga expresses rotations clockwise. (e.g., dts = 90? rga = 270!) */
      switch (orientation) {
          default:                                   return 0;
+@@ -1011,7 +1067,7 @@ static void KMSDRM_AddDisplay(_THIS, drm
+     dispdata->crtc = crtc;
+ 
+     /* store current connector orientation */
+-    dispdata->orientation = KMSDRM_ConnectorGetOrientation(viddata->drm_fd, connector->connector_id);
++    dispdata->orientation = KMSDRM_ConnectorGetOrientation(viddata->drm_fd, connector->connector_id, connector->connector_type);
+     /* save previous vrr state */
+     dispdata->saved_vrr = KMSDRM_CrtcGetVrr(viddata->drm_fd, crtc->crtc_id);
+     /* try to enable vrr */
