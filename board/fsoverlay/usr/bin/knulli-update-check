@@ -282,19 +282,39 @@ fi
 partition_updates_count=$(jq -r '.partition_updates | length' "$response_file")
 if [ "$partition_updates_count" -gt 0 ]; then
     echo "Found $partition_updates_count partition update(s)" >> "$log"
-    
-    # Log partition updates
+
     for i in $(seq 0 $((partition_updates_count - 1))); do
         partition=$(jq -r ".partition_updates[$i].partition" "$response_file")
         current_md5=$(jq -r ".partition_updates[$i].current_md5" "$response_file")
         target_md5=$(jq -r ".partition_updates[$i].target_md5" "$response_file")
         partition_url=$(jq -r ".partition_updates[$i].url" "$response_file")
-        
+
         echo "  Partition: $partition" >> "$log"
         echo "    Current MD5: $current_md5" >> "$log"
         echo "    Target MD5: $target_md5" >> "$log"
         echo "    URL: $partition_url" >> "$log"
     done
+fi
+
+# Check for boot file updates (kernel, DTBs, boot config)
+boot_file_updates_count=$(jq -r '.boot_file_updates | length' "$response_file")
+if [ "$boot_file_updates_count" -gt 0 ]; then
+    echo "Found $boot_file_updates_count boot file update(s)" >> "$log"
+
+    for i in $(seq 0 $((boot_file_updates_count - 1))); do
+        file_key=$(jq -r ".boot_file_updates[$i].file_key" "$response_file")
+        target_md5=$(jq -r ".boot_file_updates[$i].target_md5" "$response_file")
+        file_url=$(jq -r ".boot_file_updates[$i].url" "$response_file")
+
+        echo "  Boot file: $file_key" >> "$log"
+        echo "    Target MD5: $target_md5" >> "$log"
+        echo "    URL: $file_url" >> "$log"
+    done
+
+    # If no rootfs update was printed yet, still signal that an update is available
+    if [ "$rootfs_update_available" != "true" ]; then
+        echo "$current_version"
+    fi
 fi
 
 # Return success status for updates available

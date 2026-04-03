@@ -401,7 +401,8 @@ class KnulliUpgrader:
         print(f"  {partition_name} updated successfully")
         return True
 
-    def update_signature_file(self, new_version=None, rootfs_target_md5=None, partition_updates=None):
+    def update_signature_file(self, new_version=None, rootfs_target_md5=None,
+                              partition_updates=None, boot_file_updates=None):
         """Update firmware signature file"""
         print("Updating firmware signature file...")
 
@@ -421,13 +422,23 @@ class KnulliUpgrader:
             if rootfs_target_md5:
                 current_partitions["rootfs.squashfs_md5"] = rootfs_target_md5
 
-            # Update partition MD5s if provided
+            # Update partition MD5s (Allwinner BSP)
             if partition_updates:
                 for partition_update in partition_updates:
                     partition_name = partition_update["partition"]
                     target_md5 = partition_update["target_md5"]
                     current_partitions[f"{partition_name}_md5"] = target_md5
                     print(f"  Updated {partition_name}_md5 to {target_md5}")
+
+            # Update boot file MD5s and sizes (boot-FAT platforms)
+            if boot_file_updates:
+                for file_update in boot_file_updates:
+                    file_key = file_update["file_key"]
+                    target_md5 = file_update["target_md5"]
+                    current_partitions[f"{file_key}_md5"] = target_md5
+                    if file_update.get("size"):
+                        current_partitions[f"{file_key}_size"] = str(file_update["size"])
+                    print(f"  Updated {file_key}_md5 to {target_md5}")
 
             # Determine version to use
             version_to_use = new_version
@@ -511,30 +522,16 @@ class KnulliUpgrader:
                 print("ERROR: Failed to apply partition updates")
                 return 1
 
-        # Update signature file
-        signature_updated = False
-        if rootfs_update and partition_updates:
+        # Update signature file to reflect all applied changes
+        if rootfs_update or partition_updates or boot_file_updates:
             if not self.update_signature_file(
-                new_version=rootfs_update["version"],
-                rootfs_target_md5=rootfs_update["target_md5"],
-                partition_updates=partition_updates
+                new_version=rootfs_update["version"] if rootfs_update else None,
+                rootfs_target_md5=rootfs_update["target_md5"] if rootfs_update else None,
+                partition_updates=partition_updates or None,
+                boot_file_updates=boot_file_updates or None,
             ):
                 print("ERROR: Failed to update signature file")
                 return 1
-            signature_updated = True
-        elif rootfs_update:
-            if not self.update_signature_file(
-                new_version=rootfs_update["version"],
-                rootfs_target_md5=rootfs_update["target_md5"]
-            ):
-                print("ERROR: Failed to update signature file")
-                return 1
-            signature_updated = True
-        elif partition_updates:
-            if not self.update_signature_file(partition_updates=partition_updates):
-                print("ERROR: Failed to update signature file")
-                return 1
-            signature_updated = True
 
         print()
         print("Update completed successfully!")

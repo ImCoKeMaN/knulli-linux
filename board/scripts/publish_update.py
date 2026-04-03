@@ -220,37 +220,64 @@ def merge_updates(current, subtargets, channel, base_url, patches_dir):
 # File upload plan
 # ---------------------------------------------------------------------------
 
-def build_upload_plan(subtargets, output_dir, channel, updated, base_url):
+def check_baselines_exist(subtargets, releases_dir):
+    """Abort if any arch's current rootfs has not been saved as a baseline.
+
+    This enforces the rule: save_baseline.py must be run before publish_update.py
+    so that every published version can serve as a delta source for future builds.
+    """
+    missing = []
+    seen_archs = set()
+    for board, sig, _boot_dir in subtargets:
+        arch    = sig["metadata"].get("arch", "unknown")
+        new_md5 = sig["partitions"].get("rootfs.squashfs_md5", "MISSING")
+        if arch in seen_archs or new_md5 == "MISSING":
+            continue
+        seen_archs.add(arch)
+        baseline_file = releases_dir / arch / f"{new_md5}_rootfs.squashfs"
+        if not baseline_file.exists():
+            missing.append((arch, new_md5, baseline_file))
+
+    if missing:
+        print("ERROR: The following rootfs files have not been baselined:", file=sys.stderr)
+        for arch, md5, path in missing:
+            print(f"  [{arch}] {md5[:8]}… — expected at {path}", file=sys.stderr)
+        print("Run save_baseline.py first, then re-run this script.", file=sys.stderr)
+        sys.exit(1)
+
+
+def build_upload_plan(subtargets, output_dir, channel, updated, base_url, current_updates):
     """Return a list of (local_path, remote_rel_path) tuples to upload via SCP.
 
     remote_rel_path is relative to the SSH home directory on the server
     (i.e., the web root of updates.knulli.org).
     Deduplicates by remote path — if two boards produce the same remote file
     (same arch + same MD5), it's only uploaded once.
+    Boot files are skipped when their MD5 already matches what is recorded in
+    the pre-merge updates.json (i.e. they were uploaded in a previous run).
     """
     plan = {}  # remote_rel_path → local_path
 
     patches_dir = output_dir / "updates" / "patches"
-    rootfs_path = output_dir / "images" / "rootfs.squashfs"
-
-    seen_rootfs = set()
 
     for board, sig, boot_dir in subtargets:
         m = sig["metadata"]
         p = sig["partitions"]
         arch = m.get("arch", "unknown")
 
-        # rootfs squashfs
-        # if arch not in seen_rootfs:
-        #     md5 = p["rootfs.squashfs_md5"]
-        #     remote = f"rootfs/{channel}/rootfs_{md5}.squashfs"
-        #     plan[remote] = rootfs_path
-        #     seen_rootfs.add(arch)
-
-        # patches that target the new rootfs MD5
+        # patches that target the new rootfs MD5 — skip if already recorded
         new_md5 = p["rootfs.squashfs_md5"]
+        prev_patches = (current_updates
+                        .get("rootfs", {})
+                        .get(channel, {})
+                        .get(arch, {})
+                        .get("patches", {}))
         if patches_dir.is_dir():
-            for patch in patches_dir.glob(f"*_to_{new_md5}.patch"):
+            suffix = f"_to_{new_md5}.patch"
+            for patch in patches_dir.glob(f"*{suffix}"):
+                from_md5 = patch.name[: -len(suffix)]
+                if from_md5 in prev_patches:
+                    continue  # already on server
                 remote = f"updates/patches/{patch.name}"
                 plan[remote] = patch
 
@@ -258,8 +285,12 @@ def build_upload_plan(subtargets, output_dir, channel, updated, base_url):
         # written via dd — their images live in the board's source tree, not
         # produced as standalone upload artifacts here)
 
-        # Boot-FAT platforms: upload each tracked boot file
+        # Boot-FAT platforms: upload each tracked boot file, but only if its
+        # MD5 differs from what was already stored in updates.json before this run
         if not is_allwinner_bsp(p) and boot_dir:
+            prev_boot_files = (current_updates
+                               .get("boot_files", {})
+                               .get(channel, {}))
             for key, value in p.items():
                 if not key.endswith("_md5") or key == "rootfs.squashfs_md5":
                     continue
@@ -267,6 +298,12 @@ def build_upload_plan(subtargets, output_dir, channel, updated, base_url):
                 fat_path = p.get(f"{file_key}_path")
                 if not fat_path or not value or value == "MISSING":
                     continue
+                prev_md5 = (prev_boot_files
+                            .get(file_key, {})
+                            .get(board, {})
+                            .get("target_md5"))
+                if prev_md5 == value:
+                    continue  # already on server with this MD5
                 local = boot_dir / fat_path
                 if local.exists():
                     remote = f"updates/boot_files/{arch}/{channel}/{board}/{file_key}"
@@ -344,6 +381,12 @@ def main():
         help="Path to the local updates.json to read and update"
     )
     parser.add_argument(
+        "--baseline-dir",
+        help="Baseline storage directory (same as used with save_baseline.py). "
+             "When provided, the script verifies each arch's rootfs is baselined "
+             "before publishing and reads patches from there instead of output-dir."
+    )
+    parser.add_argument(
         "--base-url", required=True,
         help="Public base URL of the update server (e.g. https://updates.example.org)"
     )
@@ -385,7 +428,11 @@ def main():
     output_dir = Path(args.output_dir).resolve()
     updates_json_path = Path(args.updates_json).resolve()
     ssh_key = str(Path(args.ssh_key).expanduser())
-    patches_dir = output_dir / "updates" / "patches"
+
+    baseline_dir = Path(args.baseline_dir).resolve() if args.baseline_dir else None
+    releases_dir = baseline_dir / "releases" if baseline_dir else None
+    patches_dir  = (baseline_dir / "updates" / "patches") if baseline_dir \
+                   else (output_dir / "updates" / "patches")
 
     # --- Load current updates.json ---
     print(f"Loading {updates_json_path}")
@@ -397,6 +444,10 @@ def main():
     subtargets = collect_subtargets(output_dir)
     print(f"  Found {len(subtargets)} board variant(s): {', '.join(b for b, _, _ in subtargets)}")
 
+    # --- Preflight: verify baselines exist before touching anything ---
+    if releases_dir:
+        check_baselines_exist(subtargets, releases_dir)
+
     # --- Merge ---
     updated_updates, summary = merge_updates(
         current_updates, subtargets, args.channel, args.base_url, patches_dir
@@ -404,7 +455,7 @@ def main():
 
     # --- Upload plan ---
     upload_plan = build_upload_plan(
-        subtargets, output_dir, args.channel, updated_updates, args.base_url
+        subtargets, output_dir, args.channel, updated_updates, args.base_url, current_updates
     )
 
     # --- Show summary ---

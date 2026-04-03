@@ -8,8 +8,9 @@ For each architecture found in the build output:
   - Stores rootfs.squashfs as  BASELINE_DIR/releases/{arch}/rootfs_{md5}.squashfs
     (skipped if already present — identical by construction)
   - Stores firmware.sig alongside it as BASELINE_DIR/releases/{arch}/firmware_{md5}.sig
-  - Generates xdelta3 patches from every previously stored rootfs baseline
-    to the new one, written to BASELINE_DIR/updates/patches/
+  - Generates xdelta3 patches from the last --keep baselines to the new one,
+    written to BASELINE_DIR/updates/patches/
+  - Prunes baselines older than --keep (default 4), keeping storage bounded
 
 For Allwinner BSP boards (h700, a133), if --source-dir is provided:
   - Copies partition images (boot0.img, boot_package.fex, boot.img, env.img)
@@ -46,7 +47,8 @@ Expected BASELINE_DIR layout (mirrors the server's updates/ structure):
 Usage:
   save_baseline.py --output-dir output/h700 \\
                    --baseline-dir /data/knulli/baseline \\
-                   [--source-dir  /path/to/knulli/repo]
+                   [--source-dir  /path/to/knulli/repo] \\
+                   [--keep 4]
 """
 
 import argparse
@@ -119,11 +121,11 @@ def collect_subtargets(output_dir):
 # ---------------------------------------------------------------------------
 
 def save_rootfs_baseline(arch, new_md5, rootfs_src, sig_path, releases_dir):
-    """Copy rootfs and sig into releases/ if not already stored.
+    """Copy rootfs and sig into releases/{arch}/ if not already stored.
 
     Returns the path to the stored rootfs file.
     """
-    arch_dir = releases_dir
+    arch_dir = releases_dir / arch
     arch_dir.mkdir(parents=True, exist_ok=True)
 
     dest_rootfs = arch_dir / f"{new_md5}_rootfs.squashfs"
@@ -133,7 +135,7 @@ def save_rootfs_baseline(arch, new_md5, rootfs_src, sig_path, releases_dir):
         print(f"  [baseline] already stored: {dest_rootfs.name}")
     else:
         size_mb = rootfs_src.stat().st_size / 1024 / 1024
-        print(f"  [baseline] storing {new_md5[:8]}_rootfs… ({size_mb:.0f} MB)")
+        print(f"  [baseline] storing {new_md5[:8]}… ({size_mb:.0f} MB)")
         shutil.copy2(rootfs_src, dest_rootfs)
 
     if not dest_sig.exists():
@@ -142,24 +144,48 @@ def save_rootfs_baseline(arch, new_md5, rootfs_src, sig_path, releases_dir):
     return dest_rootfs
 
 
+def prune_baselines(arch_dir, keep, current_md5):
+    """Remove the oldest baselines, keeping at most `keep` total (including current).
+
+    Baselines are sorted by modification time — oldest are removed first.
+    The current build's rootfs is never pruned regardless of age.
+    """
+    existing = sorted(
+        arch_dir.glob("*_rootfs.squashfs"),
+        key=lambda f: f.stat().st_mtime
+    )
+    # exclude the one we just added
+    candidates = [f for f in existing if not f.name.startswith(current_md5)]
+
+    to_prune = candidates[:max(0, len(existing) - keep)]
+    for old_rootfs in to_prune:
+        old_md5 = old_rootfs.name[: -len("_rootfs.squashfs")]
+        old_sig = arch_dir / f"{old_md5}_firmware.sig"
+        print(f"  [prune] removing baseline {old_md5[:8]}…")
+        old_rootfs.unlink(missing_ok=True)
+        old_sig.unlink(missing_ok=True)
+
+
 # ---------------------------------------------------------------------------
 # Patch generation
 # ---------------------------------------------------------------------------
 
 def generate_patches(arch, new_md5, new_rootfs_path, releases_dir, patches_dir):
-    """Generate xdelta3 patches from every stored baseline to the new rootfs."""
+    """Generate xdelta3 patches from every kept baseline to the new rootfs."""
     patches_dir.mkdir(parents=True, exist_ok=True)
     arch_dir = releases_dir / arch
 
-    old_rootfs_files = sorted(arch_dir.glob("rootfs_*.squashfs"))
-    candidates = [f for f in old_rootfs_files if f.stem[len("rootfs_"):] != new_md5]
+    # Files are named {md5}_rootfs.squashfs
+    all_baselines = sorted(arch_dir.glob("*_rootfs.squashfs"))
+    candidates = [f for f in all_baselines
+                  if f.name[: -len("_rootfs.squashfs")] != new_md5]
 
     if not candidates:
         print(f"  [patches] no prior baselines for {arch} — nothing to diff")
         return
 
     for old_rootfs in candidates:
-        old_md5 = old_rootfs.stem[len("rootfs_"):]
+        old_md5 = old_rootfs.name[: -len("_rootfs.squashfs")]
         patch_name = f"{old_md5}_to_{new_md5}.patch"
         patch_path = patches_dir / patch_name
 
@@ -278,6 +304,11 @@ def main():
         "--source-dir",
         help="Knulli repo root — required for Allwinner BSP partition file copying"
     )
+    parser.add_argument(
+        "--keep", type=int, default=4,
+        help="Number of rootfs baselines to keep per arch (default: 4). "
+             "Oldest are pruned after the new one is stored."
+    )
     args = parser.parse_args()
 
     output_dir   = Path(args.output_dir).resolve()
@@ -318,6 +349,7 @@ def main():
                 arch, new_md5, rootfs_src, sig_path, releases_dir
             )
             generate_patches(arch, new_md5, new_rootfs_path, releases_dir, patches_dir)
+            prune_baselines(releases_dir / arch, args.keep, new_md5)
             seen_archs.add(arch)
 
         # Allwinner BSP: copy partition images from source tree
