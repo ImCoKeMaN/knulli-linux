@@ -44,7 +44,7 @@ def createPPSSPPConfig(iniConfig, system):
         iniConfig.add_section("Graphics")
 
     # Graphics Backend
-    have_vulkan = subprocess.check_output(["/usr/bin/knulli-vulkan", "hasVulkan"], text=True).strip()
+    have_vulkan = subprocess.run(["/usr/bin/knulli-vulkan", "hasVulkan"], text=True, capture_output=True).stdout.strip()
     if have_vulkan == "true":
         eslog.debug("Vulkan driver is available on the system.")
         iniConfig.set("Graphics", "GraphicsBackend", "3 (VULKAN)")
