@@ -93,7 +93,7 @@ def parse_firmware_sig(sig_path):
 
 
 def is_allwinner_bsp(partitions):
-    return partitions.get("boot0.img_md5", "MISSING") != "MISSING"
+    return partitions.get("boot0.img_md5", "MISSING") != "MISSING"di
 
 
 def collect_subtargets(output_dir):
@@ -195,7 +195,10 @@ def generate_patches(arch, new_md5, new_rootfs_path, releases_dir, patches_dir):
 
         print(f"  [patches] generating {patch_name} ...")
         result = subprocess.run(
-            ["xdelta3", "-e", "-s", str(old_rootfs), str(new_rootfs_path), str(patch_path)],
+            # -S none disables secondary compression (LZMA/DJW) so the patch
+            # can be applied by xdelta3 on embedded targets built without
+            # optional compressor support.
+            ["xdelta3", "-e", "-S", "none", "-s", str(old_rootfs), str(new_rootfs_path), str(patch_path)],
             capture_output=True, text=True
         )
         if result.returncode != 0:
