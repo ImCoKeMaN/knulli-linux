@@ -1,0 +1,479 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -76,6 +76,7 @@
+ 
+ if(UNIX AND NOT APPLE AND NOT ANDROID)
+   option(ENABLE_X11 "Enables X11 Support" ON)
++  option(ENABLE_WAYLAND "Enables Wayland Support" ON)
+ endif()
+ if(NOT WIN32 AND NOT APPLE AND NOT HAIKU)
+   option(ENABLE_EGL "Enables EGL OpenGL Interface" ON)
+@@ -524,6 +525,17 @@
+   endif()
+ endif()
+ 
++if(ENABLE_WAYLAND)
++  pkg_check_modules(WAYLAND_CLIENT wayland-client IMPORTED_TARGET)
++  pkg_check_modules(WAYLAND_PROTOCOLS wayland-protocols)
++  if(WAYLAND_CLIENT_FOUND AND WAYLAND_PROTOCOLS_FOUND)
++    set(HAVE_WAYLAND TRUE)
++    message(STATUS "Wayland support enabled")
++  else()
++    message(WARNING "Wayland support enabled but not found. This build will not support Wayland.")
++  endif()
++endif()
++
+ if(ENABLE_EGL)
+   find_package(EGL)
+   if(EGL_FOUND)
+--- a/Source/Core/DolphinNoGUI/CMakeLists.txt
++++ b/Source/Core/DolphinNoGUI/CMakeLists.txt
+@@ -24,6 +24,35 @@
+   target_sources(dolphin-nogui PRIVATE PlatformDRM.cpp)
+ endif()
+ 
++if(HAVE_WAYLAND)
++  find_program(WAYLAND_SCANNER wayland-scanner REQUIRED)
++  pkg_get_variable(WAYLAND_PROTOCOLS_DIR wayland-protocols pkgdatadir)
++
++  add_custom_command(
++    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/xdg-shell-client-protocol.h
++    COMMAND ${WAYLAND_SCANNER} client-header
++            ${WAYLAND_PROTOCOLS_DIR}/stable/xdg-shell/xdg-shell.xml
++            ${CMAKE_CURRENT_BINARY_DIR}/xdg-shell-client-protocol.h
++    VERBATIM
++  )
++  add_custom_command(
++    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/xdg-shell-protocol.c
++    COMMAND ${WAYLAND_SCANNER} private-code
++            ${WAYLAND_PROTOCOLS_DIR}/stable/xdg-shell/xdg-shell.xml
++            ${CMAKE_CURRENT_BINARY_DIR}/xdg-shell-protocol.c
++    VERBATIM
++  )
++
++  target_sources(dolphin-nogui PRIVATE
++    PlatformWayland.cpp
++    ${CMAKE_CURRENT_BINARY_DIR}/xdg-shell-protocol.c
++    ${CMAKE_CURRENT_BINARY_DIR}/xdg-shell-client-protocol.h
++  )
++  target_include_directories(dolphin-nogui PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
++  target_link_libraries(dolphin-nogui PRIVATE PkgConfig::WAYLAND_CLIENT)
++  target_compile_definitions(dolphin-nogui PRIVATE HAVE_WAYLAND=1)
++endif()
++
+ set_target_properties(dolphin-nogui PROPERTIES OUTPUT_NAME dolphin-emu-nogui)
+ 
+ target_link_libraries(dolphin-nogui
+--- a/Source/Core/DolphinNoGUI/MainNoGUI.cpp
++++ b/Source/Core/DolphinNoGUI/MainNoGUI.cpp
+@@ -172,6 +172,11 @@
+ {
+   std::string platform_name = static_cast<const char*>(options.get("platform"));
+ 
++#ifdef HAVE_WAYLAND
++  if (platform_name == "wayland" || platform_name.empty())
++    return Platform::CreateWaylandPlatform();
++#endif
++
+ #if HAVE_X11
+   if (platform_name == "x11" || platform_name.empty())
+     return Platform::CreateX11Platform();
+@@ -213,6 +218,10 @@
+       .help("Window platform to use [%choices]")
+       .choices({
+         "headless"
++#ifdef HAVE_WAYLAND
++            ,
++            "wayland"
++#endif
+ #ifdef __linux__
+             ,
+             "fbdev", "drm"
+--- a/Source/Core/DolphinNoGUI/Platform.h
++++ b/Source/Core/DolphinNoGUI/Platform.h
+@@ -40,6 +40,10 @@
+   static std::unique_ptr<Platform> CreateDRMPlatform();
+ #endif
+ 
++#ifdef HAVE_WAYLAND
++  static std::unique_ptr<Platform> CreateWaylandPlatform();
++#endif
++
+ #ifdef _WIN32
+   static std::unique_ptr<Platform> CreateWin32Platform();
+ #endif
+--- a/Source/Core/VideoBackends/Vulkan/CMakeLists.txt
++++ b/Source/Core/VideoBackends/Vulkan/CMakeLists.txt
+@@ -63,6 +63,11 @@
+   ${CMAKE_SOURCE_DIR}/Externals/libadrenotools/include
+ )
+ 
++if(HAVE_WAYLAND)
++  target_compile_definitions(videovulkan PUBLIC HAVE_WAYLAND=1)
++  target_link_libraries(videovulkan PUBLIC wayland-client)
++endif()
++
+ if(MSVC)
+   # Add precompiled header
+   target_link_libraries(videovulkan PRIVATE use_pch)
+--- a/Source/Core/VideoBackends/Vulkan/VKSwapChain.cpp
++++ b/Source/Core/VideoBackends/Vulkan/VKSwapChain.cpp
+@@ -22,6 +22,10 @@
+ #include <X11/Xlib.h>
+ #endif
+ 
++#if defined(VK_USE_PLATFORM_WAYLAND_KHR)
++#include <wayland-client.h>
++#endif
++
+ namespace Vulkan
+ {
+ SwapChain::SwapChain(const WindowSystemInfo& wsi, VkSurfaceKHR surface, bool vsync)
+@@ -122,6 +126,29 @@
+       return VK_NULL_HANDLE;
+     }
+ 
++    return surface;
++  }
++#endif
++
++#if defined(VK_USE_PLATFORM_WAYLAND_KHR)
++  if (wsi.type == WindowSystemType::Wayland)
++  {
++    VkWaylandSurfaceCreateInfoKHR surface_create_info = {
++        VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR,  // VkStructureType
++        nullptr,                                            // const void* pNext
++        0,                                                  // VkWaylandSurfaceCreateFlagsKHR flags
++        static_cast<struct wl_display*>(wsi.display_connection),  // struct wl_display* display
++        static_cast<struct wl_surface*>(wsi.render_surface)       // struct wl_surface* surface
++    };
++
++    VkSurfaceKHR surface;
++    VkResult res = vkCreateWaylandSurfaceKHR(instance, &surface_create_info, nullptr, &surface);
++    if (res != VK_SUCCESS)
++    {
++      LOG_VULKAN_ERROR(res, "vkCreateWaylandSurfaceKHR failed: ");
++      return VK_NULL_HANDLE;
++    }
++
+     return surface;
+   }
+ #endif
+--- a/Source/Core/VideoBackends/Vulkan/VulkanContext.cpp
++++ b/Source/Core/VideoBackends/Vulkan/VulkanContext.cpp
+@@ -374,6 +374,13 @@
+     return false;
+   }
+ #endif
++#if defined(VK_USE_PLATFORM_WAYLAND_KHR)
++  if (wstype == WindowSystemType::Wayland &&
++      !AddExtension(VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME, true))
++  {
++    return false;
++  }
++#endif
+ 
+   AddExtension(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME, false);
+   if (wstype != WindowSystemType::Headless)
+--- a/Source/Core/VideoBackends/Vulkan/VulkanLoader.h
++++ b/Source/Core/VideoBackends/Vulkan/VulkanLoader.h
+@@ -13,6 +13,10 @@
+ #define VK_USE_PLATFORM_XLIB_KHR
+ #endif
+ 
++#if defined(HAVE_WAYLAND)
++#define VK_USE_PLATFORM_WAYLAND_KHR
++#endif
++
+ #if defined(ANDROID)
+ #define VK_USE_PLATFORM_ANDROID_KHR
+ #endif
+--- a/Source/Core/VideoBackends/Vulkan/VulkanEntryPoints.inl
++++ b/Source/Core/VideoBackends/Vulkan/VulkanEntryPoints.inl
+@@ -57,6 +57,11 @@
+ VULKAN_INSTANCE_ENTRY_POINT(vkCreateMetalSurfaceEXT, false)
+ #endif
+ 
++#if defined(VK_USE_PLATFORM_WAYLAND_KHR)
++VULKAN_INSTANCE_ENTRY_POINT(vkCreateWaylandSurfaceKHR, false)
++VULKAN_INSTANCE_ENTRY_POINT(vkGetPhysicalDeviceWaylandPresentationSupportKHR, false)
++#endif
++
+ VULKAN_INSTANCE_ENTRY_POINT(vkCmdBeginDebugUtilsLabelEXT, false)
+ VULKAN_INSTANCE_ENTRY_POINT(vkCmdEndDebugUtilsLabelEXT, false)
+ VULKAN_INSTANCE_ENTRY_POINT(vkCmdInsertDebugUtilsLabelEXT, false)
+--- a/Source/Core/DolphinNoGUI/PlatformWayland.cpp
++++ b/Source/Core/DolphinNoGUI/PlatformWayland.cpp
+@@ -0,0 +1,199 @@
++// Copyright 2024 Dolphin Emulator Project
++// SPDX-License-Identifier: GPL-2.0-or-later
++
++#include <cstdio>
++#include <cstring>
++#include <thread>
++
++#include <wayland-client.h>
++#include "xdg-shell-client-protocol.h"
++
++#include "DolphinNoGUI/Platform.h"
++#include "Common/MsgHandler.h"
++#include "Common/WindowSystemInfo.h"
++#include "Core/Core.h"
++#include "Core/System.h"
++
++namespace
++{
++class PlatformWayland : public Platform
++{
++public:
++  ~PlatformWayland() override;
++
++  bool Init() override;
++  void SetTitle(const std::string& string) override;
++  void MainLoop() override;
++  WindowSystemInfo GetWindowSystemInfo() const override;
++
++  static void RegistryGlobal(void* data, wl_registry* registry, uint32_t name,
++                              const char* interface, uint32_t version);
++  static void RegistryGlobalRemove(void* data, wl_registry* registry, uint32_t name);
++  static void XdgWmBasePing(void* data, xdg_wm_base* wm_base, uint32_t serial);
++  static void XdgSurfaceConfigure(void* data, xdg_surface* xdg_surface, uint32_t serial);
++  static void XdgToplevelConfigure(void* data, xdg_toplevel* toplevel, int32_t width,
++                                    int32_t height, wl_array* states);
++  static void XdgToplevelClose(void* data, xdg_toplevel* toplevel);
++
++private:
++  wl_display* m_display = nullptr;
++  wl_registry* m_registry = nullptr;
++  wl_compositor* m_compositor = nullptr;
++  wl_surface* m_surface = nullptr;
++  xdg_wm_base* m_xdg_wm_base = nullptr;
++  xdg_surface* m_xdg_surface = nullptr;
++  xdg_toplevel* m_xdg_toplevel = nullptr;
++};
++
++static const wl_registry_listener s_registry_listener = {
++    PlatformWayland::RegistryGlobal,
++    PlatformWayland::RegistryGlobalRemove,
++};
++
++static const xdg_wm_base_listener s_xdg_wm_base_listener = {
++    PlatformWayland::XdgWmBasePing,
++};
++
++static const xdg_surface_listener s_xdg_surface_listener = {
++    PlatformWayland::XdgSurfaceConfigure,
++};
++
++static const xdg_toplevel_listener s_xdg_toplevel_listener = {
++    PlatformWayland::XdgToplevelConfigure,
++    PlatformWayland::XdgToplevelClose,
++};
++
++PlatformWayland::~PlatformWayland()
++{
++  if (m_xdg_toplevel)
++    xdg_toplevel_destroy(m_xdg_toplevel);
++  if (m_xdg_surface)
++    xdg_surface_destroy(m_xdg_surface);
++  if (m_surface)
++    wl_surface_destroy(m_surface);
++  if (m_xdg_wm_base)
++    xdg_wm_base_destroy(m_xdg_wm_base);
++  if (m_compositor)
++    wl_compositor_destroy(m_compositor);
++  if (m_registry)
++    wl_registry_destroy(m_registry);
++  if (m_display)
++    wl_display_disconnect(m_display);
++}
++
++void PlatformWayland::RegistryGlobal(void* data, wl_registry* registry, uint32_t name,
++                                      const char* interface, uint32_t version)
++{
++  PlatformWayland* platform = static_cast<PlatformWayland*>(data);
++  if (strcmp(interface, wl_compositor_interface.name) == 0)
++  {
++    platform->m_compositor = static_cast<wl_compositor*>(
++        wl_registry_bind(registry, name, &wl_compositor_interface, 1));
++  }
++  else if (strcmp(interface, xdg_wm_base_interface.name) == 0)
++  {
++    platform->m_xdg_wm_base = static_cast<xdg_wm_base*>(
++        wl_registry_bind(registry, name, &xdg_wm_base_interface, 1));
++    xdg_wm_base_add_listener(platform->m_xdg_wm_base, &s_xdg_wm_base_listener, platform);
++  }
++}
++
++void PlatformWayland::RegistryGlobalRemove(void* data, wl_registry* registry, uint32_t name)
++{
++}
++
++void PlatformWayland::XdgWmBasePing(void* data, xdg_wm_base* wm_base, uint32_t serial)
++{
++  xdg_wm_base_pong(wm_base, serial);
++}
++
++void PlatformWayland::XdgSurfaceConfigure(void* data, xdg_surface* xdg_surface, uint32_t serial)
++{
++  xdg_surface_ack_configure(xdg_surface, serial);
++  wl_surface_commit(static_cast<PlatformWayland*>(data)->m_surface);
++}
++
++void PlatformWayland::XdgToplevelConfigure(void* data, xdg_toplevel* toplevel, int32_t width,
++                                            int32_t height, wl_array* states)
++{
++}
++
++void PlatformWayland::XdgToplevelClose(void* data, xdg_toplevel* toplevel)
++{
++  static_cast<PlatformWayland*>(data)->RequestShutdown();
++}
++
++bool PlatformWayland::Init()
++{
++  m_display = wl_display_connect(nullptr);
++  if (!m_display)
++  {
++    PanicAlertFmt("Failed to connect to Wayland display");
++    return false;
++  }
++
++  m_registry = wl_display_get_registry(m_display);
++  wl_registry_add_listener(m_registry, &s_registry_listener, this);
++  wl_display_roundtrip(m_display);
++
++  if (!m_compositor)
++  {
++    PanicAlertFmt("No Wayland compositor found");
++    return false;
++  }
++  if (!m_xdg_wm_base)
++  {
++    PanicAlertFmt("No xdg_wm_base found — compositor does not support xdg-shell");
++    return false;
++  }
++
++  m_surface = wl_compositor_create_surface(m_compositor);
++  m_xdg_surface = xdg_wm_base_get_xdg_surface(m_xdg_wm_base, m_surface);
++  xdg_surface_add_listener(m_xdg_surface, &s_xdg_surface_listener, this);
++
++  m_xdg_toplevel = xdg_surface_get_toplevel(m_xdg_surface);
++  xdg_toplevel_add_listener(m_xdg_toplevel, &s_xdg_toplevel_listener, this);
++  xdg_toplevel_set_fullscreen(m_xdg_toplevel, nullptr);
++  xdg_toplevel_set_title(m_xdg_toplevel, "Dolphin");
++
++  wl_surface_commit(m_surface);
++  wl_display_roundtrip(m_display);
++
++  m_window_fullscreen = true;
++  return true;
++}
++
++void PlatformWayland::SetTitle(const std::string& string)
++{
++  if (m_xdg_toplevel)
++    xdg_toplevel_set_title(m_xdg_toplevel, string.c_str());
++}
++
++void PlatformWayland::MainLoop()
++{
++  while (IsRunning())
++  {
++    UpdateRunningFlag();
++    Core::HostDispatchJobs(Core::System::GetInstance());
++    wl_display_dispatch_pending(m_display);
++    wl_display_flush(m_display);
++    std::this_thread::sleep_for(std::chrono::milliseconds(1));
++  }
++}
++
++WindowSystemInfo PlatformWayland::GetWindowSystemInfo() const
++{
++  WindowSystemInfo wsi;
++  wsi.type = WindowSystemType::Wayland;
++  wsi.display_connection = m_display;
++  wsi.render_window = m_surface;
++  wsi.render_surface = m_surface;
++  return wsi;
++}
++
++}  // namespace
++
++std::unique_ptr<Platform> Platform::CreateWaylandPlatform()
++{
++  return std::make_unique<PlatformWayland>();
++}
+--- a/Source/Core/Common/WindowSystemInfo.h	2026-04-06 13:36:27.494316309 +0000
++++ b/Source/Core/Common/WindowSystemInfo.h	2026-04-06 13:35:39.166411637 +0000
+@@ -44,4 +44,9 @@ struct WindowSystemInfo
+ 
+   // Scale of the render surface. For hidpi systems, this will be >1.
+   float render_surface_scale = 1.0f;
++
++  // Suggested surface dimensions. Used when the compositor defers size selection to the client
++  // (e.g. Wayland with currentExtent == UINT32_MAX) and the presenter is not yet initialized.
++  int surface_width = 0;
++  int surface_height = 0;
+ };
+--- a/Source/Core/DolphinNoGUI/PlatformWayland.cpp	2026-04-06 13:36:27.641316023 +0000
++++ b/Source/Core/DolphinNoGUI/PlatformWayland.cpp	2026-04-06 13:35:39.194411581 +0000
+@@ -43,6 +43,8 @@ private:
+   xdg_wm_base* m_xdg_wm_base = nullptr;
+   xdg_surface* m_xdg_surface = nullptr;
+   xdg_toplevel* m_xdg_toplevel = nullptr;
++  int m_surface_width = 0;
++  int m_surface_height = 0;
+ };
+ 
+ static const wl_registry_listener s_registry_listener = {
+@@ -116,6 +118,13 @@ void PlatformWayland::XdgSurfaceConfigur
+ void PlatformWayland::XdgToplevelConfigure(void* data, xdg_toplevel* toplevel, int32_t width,
+                                             int32_t height, wl_array* states)
+ {
++  PlatformWayland* platform = static_cast<PlatformWayland*>(data);
++  // width/height of 0 means the compositor defers the size choice to the client.
++  // Only store non-zero values; keep whatever was set before (or 0 if never set).
++  if (width > 0)
++    platform->m_surface_width = width;
++  if (height > 0)
++    platform->m_surface_height = height;
+ }
+ 
+ void PlatformWayland::XdgToplevelClose(void* data, xdg_toplevel* toplevel)
+@@ -188,6 +197,8 @@ WindowSystemInfo PlatformWayland::GetWin
+   wsi.display_connection = m_display;
+   wsi.render_window = m_surface;
+   wsi.render_surface = m_surface;
++  wsi.surface_width = m_surface_width;
++  wsi.surface_height = m_surface_height;
+   return wsi;
+ }
+ 
+--- a/Source/Core/VideoBackends/Vulkan/VKSwapChain.cpp	2026-04-06 13:36:27.641316023 +0000
++++ b//Source/Core/VideoBackends/Vulkan/VKSwapChain.cpp	2026-04-06 13:35:39.212411545 +0000
+@@ -327,8 +327,22 @@ bool SwapChain::CreateSwapChain()
+   VkExtent2D size = surface_capabilities.currentExtent;
+   if (size.width == UINT32_MAX)
+   {
+-    size.width = std::max(g_presenter->GetBackbufferWidth(), 1);
+-    size.height = std::max(g_presenter->GetBackbufferHeight(), 1);
++    if (g_presenter)
++    {
++      size.width = std::max(g_presenter->GetBackbufferWidth(), 1);
++      size.height = std::max(g_presenter->GetBackbufferHeight(), 1);
++    }
++    else if (m_wsi.surface_width > 0 && m_wsi.surface_height > 0)
++    {
++      size.width = static_cast<uint32_t>(m_wsi.surface_width);
++      size.height = static_cast<uint32_t>(m_wsi.surface_height);
++    }
++    else
++    {
++      // Last resort fallback: use surface capability minimum (at least 1x1)
++      size.width = std::max(surface_capabilities.minImageExtent.width, 1u);
++      size.height = std::max(surface_capabilities.minImageExtent.height, 1u);
++    }
+   }
+   size.width = std::clamp(size.width, surface_capabilities.minImageExtent.width,
+                           surface_capabilities.maxImageExtent.width);
