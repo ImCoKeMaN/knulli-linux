@@ -144,18 +144,16 @@ class DolphinGenerator(Generator):
         else:
             dolphinSettings.set("Core", "MMU", "False")
 
-        # Backend - Default OpenGL
-        if system.isOptSet("gfxbackend") and system.config["gfxbackend"] == "Vulkan":
-            dolphinSettings.set("Core", "GFXBackend", "Vulkan")
-            # Check Vulkan
-            try:
-                have_vulkan = subprocess.check_output(["/usr/bin/knulli-vulkan", "hasVulkan"], text=True).strip()
-                if have_vulkan != "true":
-                    eslog.debug("Vulkan driver is not available on the system. Using OpenGL instead.")
-                    dolphinSettings.set("Core", "GFXBackend", "OGL")
-            except subprocess.CalledProcessError:
-                eslog.debug("Error checking for discrete GPU.")
-        else:
+        # Use Vulkan if available, otherwise fall back to OpenGL
+        try:
+            have_vulkan = subprocess.check_output(["/usr/bin/knulli-vulkan", "hasVulkan"], text=True).strip()
+            if have_vulkan == "true":
+                dolphinSettings.set("Core", "GFXBackend", "Vulkan")
+            else:
+                eslog.debug("Vulkan driver is not available on the system. Using OpenGL instead.")
+                dolphinSettings.set("Core", "GFXBackend", "OGL")
+        except subprocess.CalledProcessError:
+            eslog.debug("Error checking for Vulkan. Using OpenGL instead.")
             dolphinSettings.set("Core", "GFXBackend", "OGL")
 
         # Wiimote scanning
