@@ -93,7 +93,7 @@ def parse_firmware_sig(sig_path):
 
 
 def is_allwinner_bsp(partitions):
-    return partitions.get("boot0.img_md5", "MISSING") != "MISSING"di
+    return partitions.get("boot0.img_md5", "MISSING") != "MISSING"
 
 
 def collect_subtargets(output_dir):
