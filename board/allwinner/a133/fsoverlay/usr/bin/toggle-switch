@@ -21,7 +21,8 @@ case "$ACTION" in
                 echo "mute" > "$TOGGLE_STATE"
                 ;;
             rgboff)
-                /usr/bin/knulli-settings-set led.mode 0
+                /usr/bin/knulli-settings-set led.enabled 0
+                /etc/init.d/S95silky-rgb stop
                 echo "rgboff" > "$TOGGLE_STATE"
                 ;;
             airplane)
@@ -40,7 +41,8 @@ case "$ACTION" in
                 amixer -c 0 sset 'DAC volume' 160
                 ;;
             rgboff)
-                /usr/bin/knulli-settings-set led.mode 1
+                /usr/bin/knulli-settings-set led.enabled 1
+                /etc/init.d/S95silky-rgb start
                 ;;
             airplane)
                 /usr/bin/knulli-planemode disable
