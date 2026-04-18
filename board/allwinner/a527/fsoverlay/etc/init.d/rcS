@@ -38,8 +38,9 @@ for i in /etc/init.d/S??* ; do
             ;;
     esac
 
-    echo QUIT > /tmp/status.txt
     echo $(date +"%F %T,%3N")": ${i} - started" >> /var/run/boot.log
 done
+
+echo QUIT > /tmp/status.txt
 
 exit 0

@@ -25,4 +25,5 @@ cp "${BINARIES_DIR}/kernel-rk3566-bsp/rk3566-rg-arc-linux.dtb"	"${KNULLI_BINARIE
 
 cp "${BOARD_DIR}/boot/extlinux.conf"                            "${KNULLI_BINARIES_DIR}/boot/extlinux/"               || exit 1
 
+
 exit 0

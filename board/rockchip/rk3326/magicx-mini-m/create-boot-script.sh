@@ -25,4 +25,5 @@ cp "${BOARD_DIR}/boot/boot.ini"                     "${KNULLI_BINARIES_DIR}/boot
 cp "${BOARD_DIR}/boot/rk3326-odroidgo2-linux.dtb"       "${KNULLI_BINARIES_DIR}/boot/rk3326-odroidgo2-linux.dtb" || exit 1
 cp "${BOARD_DIR}/boot/rk3326-magicx-mini-m.dtb"       "${KNULLI_BINARIES_DIR}/boot/boot/rk3326-magicx-mini-m.dtb" || exit 1
 
+
 exit 0

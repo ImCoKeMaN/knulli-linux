@@ -24,4 +24,5 @@ cp "${BINARIES_DIR}/sm8250-retroidpocket-rpminiv2.dtb"    "${KNULLI_BINARIES_DIR
 cp -f "${BOARD_DIR}/grub.cfg"                           "${BINARIES_DIR}/efi-part/EFI/BOOT/grub.cfg"    || exit 1
 cp -r "${BINARIES_DIR}/efi-part/EFI/"                   "${KNULLI_BINARIES_DIR}/boot/"                || exit 1
 
+
 exit 0

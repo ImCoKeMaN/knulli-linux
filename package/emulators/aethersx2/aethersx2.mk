@@ -39,30 +39,36 @@ define AETHERSX2_INSTALL_TARGET_CMDS
     fi
 
     # Install custom sources/config
-    if [ -d $(AETHERSX2_PKG_DIR)/sources ]; then \
-        cp -rf $(AETHERSX2_PKG_DIR)/sources/* $(TARGET_DIR)/usr/share/aethersx2/; \
+    if [ -d $(BR2_EXTERNAL_KNULLI_PATH)/package/emulators/aethersx2/sources ]; then \
+        cp -rf $(BR2_EXTERNAL_KNULLI_PATH)/package/emulators/aethersx2/sources/* $(TARGET_DIR)/usr/share/aethersx2/; \
     fi
 
     # Install scripts
-    if [ -d $(AETHERSX2_PKG_DIR)/scripts ]; then \
-        cp -rf $(AETHERSX2_PKG_DIR)/scripts/* $(TARGET_DIR)/usr/bin/; \
+    if [ -d $(BR2_EXTERNAL_KNULLI_PATH)/package/emulators/aethersx2/scripts ]; then \
+        cp -rf $(BR2_EXTERNAL_KNULLI_PATH)/package/emulators/aethersx2/scripts/* $(TARGET_DIR)/usr/bin/; \
         chmod 755 $(TARGET_DIR)/usr/bin/*; \
     fi
 
     # Install device-specific config
-    if [ -d $(AETHERSX2_PKG_DIR)/config/$(KNULLI_DEVICE) ]; then \
-        cp -rf $(AETHERSX2_PKG_DIR)/config/$(KNULLI_DEVICE)/aethersx2 $(TARGET_DIR)/usr/config/; \
+    if [ -d $(BR2_EXTERNAL_KNULLI_PATH)/package/emulators/aethersx2/config/$(KNULLI_DEVICE) ]; then \
+        cp -rf $(BR2_EXTERNAL_KNULLI_PATH)/package/emulators/aethersx2/config/$(KNULLI_DEVICE)/aethersx2 $(TARGET_DIR)/usr/config/; \
     fi
 
     # Install evmapy keymap for AetherSX2
-    if [ -f $(AETHERSX2_PKG_DIR)/ps2.aethersx2.keys ]; then \
-        cp -f $(AETHERSX2_PKG_DIR)/ps2.aethersx2.keys $(TARGET_DIR)/usr/share/evmapy/ps2.aethersx2.keys; \
+    if [ -f $(BR2_EXTERNAL_KNULLI_PATH)/package/emulators/aethersx2/ps2.aethersx2.keys ]; then \
+        cp -f $(BR2_EXTERNAL_KNULLI_PATH)/package/emulators/aethersx2/ps2.aethersx2.keys $(TARGET_DIR)/usr/share/evmapy/ps2.aethersx2.keys; \
     fi
 
     # Install patches.zip for AetherSX2
-    if [ -f $(AETHERSX2_PKG_DIR)/patches.zip ]; then \
-        cp -f $(AETHERSX2_PKG_DIR)/patches.zip $(TARGET_DIR)/usr/share/knulli/datainit/bios/ps2/patches.zip; \
+    if [ -f $(BR2_EXTERNAL_KNULLI_PATH)/package/emulators/aethersx2/patches.zip ]; then \
+        cp -f $(BR2_EXTERNAL_KNULLI_PATH)/package/emulators/aethersx2/patches.zip $(TARGET_DIR)/usr/share/knulli/datainit/bios/ps2/patches.zip; \
     fi
+
+    # Copy updated qt.conf
+    if [ -d $(BR2_EXTERNAL_KNULLI_PATH)/package/emulators/aethersx2/qt.conf ]; then \
+        cp -rf $(BR2_EXTERNAL_KNULLI_PATH)/package/emulators/aethersx2/qt.conf $(TARGET_DIR)/usr/share/aethersx2/; \
+    fi
+
 endef
 
 $(eval $(generic-package))

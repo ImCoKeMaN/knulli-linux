@@ -3,8 +3,8 @@
 # knulli-emulationstation
 #
 ################################################################################
-# Last update: Commits on Oct 18, 2024
-KNULLI_EMULATIONSTATION_VERSION = knulli
+# Last update: Commits on Mar 23, 2026
+KNULLI_EMULATIONSTATION_VERSION = 2ce5944646dd6c602395e507a3ef682703315d60
 KNULLI_EMULATIONSTATION_SITE = https://github.com/knulli-cfw/batocera-emulationstation
 KNULLI_EMULATIONSTATION_SITE_METHOD = git
 KNULLI_EMULATIONSTATION_LICENSE = MIT
@@ -179,11 +179,18 @@ KNULLI_EMULATIONSTATION_ARGS = --windowed
 KNULLI_EMULATIONSTATION_POST_INSTALL_TARGET_HOOKS += KNULLI_EMULATIONSTATION_XORG
 endif
 
-## on Wayland sway runs ES
+## on Wayland if sway runs ES
 ifeq ($(BR2_PACKAGE_BATOCERA_WAYLAND_SWAY),y)
 KNULLI_EMULATIONSTATION_CMD = sway-launch
 KNULLI_EMULATIONSTATION_DEPENDENCIES += sway
 KNULLI_EMULATIONSTATION_POST_INSTALL_TARGET_HOOKS += KNULLI_EMULATIONSTATION_WAYLAND_SWAY
+endif
+
+## on Wayland: labwc runs ES
+ifeq ($(BR2_PACKAGE_BATOCERA_WAYLAND_LABWC),y)
+KNULLI_EMULATIONSTATION_CMD = labwc-launch
+KNULLI_EMULATIONSTATION_DEPENDENCIES += labwc
+KNULLI_EMULATIONSTATION_POST_INSTALL_TARGET_HOOKS += KNULLI_EMULATIONSTATION_WAYLAND_LABWC
 endif
 
 define KNULLI_EMULATIONSTATION_XORG
@@ -199,6 +206,23 @@ define KNULLI_EMULATIONSTATION_WAYLAND_SWAY
     $(INSTALL) -D -m 0755 $(KNULLI_EMULATIONSTATION_SOURCE_PATH)/wayland/sway/sway-launch \
 	    $(TARGET_DIR)/usr/bin/sway-launch
 endef
+
+define KNULLI_EMULATIONSTATION_WAYLAND_LABWC
+    mkdir -p $(TARGET_DIR)/usr/share/labwc
+        $(INSTALL) -D -m 0755 $(KNULLI_EMULATIONSTATION_SOURCE_PATH)/wayland/labwc/04-labwc.sh \
+            $(TARGET_DIR)/etc/profile.d/04-labwc.sh
+        $(INSTALL) -D -m 0755 $(KNULLI_EMULATIONSTATION_SOURCE_PATH)/wayland/labwc/rc.xml \
+            $(TARGET_DIR)/usr/share/labwc/rc.xml
+        $(INSTALL) -D -m 0755 $(KNULLI_EMULATIONSTATION_SOURCE_PATH)/wayland/labwc/S14labwc \
+            $(TARGET_DIR)/etc/init.d/S14labwc
+    $(INSTALL) -D -m 0755 $(KNULLI_EMULATIONSTATION_SOURCE_PATH)/wayland/labwc/autostart \
+            $(TARGET_DIR)/usr/share/labwc/autostart
+    $(INSTALL) -D -m 0755 $(KNULLI_EMULATIONSTATION_SOURCE_PATH)/wayland/labwc/autostart_* \
+            $(TARGET_DIR)/usr/share/labwc/
+    $(INSTALL) -D -m 0755 $(KNULLI_EMULATIONSTATION_SOURCE_PATH)/wayland/labwc/labwc-launch \
+            $(TARGET_DIR)/usr/bin/labwc-launch
+endef
+
 
 define KNULLI_EMULATIONSTATION_BOOT
 	$(INSTALL) -D -m 0755 $(KNULLI_EMULATIONSTATION_SOURCE_PATH)/S31emulationstation \

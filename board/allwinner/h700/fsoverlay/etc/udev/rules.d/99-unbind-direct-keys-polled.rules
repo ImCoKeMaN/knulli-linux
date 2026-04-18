@@ -1,0 +1,1 @@
+ACTION=="add", SUBSYSTEM=="platform", KERNEL=="*keys-polled", RUN+="/usr/bin/h700-unbind-direct-keys-polled"

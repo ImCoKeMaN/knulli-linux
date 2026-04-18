@@ -11,12 +11,22 @@ read -r MODEL < /sys/firmware/devicetree/base/model
 if [ "$BOARD" = "$ARCH" ]; then
     case "$MODEL" in
         "Retroid Pocket 5")
-            mount -o remount,rw /boot
-            echo "rp5" > /boot/boot/knulli.board
-            sync
-            mount -o remount,ro /boot
+            NEW_BOARD="rp5"
             ;;
+	"Retroid Pocket Flip2")
+	    NEW_BOARD="rpflip2"
+	    ;;
+	"Retroid Pocket Mini")
+	    NEW_BOARD="rpmini"
+	    ;;
+	"Retroid Pocket Mini V2")
+	    NEW_BOARD="rpminiv2"
+	    ;;
     esac
+    mount -o remount,rw /boot
+    echo $NEW_BOARD > /boot/boot/knulli.board
+    sync
+    mount -o rwmount,ro /boot
 fi
 
 for i in /etc/init.d/S??* ; do

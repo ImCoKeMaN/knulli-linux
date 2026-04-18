@@ -46,8 +46,7 @@ ES_TO_YABA = {
     "joystick1up": "analogy",
 }
 
-
-# Temp fix for rk3566
+# Needed because yaba binary explicitly requires libmali.so.0
 def ensure_libmali_symlink() -> bool:
     libdir = Path("/usr/lib")
     link = libdir / "libmali.so.0"
@@ -59,6 +58,25 @@ def ensure_libmali_symlink() -> bool:
         except Exception:
             return False
 
+    def _find_best_target_file(patterns: tuple[str, ...]) -> Path | None:
+        candidates: list[Path] = []
+
+        for pattern in patterns:
+            for p in libdir.glob(pattern):
+                if p.name == link.name:
+                    continue
+                try:
+                    if p.is_file() and not p.is_symlink():
+                        candidates.append(p)
+                except Exception:
+                    continue
+
+        if not candidates:
+            return None
+
+        candidates.sort(key=lambda p: p.name)
+        return candidates[-1]
+
     # If it exists and isn't a symlink, leave it alone.
     if link.exists() and not link.is_symlink():
         return True
@@ -67,38 +85,26 @@ def ensure_libmali_symlink() -> bool:
     if link.is_symlink():
         if _target_exists(link):
             return True
-        # remove broken link if needed so we can recreate
         try:
             link.unlink()
         except Exception as e:
             eslog.warning("libmali: failed to remove broken symlink %s: %s", link, e)
             return False
 
-    # Prefer "libMali.so*" then "libmali.so*".
-    candidates: list[Path] = []
+    # Prefer Mali libs first.
+    target = _find_best_target_file(("libMali.so*", "libmali.so*"))
 
-    for pattern in ("libMali.so*", "libmali.so*"):
-        for p in libdir.glob(pattern):
-            # we want a real file.
-            if p.name == link.name:
-                continue
-            try:
-                if p.is_file() and not p.is_symlink():
-                    candidates.append(p)
-            except Exception:
-                continue
+    # Fallback to EGL libs if no Mali lib exists.
+    if target is None:
+        target = _find_best_target_file(("libEGL.so*",))
 
-    if not candidates:
-        eslog.warning("libmali: no Mali library candidates found in %s", libdir)
+    if target is None:
+        eslog.warning("libmali: no suitable library found in %s", libdir)
         return False
-
-    # Prefer the latest version
-    candidates.sort(key=lambda p: p.name)
-    target = candidates[-1]
 
     try:
         link.symlink_to(target)
-        eslog.info("libmali: created symlink %s -> %s", link, target)
+        eslog.info("libmali: using %s for %s", target, link)
     except Exception as e:
         eslog.warning("libmali: failed to create symlink %s -> %s: %s", link, target, e)
         return False

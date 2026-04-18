@@ -1,0 +1,201 @@
+diff -urpN azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2_gl.cpp working_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2_gl.cpp
+--- azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2_gl.cpp	2026-03-11 02:00:41.198011218 +0000
++++ working_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2_gl.cpp	2026-03-10 20:48:52.110487412 +0000
+@@ -345,5 +345,29 @@ void EmuWindow_SDL2_GL::Present() {
+ 
+ void EmuWindow_SDL2_GL::SwapBuffers() {
+     // This is called from the emulation thread in synchronous rendering mode
++    static bool first_swap = true;
++    
++    if (first_swap) {
++        // Set vsync on for stable frame timing
++        // Using 1 enables vsync, 0 disables, -1 enables adaptive vsync if available
++        SDL_GL_SetSwapInterval(1);
++        first_swap = false;
++        LOG_INFO(Frontend, "SwapBuffers: Set swap interval to 1 (vsync)");
++    }
++    
++    // Mali tile-based GPU fix: Ensure all rendering commands are completed before swap
++    // This prevents tile corruption from incomplete renders being displayed
++    glFinish();
++    
+     SDL_GL_SwapWindow(render_window);
++    
++    // Mali tile-based GPU fix: Pre-clear the new back buffer after swap.
++    // On KMSDRM with double/triple buffering, after swap we get a different back buffer
++    // that may contain stale content from 2-3 frames ago. By clearing it immediately
++    // after swap, we ensure it starts fresh before the next frame's rendering.
++    // This combined with glInvalidateFramebuffer at frame start should eliminate
++    // tile artifacts from Mali's TBDR architecture.
++    glDisable(GL_SCISSOR_TEST);
++    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  // Black background
++    glClear(GL_COLOR_BUFFER_BIT);
+ }
+diff -urpN azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/video_core/renderer_opengl/gl_rasterizer.cpp working_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/video_core/renderer_opengl/gl_rasterizer.cpp
+--- azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/video_core/renderer_opengl/gl_rasterizer.cpp	2025-12-17 14:05:42.000000000 +0000
++++ working_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/video_core/renderer_opengl/gl_rasterizer.cpp	2026-03-11 01:42:04.190121615 +0000
+@@ -645,6 +645,15 @@ bool RasterizerOpenGL::Draw(bool acceler
+ 
+     vertex_batch.clear();
+ 
++    // Mali TBDR fix: Force tile resolution after each draw call.
++    // On tile-based GPUs, rendered data stays in tile buffers until explicitly flushed.
++    // Without this barrier, subsequent texture reads from this FBO return stale tile data,
++    // causing "flickering squares" artifacts. glMemoryBarrier ensures tiles are written
++    // to memory before any texture fetch operations.
++    if (driver.IsOpenGLES()) {
++        glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_FRAMEBUFFER_BARRIER_BIT);
++    }
++
+     if (shadow_rendering) {
+         glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT |
+                         GL_TEXTURE_UPDATE_BARRIER_BIT | GL_FRAMEBUFFER_BARRIER_BIT);
+@@ -656,6 +665,17 @@ bool RasterizerOpenGL::Draw(bool acceler
+ void RasterizerOpenGL::SyncTextureUnits(const Framebuffer* framebuffer) {
+     using TextureType = Pica::TexturingRegs::TextureConfig::TextureType;
+ 
++    // Mali TBDR fix: Ensure prior FBO rendering is complete before texture sampling.
++    // On tile-based GPUs, surfaces that were previously render targets may have
++    // unresolved tile data. When those surfaces are later sampled as textures,
++    // we get "flickering squares" - some tiles show stale content because they
++    // weren't flushed from the tile buffer to memory.
++    // GL_FRAMEBUFFER_BARRIER_BIT: Ensures writes to FBO are complete
++    // GL_TEXTURE_FETCH_BARRIER_BIT: Ensures texture fetches see the updated data
++    if (driver.IsOpenGLES()) {
++        glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_FRAMEBUFFER_BARRIER_BIT);
++    }
++
+     // Reset transient draw state
+     state.color_buffer.texture_2d = 0;
+     user_config = {};
+@@ -865,6 +885,11 @@ bool RasterizerOpenGL::AccelerateDisplay
+ 
+     screen_info.display_texture = src_surface.Handle();
+ 
++    // Mali TBDR fix: Ensure all rendering to this surface is complete before display
++    // glFinish() waits for all pending GPU operations to complete, ensuring
++    // Mali's tile cache is fully resolved before we read from the texture
++    glFinish();
++
+     return true;
+ }
+ 
+diff -urpN azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/video_core/renderer_opengl/gl_texture_runtime.cpp working_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/video_core/renderer_opengl/gl_texture_runtime.cpp
+--- azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/video_core/renderer_opengl/gl_texture_runtime.cpp	2025-12-17 14:05:42.000000000 +0000
++++ working_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/video_core/renderer_opengl/gl_texture_runtime.cpp	2026-03-11 01:05:55.131425260 +0000
+@@ -485,6 +485,13 @@ void Surface::Download(const VideoCore::
+ 
+     Attach(GL_READ_FRAMEBUFFER, download.texture_level, 0, false);
+ 
++    // Mali TBDR fix: Ensure all rendering to this surface is complete before readback.
++    // On tile-based GPUs, tiles may not be resolved to memory until we force a sync.
++    // Without this, glReadPixels can return stale/partial tile data.
++    if (driver->IsOpenGLES()) {
++        glFinish();
++    }
++
+     // Read the pixel data to the staging buffer
+     const auto& tuple = runtime->GetFormatTuple(pixel_format);
+     glReadPixels(download.texture_rect.left, download.texture_rect.bottom, unscaled_width,
+diff -urpN azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/video_core/renderer_opengl/renderer_opengl.cpp working_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/video_core/renderer_opengl/renderer_opengl.cpp
+--- azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/video_core/renderer_opengl/renderer_opengl.cpp	2026-03-11 02:00:41.200011217 +0000
++++ working_azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/video_core/renderer_opengl/renderer_opengl.cpp	2026-03-11 01:25:43.733877122 +0000
+@@ -111,6 +111,17 @@ void RendererOpenGL::SwapBuffers() {
+         // Synchronous path: render directly to default framebuffer and swap immediately
+         state.draw.draw_framebuffer = 0;
+         state.Apply();
++
++        // Mali tile-based GPU fix: Invalidate the default framebuffer before rendering.
++        // Mali uses Tile-Based Deferred Rendering (TBDR). Without invalidation, Mali will try to
++        // load old tile content from memory before rendering, causing stale content in tiles
++        // that aren't fully overwritten. This manifests as "square artifacts" on screen.
++        // glInvalidateFramebuffer tells Mali it doesn't need to preserve any existing content.
++        if (Settings::values.use_gles.GetValue()) {
++            const GLenum attachments[] = {GL_COLOR};
++            glInvalidateFramebuffer(GL_DRAW_FRAMEBUFFER, 1, attachments);
++        }
++
+         DrawScreens(main_layout, false);
+         glFlush();
+         render_window.SwapBuffers();
+@@ -185,6 +196,17 @@ void RendererOpenGL::RenderScreenshot()
+ }
+ 
+ void RendererOpenGL::PrepareRendertarget() {
++    // Mali TBDR fix: Unbind any active FBO and flush before accessing framebuffer textures.
++    // On tile-based GPUs, rendering to FBO textures doesn't immediately resolve tiles
++    // to memory. The textures we're about to use for display might still have in-flight
++    // tile data. By unbinding and flushing, we force the tile resolve operation.
++    if (Settings::values.use_gles.GetValue()) {
++        state.draw.draw_framebuffer = 0;
++        state.draw.read_framebuffer = 0;
++        state.Apply();
++        glFinish();  // Wait for all pending GPU work including tile resolves
++    }
++
+     const auto& framebuffer_config = pica.regs.framebuffer_config;
+     const auto& regs_lcd = pica.regs_lcd;
+     for (u32 i = 0; i < 3; i++) {
+@@ -205,6 +227,16 @@ void RendererOpenGL::PrepareRendertarget
+         }
+         LoadFBToScreenInfo(framebuffer, screen_infos[i], i == 1, color_fill);
+     }
++    
++    // Mali tile-based GPU fix: Ensure texture uploads are complete before drawing.
++    // On Mali Bifrost/Valhall, glTexSubImage2D can be asynchronous - the driver may
++    // copy data to a staging buffer and defer the actual texture update. Without this
++    // flush, draw calls can sample stale texture data, causing "tile artifacts" where
++    // some screen regions show old content. This is the root cause of the partial
++    // screen refresh issues on RK3576 Mali G52.
++    if (Settings::values.use_gles.GetValue()) {
++        glFlush();
++    }
+ }
+ 
+ void RendererOpenGL::RenderToMailbox(const Layout::FramebufferLayout& layout,
+@@ -687,7 +719,17 @@ void RendererOpenGL::DrawScreens(const L
+     const auto& bottom_screen = layout.bottom_screen;
+ 
+     glViewport(0, 0, layout.width, layout.height);
+-    if (render_window.NeedsClearing()) {
++    
++    // Mali tile-based GPU fix: Always clear the framebuffer on GLES.
++    // Mali uses TBDR and can preserve old tile content between frames.
++    // Even with glInvalidateFramebuffer, we need an explicit clear to fill 
++    // all tiles with a known color. Without this, areas not covered by 
++    // the 3DS screen quads show stale/corrupted tile data.
++    // Also disable scissor test during clear to ensure the entire framebuffer is cleared.
++    if (Settings::values.use_gles.GetValue()) {
++        glDisable(GL_SCISSOR_TEST);
++        glClear(GL_COLOR_BUFFER_BIT);
++    } else if (render_window.NeedsClearing()) {
+         glClear(GL_COLOR_BUFFER_BIT);
+     }
+ 
+@@ -907,9 +949,26 @@ void RendererOpenGL::TryPresent(int time
+ 
+     glBindFramebuffer(GL_READ_FRAMEBUFFER, frame->present.handle);
+     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);  // Explicitly bind to default/window framebuffer
++
++    // Mali tile-based GPU fix: Invalidate the default framebuffer before blitting.
++    // Mali uses Tile-Based Deferred Rendering (TBDR). Without invalidation, Mali will try to
++    // load old tile content from memory before the blit, but since we're replacing the entire
++    // framebuffer, this load is wasted and can cause corruption if the old data is stale.
++    // glInvalidateFramebuffer tells Mali it doesn't need to preserve any existing content.
++    if (Settings::values.use_gles.GetValue()) {
++        const GLenum attachments[] = {GL_COLOR};
++        glInvalidateFramebuffer(GL_DRAW_FRAMEBUFFER, 1, attachments);
++    }
++
+     glBlitFramebuffer(0, 0, frame->width, frame->height, 0, 0, layout.width, layout.height,
+                       GL_COLOR_BUFFER_BIT, GL_LINEAR);
+ 
++    // Mali fix: Ensure blit completes before swap. Mali's deferred rendering can delay the
++    // actual blit execution. A flush here ensures the tiles are written to the framebuffer.
++    if (Settings::values.use_gles.GetValue()) {
++        glFlush();
++    }
++
+     // Delete the fence if we're re-presenting to avoid leaking fences
+     if (frame->present_fence) {
+         glDeleteSync(frame->present_fence);

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Try both, current typo and potential fixed future version
+for NAME in dierct-keys-polled direct-keys-polled; do
+    [ -e "/sys/devices/platform/$NAME" ] || continue
+    [ -e "/sys/bus/platform/drivers/$NAME/unbind" ] || continue
+
+    printf '%s' "$NAME" > "/sys/bus/platform/drivers/$NAME/unbind"
+done
+
+exit 0

@@ -27,4 +27,5 @@ cp "${BOARD_DIR}/boot/rk3326s-gkd-pixel2.dtb"       "${KNULLI_BINARIES_DIR}/boot
 
 cp -r "${BOARD_DIR}/partitions"         "${KNULLI_BINARIES_DIR}/boot/"                         || exit 1
 
+
 exit 0

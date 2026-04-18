@@ -26,4 +26,5 @@ cp "${BINARIES_DIR}/kernel-powkiddy-x55/rk3566-evb2-lp4x-v10-linux.dtb"         
 
 cp "${BOARD_DIR}/boot/extlinux.conf"                "${KNULLI_BINARIES_DIR}/boot/extlinux/"               || exit 1
 
+
 exit 0

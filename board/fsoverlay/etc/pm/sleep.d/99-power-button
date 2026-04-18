@@ -1,0 +1,18 @@
+#!/bin/sh
+# This is a workaround to an issue where pressing the power button to wake the device
+# will cause the power-button script to run and sometimes cause a shutdown. Because this is before the pm-utils hooks
+# we use this method to ensure the power button is effectively blocked during this brief window.
+
+RESUME_FLAG="/var/run/power-button.wake"
+
+case "$1" in
+    suspend)
+        rm -f "$RESUME_FLAG"
+        touch "$RESUME_FLAG"
+        ;;
+    resume|thaw)
+        rm -f "$RESUME_FLAG"
+        ;;
+esac
+
+exit 0

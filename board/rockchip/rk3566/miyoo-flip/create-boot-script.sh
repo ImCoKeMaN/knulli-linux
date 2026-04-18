@@ -28,4 +28,5 @@ cp "${BOARD_DIR}/rk3566-miyoo-355-v10-linux.dtb" "${KNULLI_BINARIES_DIR}/boot/bo
 cp "${BOARD_DIR}/libmali.so.1.9.0"	                               "${TARGET_DIR}/usr/lib/libMali.so"		           || exit 1
 cp "${BOARD_DIR}/boot/extlinux.conf"                               "${KNULLI_BINARIES_DIR}/boot/extlinux/"             || exit 1
 
+
 exit 0

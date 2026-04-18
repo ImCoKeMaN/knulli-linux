@@ -5,7 +5,7 @@ includedir=${prefix}/include
 
 Name: gbm
 Description: Generic Buffer Management
-Version: 21.0.0
+Version: 21.1.1
 Requires.private: libdrm
 Libs: -L${libdir} -lgbm
 Cflags: -I${includedir}

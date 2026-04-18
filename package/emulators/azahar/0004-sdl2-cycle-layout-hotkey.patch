@@ -1,0 +1,47 @@
+--- a/src/citra_sdl/emu_window/emu_window_sdl2.cpp
++++ b/src/citra_sdl/emu_window/emu_window_sdl2.cpp
+@@ -10,11 +10,14 @@
+ #include "citra_sdl/emu_window/emu_window_sdl2.h"
+ #include "common/logging/log.h"
+ #include "common/scm_rev.h"
++#include "common/settings.h"
+ #include "core/core.h"
+ #include "input_common/keyboard.h"
+ #include "input_common/main.h"
+ #include "input_common/motion_emu.h"
+ #include "network/network.h"
++#include "video_core/gpu.h"
++#include "video_core/renderer_base.h"
+ 
+ void EmuWindow_SDL2::OnMouseMotion(s32 x, s32 y) {
+     TouchMoved((unsigned)std::max(x, 0), (unsigned)std::max(y, 0));
+@@ -218,7 +221,28 @@
+             break;
+         case SDL_KEYDOWN:
+         case SDL_KEYUP:
+-            OnKeyEvent(static_cast<int>(event.key.keysym.scancode), event.key.state);
++            if (event.type == SDL_KEYDOWN &&
++                event.key.keysym.scancode == SDL_SCANCODE_F10) {
++                // Cycle through safe layouts; skip SeparateWindows (4) and CustomLayout (6)
++                static constexpr u32 kLayouts[] = {0, 1, 2, 3, 5};
++                constexpr u32 kNumLayouts = 5;
++                const u32 cur = static_cast<u32>(Settings::values.layout_option.GetValue());
++                u32 next_idx = 0;
++                for (u32 i = 0; i < kNumLayouts; ++i) {
++                    if (kLayouts[i] == cur) {
++                        next_idx = (i + 1) % kNumLayouts;
++                        break;
++                    }
++                }
++                const auto next = static_cast<Settings::LayoutOption>(kLayouts[next_idx]);
++                Settings::values.layout_option = next;
++                LOG_INFO(Frontend, "Layout cycled to {}", static_cast<u32>(next));
++                if (system.IsPoweredOn()) {
++                    system.GPU().Renderer().UpdateCurrentFramebufferLayout();
++                }
++            } else {
++                OnKeyEvent(static_cast<int>(event.key.keysym.scancode), event.key.state);
++            }
+             break;
+         case SDL_MOUSEMOTION:
+             // ignore if it came from touch

@@ -56,10 +56,6 @@ for KNULLI_PATHSUBTARGET in ${KNULLI_IMAGES_TARGETS}
 do
     KNULLI_SUBTARGET=$(basename "${KNULLI_PATHSUBTARGET}")
 
-    #### create the update signatures #####
-    KNULLI_SIGNATURES_SCRIPT="${BR2_EXTERNAL_KNULLI_PATH}/board/scripts/generate_signature.sh"
-    bash "${KNULLI_SIGNATURES_SCRIPT}" "${BR2_EXTERNAL_KNULLI_PATH}/board/${KNULLI_PATHSUBTARGET}" "${BINARIES_DIR}" || exit 1
-
     #### prepare the boot dir ######
     BOOTNAMEDDIR="${KNULLI_BINARIES_DIR}/boot_${KNULLI_SUBTARGET}"
     rm -rf "${BOOTNAMEDDIR}" || exit 1 # remove in case or rerun
@@ -68,6 +64,12 @@ do
     # add some common files
     cp     "${BINARIES_DIR}/knulli-boot.conf" "${KNULLI_BINARIES_DIR}/boot/" || exit 1
     echo   "${KNULLI_SUBTARGET}" > "${KNULLI_BINARIES_DIR}/boot/boot/knulli.board" || exit 1
+
+    #### create the update signatures (after boot dir is assembled so we hash the actual on-device files) #####
+    KNULLI_SIGNATURES_SCRIPT="${BR2_EXTERNAL_KNULLI_PATH}/board/scripts/generate_signature.sh"
+    bash "${KNULLI_SIGNATURES_SCRIPT}" "${BR2_EXTERNAL_KNULLI_PATH}/board/${KNULLI_PATHSUBTARGET}" "${BINARIES_DIR}" "${KNULLI_BINARIES_DIR}/boot" || exit 1
+    # copy firmware.sig into the boot dir so it is included in the archive and the final image
+    cp "${BINARIES_DIR}/firmware.sig" "${KNULLI_BINARIES_DIR}/boot/boot/firmware.sig" || exit 1
 
     #### boot.tar.gz ###############
     echo "creating images/${KNULLI_SUBTARGET}/boot.tar.gxz"

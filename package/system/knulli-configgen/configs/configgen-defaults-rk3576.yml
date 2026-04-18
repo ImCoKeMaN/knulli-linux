@@ -1,8 +1,9 @@
 default:
   options:
+    gfxbackend: vulkan
     # menu retroarch
     retroarch.menu_driver: ozone
-    retroarch.menu_scale_factor: "1.500000"
+    retroarch.menu_scale_factor: "1.200000"
     retroarch.audio_driver: alsathread
     retroarch.ozone_font_scale: "1"
     retroarch.ozone_font_scale_factor_global: "1.200000"
@@ -41,3 +42,9 @@ cdi:
 ps2:
   emulator: aethersx2
   core:     aethersx2
+wii:
+  emulator: libretro
+  core:     dolphin
+gamecube:
+  emulator: libretro
+  core:     dolphin

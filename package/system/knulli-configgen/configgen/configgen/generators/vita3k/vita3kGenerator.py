@@ -31,6 +31,10 @@ class Vita3kGenerator(Generator):
 
         # Create save folder
         mkdir_if_not_exists(vitaSaves)
+        
+        # Create config folder
+        mkdir_if_not_exists(vitaConfig)
+
 
         # Move saves if necessary
         if (vitaConfig / 'ux0').is_dir():
@@ -45,6 +49,9 @@ class Vita3kGenerator(Generator):
         if vitaConfigFile.is_file():
             with vitaConfigFile.open('r') as stream:
                 vita3kymlconfig, indent, block_seq_indent = ruamel.yaml.util.load_yaml_guess_indent(stream)
+        
+        if not vitaConfigFile.exists():
+            vitaConfigFile.touch()
 
         if vita3kymlconfig is None:
             vita3kymlconfig = {}
@@ -56,7 +63,12 @@ class Vita3kGenerator(Generator):
         if system.isOptSet("vita3k_gfxbackend"):
             vita3kymlconfig["backend-renderer"] = system.config["vita3k_gfxbackend"]
         else:
-            vita3kymlconfig["backend-renderer"] = "OpenGL"
+            have_vulkan = subprocess.check_output(["/usr/bin/knulli-vulkan", "hasVulkan"], text=True).strip()
+            if have_vulkan == "true":
+                eslog.debug("Vulkan driver is available on the system.")
+                vita3kymlconfig["backend-renderer"] = "Vulkan"
+            else:
+                vita3kymlconfig["backend-renderer"] = "OpenGL"
         # Set the resolution multiplier
         if system.isOptSet("vita3k_resolution"):
             vita3kymlconfig["resolution-multiplier"] = int(system.config["vita3k_resolution"])

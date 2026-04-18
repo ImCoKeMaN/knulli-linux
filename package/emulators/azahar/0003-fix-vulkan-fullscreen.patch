@@ -1,0 +1,159 @@
+diff -urpN src/citra_sdl/emu_window/emu_window_sdl2.h /opt/cdata/knulli/azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2.h
+--- a/src/citra_sdl/emu_window/emu_window_sdl2.h	2025-12-17 14:05:42.000000000 +0000
++++ b/src/citra_sdl/emu_window/emu_window_sdl2.h	2026-03-22 16:45:38.779920078 +0000
+@@ -61,7 +61,7 @@ protected:
+     void OnFingerUp();
+ 
+     /// Called by PollEvents when any event that may cause the window to be resized occurs
+-    void OnResize();
++    virtual void OnResize();
+ 
+     /// Called when user passes the fullscreen parameter flag
+     void Fullscreen();
+diff -urpN src/citra_sdl/emu_window/emu_window_sdl2_vk.cpp /opt/cdata/knulli/azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2_vk.cpp
+--- a/src/citra_sdl/emu_window/emu_window_sdl2_vk.cpp	2025-12-17 14:05:42.000000000 +0000
++++ b/src/citra_sdl/emu_window/emu_window_sdl2_vk.cpp	2026-03-22 16:45:38.779920078 +0000
+@@ -6,12 +6,16 @@
+ #include <memory>
+ #include <string>
+ #include <SDL.h>
++#include <SDL_vulkan.h>
+ #include <SDL_syswm.h>
+ #include <fmt/format.h>
+ #include "citra_sdl/emu_window/emu_window_sdl2_vk.h"
+ #include "common/logging/log.h"
+ #include "common/scm_rev.h"
+ #include "core/frontend/emu_window.h"
++#ifdef SDL_VIDEO_DRIVER_WAYLAND
++#include <dlfcn.h>
++#endif
+ 
+ class DummyContext : public Frontend::GraphicsContext {};
+ 
+@@ -24,7 +28,7 @@ EmuWindow_SDL2_VK::EmuWindow_SDL2_VK(Cor
+                          SDL_WINDOWPOS_UNDEFINED, // x position
+                          SDL_WINDOWPOS_UNDEFINED, // y position
+                          Core::kScreenTopWidth, Core::kScreenTopHeight + Core::kScreenBottomHeight,
+-                         SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
++                         SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+     SDL_SysWMinfo wm;
+     SDL_VERSION(&wm.version);
+     if (SDL_GetWindowWMInfo(render_window, &wm) == SDL_FALSE) {
+@@ -78,11 +82,64 @@ EmuWindow_SDL2_VK::EmuWindow_SDL2_VK(Cor
+ 
+     render_window_id = SDL_GetWindowID(render_window);
+ 
++#ifdef SDL_VIDEO_DRIVER_WAYLAND
++    // On Wayland, SDL_SetWindowFullscreen is asynchronous: it sends a fullscreen request to the
++    // compositor but does not wait for the configure event that carries the new surface dimensions.
++    // The GL window avoids this race because SDL_GL_CreateContext() internally calls
++    // wl_display_roundtrip(), which processes the pending configure event before OnResize() fires.
++    // For the Vulkan window there is no GL context, so we do the roundtrip explicitly here.
++    if (window_info.type == Frontend::WindowSystemType::Wayland &&
++        window_info.display_connection != nullptr) {
++        LOG_INFO(Frontend, "Wayland: forcing display roundtrip to receive fullscreen configure");
++        // libwayland-client is already loaded by SDL2, so RTLD_DEFAULT finds wl_display_roundtrip
++        // without needing wayland-client.h (which may not be installed on the build system).
++        using WlDisplayRoundtrip = int (*)(void*);
++        const auto roundtrip =
++            reinterpret_cast<WlDisplayRoundtrip>(dlsym(RTLD_DEFAULT, "wl_display_roundtrip"));
++        if (roundtrip) {
++            roundtrip(window_info.display_connection);
++        } else {
++            LOG_WARNING(Frontend, "Wayland: wl_display_roundtrip not found via dlsym");
++        }
++    }
++#endif
++
+     OnResize();
+     OnMinimalClientAreaChangeRequest(GetActiveConfig().min_client_area_size);
+     SDL_PumpEvents();
+ }
+ 
++void EmuWindow_SDL2_VK::OnResize() {
++    int width = 0, height = 0;
++    SDL_Vulkan_GetDrawableSize(render_window, &width, &height);
++    if (width == 0 || height == 0) {
++        // Fallback: SDL_Vulkan_GetDrawableSize returned 0 (window not yet committed).
++        SDL_GetWindowSize(render_window, &width, &height);
++        LOG_WARNING(Frontend, "VK OnResize: SDL_Vulkan_GetDrawableSize returned 0, "
++                    "falling back to SDL_GetWindowSize = {}x{}", width, height);
++    }
++    if (width <= 0 || height <= 0) {
++        return;
++    }
++
++    // On Wayland with display rotation (e.g. weston.ini transform=rotate-90), the Vulkan WSI
++    // surface uses logical (post-rotation) coordinates while GL/EGL uses physical (pre-rotation)
++    // coordinates. When the logical surface is portrait but the physical display is landscape,
++    // HybridScreen computed for portrait dimensions only fills ~23% of the screen height.
++    // Swap to landscape so the layout matches what the GL renderer produces on this hardware.
++    if (height > width) {
++        LOG_INFO(Frontend,
++                 "VK OnResize: portrait surface {}x{} detected (display rotation); "
++                 "using landscape {}x{} for layout",
++                 width, height, height, width);
++        std::swap(width, height);
++    } else {
++        LOG_INFO(Frontend, "VK OnResize: {}x{}", width, height);
++    }
++
++    UpdateCurrentFramebufferLayout(width, height);
++}
++
+ EmuWindow_SDL2_VK::~EmuWindow_SDL2_VK() = default;
+ 
+ std::unique_ptr<Frontend::GraphicsContext> EmuWindow_SDL2_VK::CreateSharedContext() const {
+diff -urpN src/citra_sdl/emu_window/emu_window_sdl2_vk.h /opt/cdata/knulli/azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/citra_sdl/emu_window/emu_window_sdl2_vk.h
+--- a/src/citra_sdl/emu_window/emu_window_sdl2_vk.h	2025-12-17 14:05:42.000000000 +0000
++++ b/src/citra_sdl/emu_window/emu_window_sdl2_vk.h	2026-03-22 16:45:38.779920078 +0000
+@@ -21,4 +21,6 @@ public:
+     ~EmuWindow_SDL2_VK() override;
+ 
+     std::unique_ptr<Frontend::GraphicsContext> CreateSharedContext() const override;
++
++    void OnResize() override;
+ };
+diff -urpN src/video_core/renderer_vulkan/vk_present_window.cpp /opt/cdata/knulli/azahar-c8d39853c1ebacc5657e51d601713a09404ca8a7/src/video_core/renderer_vulkan/vk_present_window.cpp
+--- a/src/video_core/renderer_vulkan/vk_present_window.cpp	2025-12-17 14:05:42.000000000 +0000
++++ b/src/video_core/renderer_vulkan/vk_present_window.cpp	2026-03-22 16:45:38.824919882 +0000
+@@ -111,6 +111,39 @@ PresentWindow::PresentWindow(Frontend::E
+       use_present_thread{Settings::values.async_presentation.GetValue()},
+       last_render_surface{emu_window.GetWindowInfo().render_surface} {
+ 
++    // Sync framebuffer layout with actual Vulkan surface extent.
++    // On Wayland with a rotated display (e.g. weston transform=rotate-90), SDL reports
++    // the window size asynchronously via Wayland configure events. The VK window has no
++    // GL context creation to force a wl_display_roundtrip(), so OnResize() may fire
++    // before the fullscreen configure arrives and end up with the pre-fullscreen size.
++    // The Vulkan surface capabilities are always authoritative, so use them to correct
++    // the layout before any frames are rendered.
++    const vk::Extent2D actual_extent = swapchain.GetExtent();
++    const auto& current_layout = emu_window.GetFramebufferLayout();
++    if (actual_extent.width > 0 && actual_extent.height > 0 &&
++        (actual_extent.width != current_layout.width ||
++         actual_extent.height != current_layout.height)) {
++        // Don't override the layout if the mismatch is a 90° rotation pair: the VK window's
++        // OnResize() intentionally swaps portrait Wayland surface dims to landscape so that
++        // HybridScreen layout matches what the GL/EGL renderer sees on rotated displays.
++        const bool is_rotation_pair = (actual_extent.width == current_layout.height &&
++                                       actual_extent.height == current_layout.width);
++        if (is_rotation_pair) {
++            LOG_INFO(Render_Vulkan,
++                     "Framebuffer layout ({}x{}) vs Vulkan extent ({}x{}) is a 90° rotation pair; "
++                     "keeping layout as-is (display rotation correction applied in OnResize)",
++                     current_layout.width, current_layout.height,
++                     actual_extent.width, actual_extent.height);
++        } else {
++            LOG_INFO(Render_Vulkan,
++                     "Framebuffer layout ({}x{}) does not match Vulkan surface extent ({}x{}); "
++                     "correcting layout to match Vulkan surface",
++                     current_layout.width, current_layout.height,
++                     actual_extent.width, actual_extent.height);
++            emu_window.UpdateCurrentFramebufferLayout(actual_extent.width, actual_extent.height);
++        }
++    }
++
+     const u32 num_images = swapchain.GetImageCount();
+     const vk::Device device = instance.GetDevice();
+ 

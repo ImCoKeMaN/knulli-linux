@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# We only want to run the script if the board has lid capability
+if ! knulli-board-capability "lid"; then
+    exit 1
+fi
+
+LOCK_FILE="/var/run/lid-control.lock"
+
+exec 200>"${LOCK_FILE}"
+if ! flock -n 200; then
+    exit 0
+fi
+
+trap 'flock -u 200;' EXIT
+
+HDMI_STATE_FILE="/sys/devices/platform/soc/6000000.hdmi/extcon/hdmi/state"
+FLAG_FILE="/var/run/lcd_off.flag"
+
+# Sets a default if not already set
+MODE="$(/usr/bin/knulli-settings-get system.lid)"
+if [[ -z "$MODE" || ! "$MODE" =~ ^(suspend|shutdown|dispoff|none)$ ]]; then
+    MODE="suspend" # default can be suspend|shutdown|dispoff|none
+    /usr/bin/knulli-settings-set system.lid "$MODE"
+fi
+
+MUTE="$(/usr/bin/knulli-settings-get system.batterysaver.mute)"
+
+display_off() {
+    knulli-brightness dispoff
+    [[ "$MUTE" == "1" ]] && knulli-audio setSystemVolume mute
+}
+
+suspend_system() {
+    knulli-suspend
+}
+
+shutdown_system() {
+    knulli-shutdown -s
+}
+
+do_open() {
+    if [ "$MODE" == "dispoff" ] || [ -f "$FLAG_FILE" ]; then
+        knulli-brightness dispon
+        [[ "$MUTE" == "1" ]] && knulli-audio setSystemVolume unmute
+        [ -f "$FLAG_FILE" ] && rm -f "$FLAG_FILE"
+    fi
+}
+
+
+do_close() {
+    if [ "$MODE" == "shutdown" ]; then
+	shutdown_system
+    elif [ "$MODE" == "suspend" ]; then
+	suspend_system
+    elif [ "$MODE" == "dispoff" ]; then
+	display_off
+    fi
+}
+
+sleep 0.5 # Waits for battery-saver because hall is a detected input (if inactive and screen is dimmed or suspend while lid sclose)
+
+case "$1" in
+    open)
+        do_open
+        ;;
+    close)
+        do_close
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+
+exit 0

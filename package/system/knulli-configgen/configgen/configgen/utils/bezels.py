@@ -73,20 +73,28 @@ def getBezelInfos(rom: str | Path, bezel: str, systemName: str, emulator: str) -
     # Paths in order of priority
     search_paths = [
         # (pathBase, specific_to_game)
+        ( f"{USER_DECORATIONS}/{bezel}/games/{systemName}/{romBase}-{resolution}", True),
         ( f"{USER_DECORATIONS}/{bezel}/games/{systemName}/{romBase}-{aspectRatio}", True),
         ( f"{USER_DECORATIONS}/{bezel}/games/{systemName}/{romBase}", True),
+        ( f"{SYSTEM_DECORATIONS}/{bezel}/games/{systemName}/{romBase}-{resolution}", True),
         ( f"{SYSTEM_DECORATIONS}/{bezel}/games/{systemName}/{romBase}-{aspectRatio}", True),
         ( f"{SYSTEM_DECORATIONS}/{bezel}/games/{systemName}/{romBase}", True),
+        ( f"{USER_DECORATIONS}/{bezel}/games/{romBase}-{resolution}", True),
         ( f"{USER_DECORATIONS}/{bezel}/games/{romBase}-{aspectRatio}", True),
         ( f"{USER_DECORATIONS}/{bezel}/games/{romBase}", True),
+        ( f"{SYSTEM_DECORATIONS}/{bezel}/games/{romBase}-{resolution}", True),
         ( f"{SYSTEM_DECORATIONS}/{bezel}/games/{romBase}-{aspectRatio}", True),
         ( f"{SYSTEM_DECORATIONS}/{bezel}/games/{romBase}", True)
     ]
 
     if altDecoration != "0":
+        search_paths.append(( f"{USER_DECORATIONS}/{bezel}/systems/{systemName}-{altDecoration}-{resolution}", False))
         search_paths.append(( f"{USER_DECORATIONS}/{bezel}/systems/{systemName}-{altDecoration}-{aspectRatio}", False))
+        search_paths.append(( f"{SYSTEM_DECORATIONS}/{bezel}/systems/{systemName}-{altDecoration}-{resolution}", False))
         search_paths.append(( f"{SYSTEM_DECORATIONS}/{bezel}/systems/{systemName}-{altDecoration}-{aspectRatio}", False))
+        search_paths.append(( f"{USER_DECORATIONS}/{bezel}/default-{altDecoration}-{resolution}", True))
         search_paths.append(( f"{USER_DECORATIONS}/{bezel}/default-{altDecoration}-{aspectRatio}", True))
+        search_paths.append(( f"{SYSTEM_DECORATIONS}/{bezel}/default-{altDecoration}-{resolution}", True))
         search_paths.append(( f"{SYSTEM_DECORATIONS}/{bezel}/default-{altDecoration}-{aspectRatio}", True))
         search_paths.append(( f"{USER_DECORATIONS}/{bezel}/systems/{systemName}-{altDecoration}", False))
         search_paths.append(( f"{SYSTEM_DECORATIONS}/{bezel}/systems/{systemName}-{altDecoration}", False))
@@ -94,9 +102,13 @@ def getBezelInfos(rom: str | Path, bezel: str, systemName: str, emulator: str) -
         search_paths.append(( f"{SYSTEM_DECORATIONS}/{bezel}/default-{altDecoration}", True))
 
     if altDecoration != "90" and altDecoration != "270":
+        search_paths.append(( f"{USER_DECORATIONS}/{bezel}/systems/{systemName}-{resolution}", False))
         search_paths.append(( f"{USER_DECORATIONS}/{bezel}/systems/{systemName}-{aspectRatio}", False))
+        search_paths.append(( f"{SYSTEM_DECORATIONS}/{bezel}/systems/{systemName}-{resolution}", False))
         search_paths.append(( f"{SYSTEM_DECORATIONS}/{bezel}/systems/{systemName}-{aspectRatio}", False))
+        search_paths.append(( f"{USER_DECORATIONS}/{bezel}/default-{resolution}", True))
         search_paths.append(( f"{USER_DECORATIONS}/{bezel}/default-{aspectRatio}", True))
+        search_paths.append(( f"{SYSTEM_DECORATIONS}/{bezel}/default-{resolution}", True))
         search_paths.append(( f"{SYSTEM_DECORATIONS}/{bezel}/default-{aspectRatio}", True))
         search_paths.append(( f"{USER_DECORATIONS}/{bezel}/systems/{systemName}", False))
         search_paths.append(( f"{SYSTEM_DECORATIONS}/{bezel}/systems/{systemName}", False))

@@ -25,4 +25,5 @@ cp "${BOARD_DIR}/rk3566-anbernic-rg-ds.dtb"			"${KNULLI_BINARIES_DIR}/boot/boot/
 
 cp "${BOARD_DIR}/boot/extlinux.conf"                            "${KNULLI_BINARIES_DIR}/boot/extlinux/"               || exit 1
 
+
 exit 0

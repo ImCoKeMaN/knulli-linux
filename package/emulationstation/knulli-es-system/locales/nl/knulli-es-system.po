@@ -100,7 +100,7 @@ msgctxt "game_options"
 msgid "0.9x"
 msgstr "0.9x"
 
-#. TRANSLATION: lexaloffle/pcsx2
+#. TRANSLATION: lexaloffle/aethersx2
 msgctxt "game_options"
 msgid "1 (Default)"
 msgstr ""
@@ -160,7 +160,7 @@ msgctxt "game_options"
 msgid "1.25x (800x600)"
 msgstr "1.25x (800x600)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "1.25x Native"
 msgstr "1.25x Native"
@@ -210,7 +210,7 @@ msgctxt "game_options"
 msgid "1.5x 720p (960x792)"
 msgstr "1.5x 720p (960x792)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "1.5x Native"
 msgstr "1.5x Native"
@@ -225,7 +225,7 @@ msgctxt "game_options"
 msgid "1.6x (20.00Mhz)"
 msgstr "1.6x (20.00Mhz)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "1.75x Native"
 msgstr "1.75x Native"
@@ -435,7 +435,7 @@ msgctxt "game_options"
 msgid "128KB"
 msgstr "128KB"
 
-#. TRANSLATION: ioquake3, libretro/dosbox_pure, libretro/mame, mame/pcsx2
+#. TRANSLATION: ioquake3, libretro/dosbox_pure, libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "128MB"
 msgstr "128MB"
@@ -610,7 +610,7 @@ msgctxt "game_options"
 msgid "16:9 RENDERING RESOLUTION"
 msgstr "16:9 RENDERRESOLUTIE"
 
-#. TRANSLATION: libretro/dosbox_pure, libretro/mame, libretro/np2kai, mame/pcsx2
+#. TRANSLATION: libretro/dosbox_pure, libretro/mame, libretro/np2kai, mame/aethersx2
 msgctxt "game_options"
 msgid "16MB"
 msgstr "16MB"
@@ -775,7 +775,7 @@ msgctxt "game_options"
 msgid "2.25x (1440x1080)"
 msgstr "2.25x (1440x1080)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "2.25x Native"
 msgstr "2.25x Native"
@@ -795,12 +795,12 @@ msgctxt "game_options"
 msgid "2.5x 1080p (1600x1320)"
 msgstr "2.5x 1080p (1600x1320)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "2.5x Native"
 msgstr "2.5x Native"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "2.75x Native"
 msgstr "2.75x Native"
@@ -1025,7 +1025,7 @@ msgctxt "game_options"
 msgid "2M"
 msgstr "2M"
 
-#. TRANSLATION: libretro/mame, libretro/mame, libretro/px68k, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, libretro/mame, libretro/px68k, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "2MB"
 msgstr "2MB"
@@ -1080,7 +1080,7 @@ msgctxt "game_options"
 msgid "2x MSAA"
 msgstr "2x MSAA"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "2x Native (~720p)"
 msgstr "2x Native (~720p)"
@@ -1105,12 +1105,12 @@ msgctxt "game_options"
 msgid "2x-VBlank"
 msgstr "2x-VBlank"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "3 1/2 Disk (Drive 3)"
 msgstr "3 1/2 Disk (Drive 3)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "3 1/2 Disk (Drive 4)"
 msgstr "3 1/2 Disk (Drive 4)"
@@ -1135,7 +1135,7 @@ msgctxt "game_options"
 msgid "3 threads"
 msgstr "3 threads"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "3.5x Native"
 msgstr "3.5x Native"
@@ -1200,17 +1200,17 @@ msgctxt "game_options"
 msgid "32 MHz (Overclock)"
 msgstr "32 MHz (Overclock)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "32K RAM EXPANSION"
 msgstr "32K RAM UITBREIDING"
 
-#. TRANSLATION: libretro/dosbox_pure, libretro/mame, libretro/np2kai, mame/pcsx2
+#. TRANSLATION: libretro/dosbox_pure, libretro/mame, libretro/np2kai, mame/aethersx2
 msgctxt "game_options"
 msgid "32MB"
 msgstr "32MB"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "32k RAM expansion card installed"
 msgstr "32k RAM uitbreidingskaart geïnstalleerd"
@@ -1285,7 +1285,7 @@ msgctxt "game_options"
 msgid "3x (2160p/3240p)"
 msgstr "3x (2160p/3240p)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "3x Native (~1080p)"
 msgstr "3x Native (~1080p)"
@@ -1295,7 +1295,7 @@ msgctxt "game_options"
 msgid "3x native (768 x 576)"
 msgstr "3x native (768 x 576)"
 
-#. TRANSLATION: lexaloffle/pcsx2
+#. TRANSLATION: azahar, lexaloffle/aethersx2
 msgctxt "game_options"
 msgid "4 (Default)"
 msgstr ""
@@ -1405,7 +1405,7 @@ msgctxt "game_options"
 msgid "486DX2, 66MHz (26800 cps)"
 msgstr "486DX2, 66MHz (26800 cps)"
 
-#. TRANSLATION: libretro/dosbox_pure, libretro/mame, mame/pcsx2, xenia, xenia-canary
+#. TRANSLATION: libretro/dosbox_pure, libretro/mame, mame/aethersx2, xenia, xenia-canary
 msgctxt "game_options"
 msgid "48MB"
 msgstr "48MB"
@@ -1419,6 +1419,11 @@ msgstr "4:3 (Standaard)"
 msgctxt "game_options"
 msgid "4:3 RENDERING RESOLUTION"
 msgstr "4:3 RENDER RESOLUTIE"
+
+#. TRANSLATION: yabasanshiro
+msgctxt "game_options"
+msgid "4:3(default)"
+msgstr ""
 
 #. TRANSLATION: libretro/yabasanshiro
 msgctxt "game_options"
@@ -1435,7 +1440,7 @@ msgctxt "game_options"
 msgid "4M"
 msgstr "4M"
 
-#. TRANSLATION: libretro/dosbox_pure, libretro/mame, libretro/mame, libretro/px68k, mame/pcsx2, ...
+#. TRANSLATION: libretro/dosbox_pure, libretro/mame, libretro/mame, libretro/px68k, mame/aethersx2, ...
 msgctxt "game_options"
 msgid "4MB"
 msgstr "4MB"
@@ -1480,7 +1485,7 @@ msgctxt "game_options"
 msgid "4x MULTISAMPLING"
 msgstr "4x MULTISAMPLING"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "4x Native (~1440p/2K)"
 msgstr "4x Native (~1440p/2K)"
@@ -1505,12 +1510,12 @@ msgctxt "game_options"
 msgid "4xrgss"
 msgstr ""
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "5 1/4 Disk (Drive 1)"
 msgstr "5 1/4 Disk (Drive 1)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "5 1/4 Disk (Drive 2)"
 msgstr "5 1/4 Disk (Drive 2)"
@@ -1650,7 +1655,7 @@ msgctxt "game_options"
 msgid "5x (3600p/5400p)"
 msgstr "5x (3600p/5400p)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "5x Native (~1620p)"
 msgstr "5x Native (~1620p)"
@@ -1725,7 +1730,7 @@ msgctxt "game_options"
 msgid "64KB"
 msgstr "64KB"
 
-#. TRANSLATION: ioquake3, libretro/dosbox_pure, libretro/mame, libretro/np2kai, mame/pcsx2
+#. TRANSLATION: ioquake3, libretro/dosbox_pure, libretro/mame, libretro/np2kai, mame/aethersx2
 msgctxt "game_options"
 msgid "64MB"
 msgstr "64MB"
@@ -1765,7 +1770,7 @@ msgctxt "game_options"
 msgid "6x 4K (3840x3168)"
 msgstr "6x 4K (3840x3168)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "6x Native (~2160p/4K)"
 msgstr "6x Native (~2160p/4K)"
@@ -1785,7 +1790,7 @@ msgctxt "game_options"
 msgid "70fps"
 msgstr "70fps"
 
-#. TRANSLATION: libretro/kronos, libretro/yabasanshiro, theforceengine
+#. TRANSLATION: libretro/kronos, libretro/yabasanshiro, theforceengine, yabasanshiro, yabasanshiro
 msgctxt "game_options"
 msgid "720p"
 msgstr "720p"
@@ -1845,7 +1850,7 @@ msgctxt "game_options"
 msgid "7x (5040p/7560p)"
 msgstr "7x (5040p/7560p)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "7x Native (~2520p)"
 msgstr "7x Native (~2520p)"
@@ -1910,7 +1915,7 @@ msgctxt "game_options"
 msgid "8192kB"
 msgstr "8192kB"
 
-#. TRANSLATION: libretro/dosbox_pure, libretro/mame, libretro/px68k, mame/pcsx2
+#. TRANSLATION: libretro/dosbox_pure, libretro/mame, libretro/px68k, mame/aethersx2
 msgctxt "game_options"
 msgid "8MB"
 msgstr "8MB"
@@ -1960,7 +1965,7 @@ msgctxt "game_options"
 msgid "8x MSAA"
 msgstr "8x MSAA"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "8x Native (~2880p/5K)"
 msgstr "8x Native (~2880p/5K)"
@@ -2000,7 +2005,7 @@ msgctxt "game_options"
 msgid "960p"
 msgstr "960p"
 
-#. TRANSLATION: libretro/dosbox_pure, libretro/mame, mame/pcsx2, xenia, xenia-canary
+#. TRANSLATION: libretro/dosbox_pure, libretro/mame, mame/aethersx2, xenia, xenia-canary
 msgctxt "game_options"
 msgid "96MB"
 msgstr "96MB"
@@ -2065,7 +2070,7 @@ msgctxt "game_options"
 msgid "ACTIVE INPUT DEVICES FIX"
 msgstr "ACTIEVE INVOERAPPARATEN FIX"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "ADD USER DISK"
 msgstr "VOEG USER DISK TOE"
@@ -2080,7 +2085,7 @@ msgctxt "game_options"
 msgid "ADJUST POWERPC FREQUENCY"
 msgstr "POWERPC FREQUENTIE AANPASSEN"
 
-#. TRANSLATION: amiberry, amiberry, cemu, cemu, cemu, ...
+#. TRANSLATION: advanced_drastic, advanced_drastic, advanced_drastic, advanced_drastic, advanced_drastic, ...
 msgctxt "game_options"
 msgid "ADVANCED OPTIONS"
 msgstr "GEAVANCEERDE OPTIES"
@@ -2165,7 +2170,7 @@ msgctxt "game_options"
 msgid "ANISOTROPIC FILTER"
 msgstr "ANISOTROPISCHE FILTER"
 
-#. TRANSLATION: dolphin, dolphin_triforce, dxx-rebirth, flycast, iortcw, ...
+#. TRANSLATION: aethersx2, dolphin, dolphin_triforce, dxx-rebirth, flycast, ...
 msgctxt "game_options"
 msgid "ANISOTROPIC FILTERING"
 msgstr "ANISOTROPISCH FILTEREN"
@@ -2195,17 +2200,17 @@ msgctxt "game_options"
 msgid "ANTI-ALIASING MODE"
 msgstr "ANTI-ALIASING MODUS"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "ANTI-BLUR"
 msgstr "ANTI-BLUR"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "APF M-1000 cartridges"
 msgstr "APF M-1000 cartridges"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "ARCHIMEDES MODEL"
 msgstr "ARCHIMEDES MODEL"
@@ -2405,37 +2410,37 @@ msgctxt "game_options"
 msgid "Accurate XFloat"
 msgstr "Nauwkeurige XFloat"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Acorn Analogue Joysticks"
 msgstr "Acorn Analoge Joysticks"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Acorn Archimedes ROM images"
 msgstr "Acorn Archimedes ROM images"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Acorn Archimedes floppy images"
 msgstr "Acorn Archimedes floppy images"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Acorn Archimedes hard disks"
 msgstr "Acorn Archimedes harde schijven"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Acorn Atom Utility ROMs"
 msgstr "Acorn Atom Utility ROMs"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Acorn Atom cassettes"
 msgstr "Acorn Atom cassettes"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Acorn Atom disk images"
 msgstr "Acorn Atom schijf images"
@@ -2455,62 +2460,62 @@ msgctxt "game_options"
 msgid "Acorn BBC Master disks"
 msgstr "Acorn BBC Master disks"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Acorn BBC Micro Model B Original disks"
 msgstr "Acorn BBC Micro Model B Originele disks"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Acorn BBC Micro Model B disks"
 msgstr "Acorn BBC Micro Model B disks"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Acorn BBC Micro ROMs"
 msgstr "Acorn BBC Micro ROMs"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Acorn BBC Micro cassettes"
 msgstr "Acorn BBC Micro cassettes"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Acorn BBC Micro hard disks"
 msgstr "Acorn BBC Micro harddisks"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Acorn Bitstik"
 msgstr "Acorn Bitstik"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Acorn Electron Cartridges"
 msgstr "Acorn Electron Cartridges"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Acorn Electron Cassettes"
 msgstr "Acorn Electron Cassettes"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Acorn Electron Disks"
 msgstr "Acorn Electron Disks"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Acron Electron ROMs"
 msgstr "Acron Electron ROMs"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Adaptive (Bottom Field First)"
 msgstr "Adaptief (Onderste Veld Eerst)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Adaptive (Top Field First)"
 msgstr "Adaptief (Bovenste Veld Eerst)"
@@ -2579,7 +2584,7 @@ msgstr ""
 "serie wordt geleverd, op basis van de standaard maximale waarde. Let op: een "
 "te hoog wattage kan uw apparaat beschadigen."
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Adjusts Full Motion Video movies aspect ratio."
 msgstr "Past de beeldverhouding van Full Motion Video-films aan."
@@ -2702,12 +2707,12 @@ msgctxt "game_options"
 msgid "Allows up to 7 or 12 controllers in supported games."
 msgstr "Maakt tot 7 of 12 controllers mogelijk in ondersteunde spellen."
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Allows up to 8 controllers in supported games."
 msgstr "Maakt maximaal 8 controllers mogelijk in ondersteunde spellen."
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Allows user replaceable textures."
 msgstr "Maakt door de gebruiker vervangbare texturen mogelijk."
@@ -2812,57 +2817,57 @@ msgctxt "game_options"
 msgid "Any"
 msgstr "Elke"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Apple (2x 2-button Analog)"
 msgstr "Apple (2x 2-button Analoog)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Apple //e"
 msgstr "Apple //e"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Apple //e Enhanced (Default)"
 msgstr "Apple //e Enhanced (Standaard)"
 
-#. TRANSLATION: libretro/mame, libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Apple II cleanly cracked disks"
 msgstr "Apple II netjes gekraakte disks"
 
-#. TRANSLATION: libretro/mame, libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Apple II miscellaneous disks"
 msgstr "Apple II diverse disks"
 
-#. TRANSLATION: libretro/mame, libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Apple II original disks"
 msgstr "Apple II originele disks"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Apple IIgs cleanly cracked disks"
 msgstr "Apple IIgs cleanly cracked disks"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Apple IIgs miscellaneous disks"
 msgstr "Apple IIgs diverse disks"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Apple IIgs original disks"
 msgstr "Apple IIgs originele disks"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Apple ][ Plus"
 msgstr "Apple ][ Plus"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid ""
 "Applies the FXAA anti-aliasing algorithm to improve the visual quality of "
@@ -2941,17 +2946,17 @@ msgctxt "game_options"
 msgid "Arcade Universe BIOS (Cheats)"
 msgstr "Arcade Universe BIOS (Cheats)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Archimedes 310"
 msgstr "Archimedes 310"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Archimedes 440/1 (Default)"
 msgstr "Archimedes 440/1 (Standaard)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Archimedes 540"
 msgstr "Archimedes 540"
@@ -2966,7 +2971,7 @@ msgctxt "game_options"
 msgid "Arrange the dual screen layout."
 msgstr "Schik de dubbel scherm indeling."
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid ""
 "Arrange the dual screen layout. Separate windows can be changed with "
@@ -3005,7 +3010,7 @@ msgctxt "game_options"
 msgid "Async with Shader Interpreter"
 msgstr "Async met Shader Interpreter"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Atari 400 / 800 floppy disks"
 msgstr "Atari 400 / 800 floppy disks"
@@ -3029,7 +3034,7 @@ msgstr ""
 "Atari ST-monitoren hadden een zichtbare rand rond het hoofdscherm, maar de "
 "meeste software geeft daarin niets weer."
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Atari XE Game System cartridges"
 msgstr "Atari XE Game System cartridges"
@@ -3054,7 +3059,7 @@ msgctxt "game_options"
 msgid "Auto Max Quality"
 msgstr "Automatische maximale kwaliteit"
 
-#. TRANSLATION: pcsx2, pcsx2
+#. TRANSLATION: aethersx2, aethersx2, pcsx2, pcsx2
 msgctxt "game_options"
 msgid "Auto Standard (4:3 interlaced / 3:2 progressive)"
 msgstr "Auto Standaard (4:3 geïnterlinieerd / 3:2 progressief)"
@@ -3108,7 +3113,7 @@ msgstr ""
 "Verlaag automatisch de framevertraging tijdelijk om framedrops te voorkomen. "
 "Kan haperingen introduceren."
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Automatically loads and applies cheats on game start."
 msgstr ""
@@ -3158,7 +3163,7 @@ msgctxt "game_options"
 msgid "BATTERY MODE"
 msgstr "BATTERIJ MODUS"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "BBC A3000"
 msgstr "Archimedes 310"
@@ -3263,7 +3268,7 @@ msgctxt "game_options"
 msgid "BILINEAR FILTER"
 msgstr "BILINEAIR FILTER"
 
-#. TRANSLATION: model2emu, pcsx2
+#. TRANSLATION: advanced_drastic, aethersx2, model2emu, pcsx2
 msgctxt "game_options"
 msgid "BILINEAR FILTERING"
 msgstr "BILINEAIRE FILTER"
@@ -3308,7 +3313,7 @@ msgctxt "game_options"
 msgid "BLEND SPRITES (SINGE)"
 msgstr "BLEND SPRITES (SINGE)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "BLENDING ACCURACY"
 msgstr "BLENDING NAUWKEURIGHEID"
@@ -3328,7 +3333,7 @@ msgctxt "game_options"
 msgid "BOOT ANIMATION FIRST"
 msgstr "BOOT ANIMATIES EERST"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "BOOT DISK"
 msgstr "BOOT SCHIJF"
@@ -3353,7 +3358,7 @@ msgctxt "game_options"
 msgid "Balanced"
 msgstr "Gebalanceerd"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Bally Professional Arcade cartridges"
 msgstr "Bally Professional Arcade cartridges"
@@ -3363,12 +3368,12 @@ msgctxt "game_options"
 msgid "Baltic"
 msgstr "Baltisch"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Basic (Recommended)"
 msgstr "Basis (Aanbevolen)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Basic (generated Mipmaps)"
 msgstr "Basis (gegenereerde Mipmaps)"
@@ -3377,6 +3382,11 @@ msgstr "Basis (gegenereerde Mipmaps)"
 msgctxt "game_options"
 msgid "Batocera sets first audio device (Default)"
 msgstr "Batocera stelt eerste audioapparaat in (Standaard)"
+
+#. TRANSLATION: shared
+msgctxt "game_options"
+msgid "Battery"
+msgstr ""
 
 #. TRANSLATION: libretro/mesen, libretro/mesen-s
 msgctxt "game_options"
@@ -3403,12 +3413,12 @@ msgctxt "game_options"
 msgid "Bilinear (Default)"
 msgstr "Bilinear (Standaard)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Bilinear (Forced excluding sprite)"
 msgstr "Bilineair (geforceerd exclusief sprite)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Bilinear (Forced)"
 msgstr "Bilineair (Geforceerd)"
@@ -3418,17 +3428,17 @@ msgctxt "game_options"
 msgid "Bilinear (No Edge Blending)"
 msgstr "Bilineair (Geen Randovervloeiing)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Bilinear (PS2)"
 msgstr "Bilineair (PS2)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Bilinear (Sharp)"
 msgstr "Bilinear (Scherp)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Bilinear (Smooth)"
 msgstr "Bilinear (Glad)"
@@ -3448,17 +3458,17 @@ msgctxt "game_options"
 msgid "Bisqwit 8x"
 msgstr "Bisqwit 8x"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Bit Corp Gamate cartridges"
 msgstr "Bit Corp Gamate cartridges"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Blend (Bottom Field First)"
 msgstr "Blend (Onderste Veld Eerst)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Blend (Top Field First)"
 msgstr "Blend (Bovenste Veld Eerst)"
@@ -3504,12 +3514,12 @@ msgid "Blur high-res mode, allowing for better transparency effects."
 msgstr ""
 "Vervaag hoge resolutie modus, zorgt voor betere transparantie effecten."
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Bob (Bottom Field First)"
 msgstr "Bob (Onderste Veld Eerst)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Bob (Top Field First)"
 msgstr "Bob (Bovenste Veld Eerst)"
@@ -3541,7 +3551,7 @@ msgctxt "game_options"
 msgid "Bottom (Default)"
 msgstr "Onder (Standaard)"
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid "Bottom Only"
 msgstr "Alleen onderin"
@@ -3550,6 +3560,16 @@ msgstr "Alleen onderin"
 msgctxt "game_options"
 msgid "Bottom only"
 msgstr "Alleen onderkant"
+
+#. TRANSLATION: advanced_drastic
+msgctxt "game_options"
+msgid "Bottom-Left"
+msgstr ""
+
+#. TRANSLATION: advanced_drastic
+msgctxt "game_options"
+msgid "Bottom-Right"
+msgstr ""
 
 #. TRANSLATION: libretro/hatarib
 msgctxt "game_options"
@@ -3683,12 +3703,12 @@ msgctxt "game_options"
 msgid "CABLE"
 msgstr "KABEL"
 
-#. TRANSLATION: lexaloffle/pcsx2
+#. TRANSLATION: lexaloffle/aethersx2
 msgctxt "game_options"
 msgid "CART PREFETCH THREADS"
 msgstr ""
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "CD"
 msgstr "CD"
@@ -3708,7 +3728,7 @@ msgctxt "game_options"
 msgid "CD-DA VOLUME"
 msgstr "CD-DA VOLUME"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "CD-ROM"
 msgstr "CD-ROM"
@@ -3763,7 +3783,7 @@ msgctxt "game_options"
 msgid "CGA"
 msgstr "CGA"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "CHEATS"
 msgstr "CHEATS"
@@ -3788,17 +3808,17 @@ msgctxt "game_options"
 msgid "CLEAR MEMORY PAGE STATE"
 msgstr "WISSEN GEHEUGENPAGINA STAAT"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "COIN SOUND PLUGIN"
 msgstr "MUNT GELUID PLUGIN"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "COLOR COMPUTER MODEL"
 msgstr "COLOR COMPUTER MODEL"
 
-#. TRANSLATION: libretro/gambatte, libretro/mgba, libretro/mgba, libretro/vba-m, libretro/vba-m
+#. TRANSLATION: libretro/gambatte, libretro/gpsp, libretro/mgba, libretro/mgba, libretro/vba-m, ...
 msgctxt "game_options"
 msgid "COLOR CORRECTION"
 msgstr "KLEUR CORRECTIE"
@@ -3808,7 +3828,7 @@ msgctxt "game_options"
 msgid "COLOR FILTER"
 msgstr "KLEUR FILTER"
 
-#. TRANSLATION: libretro/mesen, libretro/potator
+#. TRANSLATION: libretro/mednafen_supergrafx, libretro/mesen, libretro/pce, libretro/pce_fast, libretro/potator
 msgctxt "game_options"
 msgid "COLOR PALETTE"
 msgstr "KLEUR PALET"
@@ -4178,12 +4198,12 @@ msgctxt "game_options"
 msgid "Cached Interpreter (Faster)"
 msgstr "Cached Interpreter (Sneller)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Camputers Lynx cassettes"
 msgstr "Camputers Lynx cassettes"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Camputers Lynx floppies"
 msgstr "Camputers Lynx floppies"
@@ -4271,7 +4291,7 @@ msgctxt "game_options"
 msgid "Can reduce crackle and stutter but increases audio latency."
 msgstr "Kan gekraak en stotteren verminderen, maar verhoogt de audiolatentie."
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Can sharpen images in lower resolutions."
 msgstr "Kan afbeeldingen in lagere resoluties verscherpen."
@@ -4296,27 +4316,27 @@ msgctxt "game_options"
 msgid "Cartridge"
 msgstr "Cartridge"
 
-#. TRANSLATION: libretro/mame, libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Cartridge (Slot 1)"
 msgstr "Cartridge (Slot 1)"
 
-#. TRANSLATION: libretro/mame, libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Cartridge (Slot 2)"
 msgstr "Cartridge (Slot 2)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Cartridge (Slot 3)"
 msgstr "Cartridge (Slot 3)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Cartridge (Slot 4)"
 msgstr "Cartridge (Slot 4)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Casio PV-1000 cartridges"
 msgstr "Casio PV-1000 cartridges"
@@ -4326,12 +4346,12 @@ msgctxt "game_options"
 msgid "Cassette"
 msgstr "Cassette"
 
-#. TRANSLATION: libretro/mame, libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Cassette 1"
 msgstr "Cassette 1"
 
-#. TRANSLATION: libretro/mame, libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Cassette 2"
 msgstr "Cassette 2"
@@ -4343,8 +4363,8 @@ msgstr "Catalaans"
 
 #. TRANSLATION: scummvm
 msgctxt "game_options"
-msgid "Center (Default)"
-msgstr "Midden (Standaard)"
+msgid "Center"
+msgstr ""
 
 #. TRANSLATION: libretro/mesen-s
 msgctxt "game_options"
@@ -4441,12 +4461,12 @@ msgctxt "game_options"
 msgid "Choose downscaling method."
 msgstr "Kies de downscaling methode."
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Choose hardware for the memory expansion slot"
 msgstr "Kies hardware voor het geheugenuitbreidingsslot"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Choose mipmapping type."
 msgstr "Kies het mipmapping type."
@@ -4561,7 +4581,7 @@ msgstr ""
 "Kies of u de SDL Game Controller-configuratie wilt doorgeven aan de Windows-"
 "game. Uitschakelen kan bij sommige games helpen."
 
-#. TRANSLATION: cemu, citra, dolphin, duckstation, gzdoom, ...
+#. TRANSLATION: aethersx2, azahar, cemu, citra, dolphin, ...
 msgctxt "game_options"
 msgid "Choose which graphics API library to use."
 msgstr "Kies welke grafische API-bibliotheek u wilt gebruiken."
@@ -4727,22 +4747,22 @@ msgctxt "game_options"
 msgid "Close app on the remote host when quitting Moonlight."
 msgstr "Sluit de app op de externe host wanneer u Moonlight afsluit."
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Coleco ADAM diskettes"
 msgstr "Coleco ADAM diskettes"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Coleco Adam Digital Data Packs"
 msgstr "Coleco Adam Digital Data Packs"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Coleco Adam cartridges"
 msgstr "Coleco Adam cartridges"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Coleco ColecoVision cartridges"
 msgstr "Coleco ColecoVision cartridges"
@@ -4752,30 +4772,35 @@ msgctxt "game_options"
 msgid "Color"
 msgstr "Kleur"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Color Computer"
 msgstr "Color Computer"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Color Computer 2"
 msgstr "Color Computer 2"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Color Computer 2B"
 msgstr "Color Computer 2B"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Color Computer 3 (NTSC) (Default)"
 msgstr "Color Computer 3 (NTSC) (Standaard)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Color Computer 3 (PAL)"
 msgstr "Color Computer 3 (PAL)"
+
+#. TRANSLATION: libretro/mednafen_supergrafx, libretro/pce, libretro/pce_fast
+msgctxt "game_options"
+msgid "Color palette to apply."
+msgstr ""
 
 #. TRANSLATION: libretro/snes9x, libretro/snes9x_next
 msgctxt "game_options"
@@ -4791,7 +4816,7 @@ msgstr ""
 "Compileer shaders bij de volgende lancering van het spel (eenmalig). "
 "Vermindert microbevriezingen. Alleen Vulkan."
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid ""
 "Compile shaders using background threads to avoid shader compilation "
@@ -4800,7 +4825,7 @@ msgstr ""
 "Compileer shaders met behulp van achtergrondthreads om haperen van de shader-"
 "compilatie te voorkomen. Kan grafische problemen veroorzaken."
 
-#. TRANSLATION: libretro/snes9x, libretro/snes9x_next, redream
+#. TRANSLATION: libretro/mednafen_supergrafx, libretro/pce, libretro/pce_fast, libretro/snes9x, libretro/snes9x_next, ...
 msgctxt "game_options"
 msgid "Composite"
 msgstr "Composiet"
@@ -4840,17 +4865,17 @@ msgctxt "game_options"
 msgid "Console AES World"
 msgstr "Console AES Wereld"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Control the texture filtering of the emulation."
 msgstr "Beheer de textuurfiltering van de emulatie."
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Control the texture's trilinear filtering of the emulation."
 msgstr "Beheer de trilineaire filtering van de texture van de emulatie."
 
-#. TRANSLATION: libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Controls for 5/6 button games and other unique controls"
 msgstr "Controls voor 5/6 knop spellen en andere unieke controls"
@@ -4889,7 +4914,7 @@ msgctxt "game_options"
 msgid "Crash-n Burn"
 msgstr "Crash-n Burn"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Creatronic Mega Duck cartridges"
 msgstr "Creatronic Mega Duck cartridges"
@@ -5026,7 +5051,7 @@ msgctxt "game_options"
 msgid "DEFAULT POWER ON RAM STATE"
 msgstr "STANDAARD INSCHAKELDE RAM STAAT"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "DEINTERLACING"
 msgstr "DEINTERLACING"
@@ -5045,6 +5070,11 @@ msgstr "DEV MENU"
 msgctxt "game_options"
 msgid "DIGITAL AUDIO"
 msgstr "DIGITALE AUDIO"
+
+#. TRANSLATION: libretro/flycast, libretro/flycastvl
+msgctxt "game_options"
+msgid "DIGITAL SIGNAL PROCESSOR"
+msgstr ""
 
 #. TRANSLATION: flycast/dolphin
 msgctxt "game_options"
@@ -5081,7 +5111,7 @@ msgctxt "game_options"
 msgid "DISABLE VERTEX CACHE"
 msgstr "SCHAKEL VERTEX CACHE UIT"
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid "DISK SHADER CACHE"
 msgstr "DISK SHADER CACHE"
@@ -5091,7 +5121,7 @@ msgctxt "game_options"
 msgid "DISK TYPE"
 msgstr "DISK TYPE"
 
-#. TRANSLATION: dolphin, dolphin, dolphin, dolphin, dolphin, ...
+#. TRANSLATION: aethersx2, aethersx2, aethersx2, aethersx2, aethersx2, ...
 msgctxt "game_options"
 msgid "DISPLAY"
 msgstr "WEERGAVE"
@@ -5116,7 +5146,7 @@ msgctxt "game_options"
 msgid "DISPLAY ROTATION"
 msgstr "SCHERMROTATIE"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "DITHERING"
 msgstr "DITHERING"
@@ -5206,6 +5236,11 @@ msgctxt "game_options"
 msgid "DUALSHOCK MOTION CONTROL"
 msgstr "DUALSHOCK MOTION CONTROL"
 
+#. TRANSLATION: shared
+msgctxt "game_options"
+msgid "DUMP SRM SAVES WHILE IN GAME"
+msgstr ""
+
 #. TRANSLATION: wine
 msgctxt "game_options"
 msgid "DXVK FEATURE"
@@ -5286,7 +5321,7 @@ msgctxt "game_options"
 msgid "Default (2 Buttons)"
 msgstr "Standaard (2 Knoppen)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Default Only"
 msgstr "Alleen Standaard"
@@ -5425,6 +5460,12 @@ msgctxt "game_options"
 msgid "Determines how the cursor should apprear on the botton screen."
 msgstr "Bepaalt hoe de cursor op het onderste scherm moet verschijnen."
 
+#. TRANSLATION: azahar
+msgctxt "game_options"
+msgid ""
+"Determines the proportion of the larger screen relative to the smaller one."
+msgstr ""
+
 #. TRANSLATION: duckstation
 msgctxt "game_options"
 msgid "Determines the speed and the runahead behaviour of the system."
@@ -5440,12 +5481,12 @@ msgctxt "game_options"
 msgid "Diablo Music Fix"
 msgstr "Diablo Muziek Fix"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Dick Smith Electronics VZ-200/300 cassettes"
 msgstr "Dick Smith Electronics VZ-200/300 cassettes"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Dick Smith Electronics VZ-200/300 snapshots"
 msgstr "Dick Smith Electronics VZ-200/300 snapshots"
@@ -5495,7 +5536,7 @@ msgctxt "game_options"
 msgid "Disable to access the system's settings, like time and language."
 msgstr "Schakel toegang tot de systeem instellingen uit, zoals tijd en taal."
 
-#. TRANSLATION: bigpemu, corsixth, corsixth, duckstation, duckstation, ...
+#. TRANSLATION: aethersx2, aethersx2, aethersx2, aethersx2, aethersx2, ...
 msgctxt "game_options"
 msgid "Disabled"
 msgstr "Uitgeschakeld"
@@ -5543,22 +5584,22 @@ msgctxt "game_options"
 msgid "Disk (Drive 2)"
 msgstr "Disk (Drive 2)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Disk (Drive 3)"
 msgstr "Disk (Drive 3)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Disk (Drive 4)"
 msgstr "Disk (Drive 4)"
 
-#. TRANSLATION: mame/pcsx2
+#. TRANSLATION: mame/aethersx2
 msgctxt "game_options"
 msgid "Disk Image"
 msgstr "SCHIJFIMAGE"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Display on screen information like savestate, config warning etc..."
 msgstr ""
@@ -5644,6 +5685,13 @@ msgid "DualShock has rumble support. Not all games support DualShock."
 msgstr ""
 "DualShock heeft rumble support. Niet alle games ondersteunen DualShock."
 
+#. TRANSLATION: shared
+msgctxt "game_options"
+msgid ""
+"Dumps your ingame saves every 10 seconds while in game. Might wear out your "
+"SD card faster if enabled. Works only on libretro cores."
+msgstr ""
+
 #. TRANSLATION: rpcs3
 msgctxt "game_options"
 msgid ""
@@ -5697,7 +5745,7 @@ msgctxt "game_options"
 msgid "EGA"
 msgstr "EGA"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "ELECTRON MODEL"
 msgstr "ELECTRON MODEL"
@@ -5742,7 +5790,7 @@ msgctxt "game_options"
 msgid "ENABLE AI TRANSLATION SERVICE"
 msgstr "INSCHAKELEN AI VERTAALSERVICE"
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid "ENABLE ASYNC SHADER COMPILATION"
 msgstr "ASYNC SHADER COMPILATIE INSCHAKELEN"
@@ -5802,7 +5850,7 @@ msgctxt "game_options"
 msgid "ENABLE MIP-MAP"
 msgstr "MIP-MAP INSCHAKELEN"
 
-#. TRANSLATION: cemu, mame/pcsx2, wine
+#. TRANSLATION: cemu, mame/aethersx2, wine
 msgctxt "game_options"
 msgid "ENABLE MOUSE"
 msgstr "MUIS INSCHAKELEN"
@@ -5867,7 +5915,7 @@ msgctxt "game_options"
 msgid "ENABLE WIDESCREEN"
 msgstr "BREEDBEELD INSCHAKELEN"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "ENABLE WIDESCREEN PATCHES"
 msgstr "BREEDBEELDPATCHES INSCHAKELEN"
@@ -5932,17 +5980,17 @@ msgctxt "game_options"
 msgid "Eire"
 msgstr "Eire"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Electron"
 msgstr "Electron"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Electron w/64k Master RAM Board (default)"
 msgstr "Electron w/64k Master RAM Board (standaard)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Emerson Arcadia 2001 cartridges"
 msgstr "Emerson Arcadia 2001 cartridges"
@@ -6052,7 +6100,7 @@ msgstr ""
 "Schakel Gravis Utrasound-emulatie in. Zorg ervoor dat de map ULTRASND zich "
 "in de hoofdmap van uw <game>.pc rom-map bevindt."
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Enable No-interlacing Patches."
 msgstr "Schakel niet-interlacing patches in."
@@ -6121,7 +6169,7 @@ msgctxt "game_options"
 msgid "Enable launching pre-installed WHDLoad installs."
 msgstr "Start voorgeinstalleerd WHDLoad installs inschakelen."
 
-#. TRANSLATION: mame/pcsx2
+#. TRANSLATION: mame/aethersx2
 msgctxt "game_options"
 msgid ""
 "Enable mouse input for trackballs, spinners, lightguns (if no gun "
@@ -6163,7 +6211,7 @@ msgstr ""
 "In- of uitschakelen dat randen worden toegevoegd wanneer de inhoud een 4:3-"
 "aspect heeft met een breedbeeldscherm."
 
-#. TRANSLATION: libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Enable or disable high score saving"
 msgstr "Schakel het opslaan van high scores in of uit"
@@ -6208,7 +6256,7 @@ msgctxt "game_options"
 msgid "Enable the BASIC interpreter. Some games need this."
 msgstr "Schakel de BASIC-interpreter in. Sommige spellen hebben dit nodig."
 
-#. TRANSLATION: flycast/dolphin
+#. TRANSLATION: flycast/dolphin, libretro/flycast, libretro/flycastvl
 msgctxt "game_options"
 msgid ""
 "Enable the Dreamcast DSP for more accurate audio. Only recommended for fast "
@@ -6263,7 +6311,7 @@ msgctxt "game_options"
 msgid "Enable to display if your BIOS haas known problems."
 msgstr "Schakel dit in om weer te geven of uw BIOS bekende problemen heeft."
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Enable to improve bluriness."
 msgstr "Inschakelen om de onscherpte te verbeteren."
@@ -6317,12 +6365,12 @@ msgctxt "game_options"
 msgid "Enable widescreen support."
 msgstr "Schakel breedbeeldondersteuning in."
 
-#. TRANSLATION: bigpemu, cemu, cemu, cemu, cemu, ...
+#. TRANSLATION: aethersx2, aethersx2, aethersx2, aethersx2, aethersx2, ...
 msgctxt "game_options"
 msgid "Enabled"
 msgstr "Ingeschakeld"
 
-#. TRANSLATION: corsixth, corsixth, duckstation, duckstation, libretro/mame, ...
+#. TRANSLATION: aethersx2, corsixth, corsixth, duckstation, duckstation, ...
 msgctxt "game_options"
 msgid "Enabled (Default)"
 msgstr "Ingeschakeld (Standaard)"
@@ -6368,7 +6416,7 @@ msgstr ""
 "Schakelt bilineair filteren in op tilemaps. Ziet er goed uit, maar kan wat "
 "sterk artifacten veroorzaken."
 
-#. TRANSLATION: lexaloffle/pcsx2
+#. TRANSLATION: lexaloffle/aethersx2
 msgctxt "game_options"
 msgid "Enables integer scaling for pixel-perfect image quality."
 msgstr ""
@@ -6492,14 +6540,14 @@ msgstr ""
 "Verbetering. Verhoog de renderresolutie bij een verhouding van 16:9. Maakt "
 "3D-objecten duidelijker."
 
-#. TRANSLATION: citra, dolphin, dolphin_triforce, duckstation, flycast, ...
+#. TRANSLATION: aethersx2, azahar, citra, dolphin, dolphin_triforce, ...
 msgctxt "game_options"
 msgid ""
 "Enhancement. Increase the rendering resolution. Makes 3D objects clearer."
 msgstr ""
 "Verbetering. Verhoogt de weergaveresolutie. Maakt 3D-objecten duidelijker."
 
-#. TRANSLATION: dolphin, dolphin_triforce, duckstation, libretro/dolphin, libretro/duckstation, ...
+#. TRANSLATION: aethersx2, dolphin, dolphin_triforce, duckstation, libretro/dolphin, ...
 msgctxt "game_options"
 msgid "Enhancement. Only works with a 16/9 ratio and bezels disabled."
 msgstr ""
@@ -6623,12 +6671,12 @@ msgstr ""
 "Zorg ervoor dat elk frame dat de console weergeeft, op het scherm wordt "
 "weergegeven."
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Entex AdventureVision cartridges"
 msgstr "Coleco ColecoVision cartridges"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Epoch Game Pocket Computer cartridges"
 msgstr "Epoch Game Pocket Computer cartridges"
@@ -6770,37 +6818,37 @@ msgctxt "game_options"
 msgid "FM SYNTHESIZER"
 msgstr "FM SYNTHESIZER"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "FM TOWNS MODEL"
 msgstr "FM TOWNS MODEL"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "FM Towns (Model 1/2)"
 msgstr "FM Towns (Model 1/2)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "FM Towns II UX"
 msgstr "FM Towns II UX"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "FM Towns Marty (Default)"
 msgstr "FM Towns Marty (Standaard)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "FM-7 MODEL"
 msgstr "FM-7 MODEL"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "FMV ASPECT RATIO"
 msgstr "FMV ASPECT RATIO"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "FMV movie deinterlacing."
 msgstr "De-interlacing van FMV-films."
@@ -6840,7 +6888,7 @@ msgctxt "game_options"
 msgid "FRAME DUPING (SPEED UP)"
 msgstr "FRAME DUPING (VERSNELLEN)"
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid "FRAME LIMIT"
 msgstr "FRAME LIMIET"
@@ -6855,7 +6903,7 @@ msgctxt "game_options"
 msgid "FRAME RATE LIMIT"
 msgstr "FRAMERATE LIMIET"
 
-#. TRANSLATION: lexaloffle/pcsx2
+#. TRANSLATION: lexaloffle/aethersx2
 msgctxt "game_options"
 msgid "FRAME SLEEP DURATION"
 msgstr ""
@@ -6909,7 +6957,7 @@ msgstr ""
 "VOLLEDIG SCHERM geeft je een bovenaanzicht van het speelveld. Voor gebruik "
 "in een kast of met meerdere vensters op het bureaublad."
 
-#. TRANSLATION: pcsx2, suyu, vita3k
+#. TRANSLATION: aethersx2, pcsx2, suyu, vita3k
 msgctxt "game_options"
 msgid "FXAA"
 msgstr "FXAA"
@@ -6962,7 +7010,7 @@ msgstr ""
 "Vult het scherm, ongeacht de beeldverhouding. Werkt niet met Interger "
 "Opschaling."
 
-#. TRANSLATION: lexaloffle/pcsx2
+#. TRANSLATION: lexaloffle/aethersx2
 msgctxt "game_options"
 msgid "Filters out games tagged mature in splore."
 msgstr ""
@@ -6994,10 +7042,10 @@ msgstr "Aanpassen aan scherm"
 
 #. TRANSLATION: scummvm
 msgctxt "game_options"
-msgid "Fit resolution scale"
-msgstr "Pas de resolutieschaal aan"
+msgid "Fit resolution scale (Default)"
+msgstr ""
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Fit to Window / Fullscreen"
 msgstr "Aanpassen aan venster / Volledig scherm"
@@ -7028,7 +7076,7 @@ msgstr ""
 "synchroniseert bij videosynchronisatie, behalve late frames (onder doel-FPS) "
 "die onmiddellijk worden weergegeven."
 
-#. TRANSLATION: citra, dolphin, dolphin_triforce, duckstation, pcsx2
+#. TRANSLATION: aethersx2, azahar, citra, dolphin, dolphin_triforce, ...
 msgctxt "game_options"
 msgid "Fix screen tearing. CPU heavy."
 msgstr "Verhelp screen tearing. Zwaar voor de CPU."
@@ -7068,17 +7116,17 @@ msgctxt "game_options"
 msgid "Flight Stick (3 Axes, 4 Btns, 1 Hat)"
 msgstr "Flight Stick (3 Axis, 4 Knoppen, 1 Hat)"
 
-#. TRANSLATION: libretro/mame, libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Floppy Disk"
 msgstr "Floppy Disk"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Floppy Disk (Drive 1)"
 msgstr "Floppy Disk (Drive 1)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Floppy Disk (Drive 2 - Model 1/2 & II UX)"
 msgstr "Floppy Disk (Drive 2 - Model 1/2 & II UX)"
@@ -7150,7 +7198,7 @@ msgctxt "game_options"
 msgid "Force 32:9"
 msgstr "Forceer 32:9"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Force 32bit"
 msgstr ""
@@ -7208,7 +7256,7 @@ msgctxt "game_options"
 msgid "Force the game to render in this aspect ratio."
 msgstr "Forceer het spel om in deze beeldverhouding te renderen."
 
-#. TRANSLATION: pcsx2, shared
+#. TRANSLATION: aethersx2, pcsx2, shared
 msgctxt "game_options"
 msgid ""
 "Force the game to render in this aspect ratio. Not all systems support all "
@@ -7220,6 +7268,11 @@ msgstr ""
 #. TRANSLATION: shared
 msgctxt "game_options"
 msgid "Forces integer scaling to round up instead of down."
+msgstr ""
+
+#. TRANSLATION: yabasanshiro
+msgctxt "game_options"
+msgid "Forces specific aspect ratio."
 msgstr ""
 
 #. TRANSLATION: model2emu
@@ -7264,37 +7317,37 @@ msgctxt "game_options"
 msgid "Frontend MIDI driver"
 msgstr "Frontend MIDI driver"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Fujitsu FM Towns CD-ROMs"
 msgstr "Fujitsu FM Towns CD-ROMs"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Fujitsu FM Towns cracked floppy disk images"
 msgstr "Fujitsu FM Towns cracked floppy disk images"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Fujitsu FM Towns miscellaneous floppy disk images"
 msgstr "Fujitsu FM Towns miscellaneous floppy disk images"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Fujitsu FM Towns original floppy disk images"
 msgstr "Fujitsu FM Towns original floppy disk images"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Fujitsu FM-7 cassettes"
 msgstr "Fujitsu FM-7 cassettes"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Fujitsu FM-7 disk images"
 msgstr "Fujitsu FM-7 disk images"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Fujitsu FM-77AV disk images"
 msgstr "Fujitsu FM-77AV disk images"
@@ -7304,17 +7357,17 @@ msgctxt "game_options"
 msgid "Full"
 msgstr "Volledig"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Full (Hash Cache)"
 msgstr "Volledig (Hash Cache)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Full (PS2 Mipmaps)"
 msgstr "Volledig (PS2 Mipmaps)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Full (Slow)"
 msgstr "Volledig (Traag)"
@@ -7333,6 +7386,11 @@ msgstr "Volledige 244 lijnen"
 msgctxt "game_options"
 msgid "Full Frame"
 msgstr "Volledig Frame"
+
+#. TRANSLATION: yabasanshiro
+msgctxt "game_options"
+msgid "Full Screen(Stretch)"
+msgstr ""
 
 #. TRANSLATION: openmsx
 msgctxt "game_options"
@@ -7354,12 +7412,12 @@ msgctxt "game_options"
 msgid "Fuller Joystick"
 msgstr "Fuller Joystick"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Funtech Super A'Can cartridges"
 msgstr "Funtech Super A'Can cartridges"
 
-#. TRANSLATION: demul, dolphin, flycast, mupen64plus, pcsx2, ...
+#. TRANSLATION: aethersx2, demul, dolphin, flycast, mupen64plus, ...
 msgctxt "game_options"
 msgid "GAME ASPECT RATIO"
 msgstr "SPEL ASPECT RATIO"
@@ -7549,7 +7607,7 @@ msgctxt "game_options"
 msgid "GBC - Yellow"
 msgstr "GBC - Geel"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "GCE Vectrex cartridges"
 msgstr "GCE Vectrex cartridges"
@@ -7614,12 +7672,12 @@ msgctxt "game_options"
 msgid "GRAPHICAL USER INTERFACE"
 msgstr "GRAFISCHE GEBRUIKER INTERFACE"
 
-#. TRANSLATION: citra, citra, citra, citra, citra, ...
+#. TRANSLATION: azahar, azahar, azahar, azahar, azahar, ...
 msgctxt "game_options"
 msgid "GRAPHICS"
 msgstr "GRAPHICS"
 
-#. TRANSLATION: cemu, citra, dolphin, duckstation, flycast, ...
+#. TRANSLATION: aethersx2, azahar, cemu, citra, dolphin, ...
 msgctxt "game_options"
 msgid "GRAPHICS API"
 msgstr "GRAPHICS API"
@@ -7694,7 +7752,7 @@ msgctxt "game_options"
 msgid "GamePad + 4 Sideway Wiimote"
 msgstr "Controller + 4 Sideway Wiimote"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "GamePark GP32 SmartMedia cards"
 msgstr "GamePark GP32 SmartMedia cards"
@@ -7747,7 +7805,7 @@ msgctxt "game_options"
 msgid "Generic Keyboard Binds"
 msgstr "Generieke Keyboard Bindingen"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Genesis/Megadrive Style"
 msgstr "Genesis/Megadrive Stijl"
@@ -7792,7 +7850,7 @@ msgctxt "game_options"
 msgid "Giga"
 msgstr "Giga"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Gizmo (1-Button Digital)"
 msgstr "Gizmo (1-Button Digitaal)"
@@ -7912,6 +7970,11 @@ msgctxt "game_options"
 msgid "HARD TEXTURE CACHE MEMORY LIMIT"
 msgstr "HARDE TEXTUUR CACHEGEHEUGEN LIMIET"
 
+#. TRANSLATION: azahar
+msgctxt "game_options"
+msgid "HARDWARE SHADER"
+msgstr ""
+
 #. TRANSLATION: theforceengine
 msgctxt "game_options"
 msgid "HD TEXTURES"
@@ -7947,7 +8010,7 @@ msgctxt "game_options"
 msgid "HIGH RESOLUTION MODE"
 msgstr "HOGE RESOLUTIE MODUS"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "HIGH SCORE PLUGIN"
 msgstr "HIGH SCORE PLUGIN"
@@ -7971,6 +8034,11 @@ msgstr "HLE (per-pixel)"
 msgctxt "game_options"
 msgid "HLE (per-strip)"
 msgstr "HLE (per-strip)"
+
+#. TRANSLATION: yabasanshiro
+msgctxt "game_options"
+msgid "HLE BIOS"
+msgstr ""
 
 #. TRANSLATION: scummvm
 msgctxt "game_options"
@@ -8002,12 +8070,12 @@ msgctxt "game_options"
 msgid "Hard Disk Image"
 msgstr "Harde Schijf Image"
 
-#. TRANSLATION: libretro/mame, libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Hard Drive"
 msgstr "Harde Schijf"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Hard Drive (II UX)"
 msgstr "Hard Drive (II UX)"
@@ -8017,7 +8085,7 @@ msgctxt "game_options"
 msgid "Hardware (default)"
 msgstr "Hardware (standaard)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Hartung Game Master cartridges"
 msgstr "Hartung Game Master cartridges"
@@ -8050,6 +8118,11 @@ msgid ""
 msgstr ""
 "Helpt het energieverbruik van de CPU te verminderen door de CPU te beperken "
 "wanneer deze niet nodig is. Handig voor handhelds."
+
+#. TRANSLATION: azahar
+msgctxt "game_options"
+msgid "Helps some games to launch when disabled. May affect performance."
+msgstr ""
 
 #. TRANSLATION: libretro/dosbox_pure
 msgctxt "game_options"
@@ -8084,7 +8157,7 @@ msgid "Hides borders on many games. Some games used the borders."
 msgstr ""
 "Verbergt randen voor veel spellen. Sommige spellen gebruiken de randen."
 
-#. TRANSLATION: amiberry, libretro/fceumm, libretro/mesen, libretro/mesen-s, mupen64plus, ...
+#. TRANSLATION: aethersx2, amiberry, libretro/fceumm, libretro/mesen, libretro/mesen-s, ...
 msgctxt "game_options"
 msgid "High"
 msgstr "Hoog"
@@ -8131,12 +8204,12 @@ msgctxt "game_options"
 msgid "Horizontal"
 msgstr "Horizontaal"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "How much RAM the emulated FM Towns will have installed"
 msgstr "Hoeveel RAM de geëmuleerde FM Towns zullen hebben geïnstalleerd"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid ""
 "How much RAM the emulated Mac will have installed (Mac IIx & Mac LC 3 only)"
@@ -8169,12 +8242,12 @@ msgctxt "game_options"
 msgid "Hybrid + Bicubic"
 msgstr "Hybride + Bicubic"
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid "Hybrid Screen Bottom"
 msgstr "Hybride schermbodem"
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid "Hybrid Screen Top"
 msgstr "Hybride scherm bovenaan"
@@ -8194,7 +8267,7 @@ msgctxt "game_options"
 msgid "IDE (Default)"
 msgstr "IDE (Standaard)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "IMAGE READER"
 msgstr "IMAGE LEZER"
@@ -8234,7 +8307,7 @@ msgctxt "game_options"
 msgid "INTEGER OVERSCALE"
 msgstr ""
 
-#. TRANSLATION: melonds, pcsx2
+#. TRANSLATION: aethersx2, melonds, pcsx2
 msgctxt "game_options"
 msgid "INTEGER SCALING"
 msgstr "INTEGER SCHALEN"
@@ -8254,7 +8327,12 @@ msgctxt "game_options"
 msgid "INTEGER UPSCALING"
 msgstr "INTEGER OPSCHALING"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: libretro/gpsp, libretro/vba-m
+msgctxt "game_options"
+msgid "INTERFRAME BLENDING"
+msgstr ""
+
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "INTERLACING PATCHES"
 msgstr "INTERLACING PATCHES"
@@ -8347,7 +8425,7 @@ msgid "Improves clarity of distant textures when mip-mapping is enabled."
 msgstr ""
 "Verhoogt helderheid van verre textures als mip-mapping ingeschakeld is."
 
-#. TRANSLATION: dolphin, dolphin_triforce, dxx-rebirth, iortcw, libretro/dolphin, ...
+#. TRANSLATION: aethersx2, dolphin, dolphin_triforce, dxx-rebirth, iortcw, ...
 msgctxt "game_options"
 msgid "Improves clarity of distant textures."
 msgstr "Verbeterd helderheid van verre textures."
@@ -8362,6 +8440,13 @@ msgctxt "game_options"
 msgid "Improves performance in 3D games. Can cause glitches."
 msgstr "Verbeterd prestatie in 3D spellen. Kan glitches veroorzaken."
 
+#. TRANSLATION: yabasanshiro
+msgctxt "game_options"
+msgid ""
+"Improves visual fidelity for games that use RBG effects. Can cause issues in "
+"some games."
+msgstr ""
+
 #. TRANSLATION: libretro
 msgctxt "game_options"
 msgid "In milliseconds. Can reduce crackling/cutting out."
@@ -8372,12 +8457,24 @@ msgctxt "game_options"
 msgid "Increase emulator performance, at the cost of accuracy/stability."
 msgstr "Verhoog emulator prestatie, ten koste van accuratie/stabiliteit."
 
+#. TRANSLATION: yabasanshiro
+msgctxt "game_options"
+msgid ""
+"Increase the rendering resolution when screen is rotated. Makes 3D objects "
+"clearer."
+msgstr ""
+
+#. TRANSLATION: yabasanshiro
+msgctxt "game_options"
+msgid "Increase the rendering resolution. Makes 3D objects clearer."
+msgstr ""
+
 #. TRANSLATION: xemu
 msgctxt "game_options"
 msgid "Increase to 128 MiB for debug or homebrew applications."
 msgstr "Verhoog tot 128 MiB voor debug- of homebrew-applicaties."
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid ""
 "Insert a disk into the floppy drive, a blank will be used if one doesn't "
@@ -8405,7 +8502,7 @@ msgstr ""
 "Installeer de image lezer kaart om schijfkopiebestanden te lezen (alleen Mac "
 "IIx). Minimale ramgrootte van 4 MB aanbevolen."
 
-#. TRANSLATION: mame/pcsx2
+#. TRANSLATION: mame/aethersx2
 msgctxt "game_options"
 msgid "Install the image reader card to read idks image files (Mac IIx only)"
 msgstr ""
@@ -8427,7 +8524,7 @@ msgctxt "game_options"
 msgid "Interpreter is the most accurate, but is the slowest."
 msgstr "Interpreter is het meest nauwkeurig, maar is het langzaamst."
 
-#. TRANSLATION: mame/pcsx2
+#. TRANSLATION: mame/aethersx2
 msgctxt "game_options"
 msgid "Interton VC 4000 cartridges"
 msgstr "Interton VC 4000 cartridges"
@@ -8536,7 +8633,7 @@ msgctxt "game_options"
 msgid "JOYSTICK TO DPAD"
 msgstr "JOYSTICK NAAR DPAD"
 
-#. TRANSLATION: libretro/mame, libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "JOYSTICK TYPE"
 msgstr "JOYSTICK TYPE"
@@ -8862,7 +8959,7 @@ msgstr ""
 "LLVM is het snelst. Gebruik de Interpreter-instellingen als er problemen "
 "zijn."
 
-#. TRANSLATION: citra, dolphin, dolphin_triforce, duckstation, libretro/mesen, ...
+#. TRANSLATION: azahar, citra, dolphin, dolphin_triforce, duckstation, ...
 msgctxt "game_options"
 msgid "LOAD CUSTOM TEXTURES"
 msgstr "LAAD AANGEPASTE TEXTURES"
@@ -8877,7 +8974,7 @@ msgctxt "game_options"
 msgid "LOADING SPEED"
 msgstr "LAADSNELHEID"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "LYNX MODEL"
 msgstr "LYNX MODEL"
@@ -8887,12 +8984,12 @@ msgctxt "game_options"
 msgid "Landscape"
 msgstr "Landschap"
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid "Large Bottom"
 msgstr "Grote bodem"
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid "Large Top"
 msgstr "Grote bovenkant"
@@ -8902,12 +8999,12 @@ msgctxt "game_options"
 msgid "Larger"
 msgstr "Groter"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Laser 310/VZ-300 16k Memory"
 msgstr "Laser 310/VZ-300 16k Geheugen"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Laser/VZ 64k Memory (Default)"
 msgstr "Laser/VZ 64k Geheugen (Standaard)"
@@ -8922,7 +9019,7 @@ msgctxt "game_options"
 msgid "Left stick"
 msgstr "Linker stick"
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid "Left/Right"
 msgstr "Links/Rechts"
@@ -9072,17 +9169,17 @@ msgctxt "game_options"
 msgid "Lunar Ignore Brightness Color Fix"
 msgstr "Lunar Negeer Helderheid Kleuren Fix"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Lynx 128k"
 msgstr "Lynx 128k"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Lynx 48k"
 msgstr "Lynx 48k"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Lynx 96k"
 msgstr "Lynx 96k"
@@ -9092,7 +9189,7 @@ msgctxt "game_options"
 msgid "M.A.C.S. Rifle"
 msgstr "M.A.C.S. Rifle"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "MAC MODEL"
 msgstr "MAC MODEL"
@@ -9152,7 +9249,7 @@ msgctxt "game_options"
 msgid "MEMORY MANAGEMENT UNIT"
 msgstr "GEHEUGEN BEHEER UNIT"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "MEMORY SLOT"
 msgstr "GEHEUGENSLOT"
@@ -9172,12 +9269,12 @@ msgctxt "game_options"
 msgid "MIDI OUTPUT"
 msgstr "MIDI OUTPUT"
 
-#. TRANSLATION: pcsx2, theforceengine
+#. TRANSLATION: aethersx2, pcsx2, theforceengine
 msgctxt "game_options"
 msgid "MIPMAPPING"
 msgstr "MIPMAPPING"
 
-#. TRANSLATION: hatari, libretro/fuse, libretro/mame, mame/pcsx2
+#. TRANSLATION: hatari, libretro/fuse, libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "MODEL"
 msgstr "MODEL"
@@ -9227,7 +9324,7 @@ msgctxt "game_options"
 msgid "MULTISCREENS"
 msgstr "MULTISCHERM"
 
-#. TRANSLATION: libretro/kronos, libretro/mednafen_psx, libretro/pcsx_rearmed, libretro/yabasanshiro, pcsx2
+#. TRANSLATION: aethersx2, libretro/kronos, libretro/mednafen_psx, libretro/pcsx_rearmed, libretro/yabasanshiro, ...
 msgctxt "game_options"
 msgid "MULTITAP"
 msgstr "MULTITAP"
@@ -9242,32 +9339,32 @@ msgctxt "game_options"
 msgid "MUSIC VOLUME"
 msgstr "MUZIEK VOLUME"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Mac 128k (128kb RAM, 2 LD Floppies)"
 msgstr "Mac 128k (128kb RAM, 2 LD Floppies)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Mac 512k (512kb RAM, 2 LD Floppies)"
 msgstr "Mac 512k (512kb RAM, 2 LD Floppies)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Mac Classic (4Mb RAM, 2 HD Floppies/HDD)"
 msgstr "Mac Classic (4Mb RAM, 2 HD Floppies/HDD)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Mac Harddisks"
 msgstr "Mac Harddisks"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Mac II (2Mb RAM, Color, 2 HD Floppies/CD/HDD)"
 msgstr "Mac II (2Mb RAM, Color, 2 HD Floppies/CD/HDD)"
 
-#. TRANSLATION: mame/pcsx2
+#. TRANSLATION: mame/aethersx2
 msgctxt "game_options"
 msgid "Mac IIx (2Mb RAM, Color, 2 HD Floppies/CD/HDD, Image Reader)"
 msgstr "Mac IIx (2Mb RAM, Color, 2 HD Floppies/CD/HDD, Image Reader)"
@@ -9277,27 +9374,27 @@ msgctxt "game_options"
 msgid "Mac IIx (2Mb RAM, Color, 2 HD Floppies/CD/HDD/Image Reader)"
 msgstr "Mac IIx (2Mb RAM, Color, 2 HD Floppies/CD/HDD/Image Reader)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Mac LC 3 (Default) (4Mb RAM, Color, 2 HD Floppies/CD/HDD)"
 msgstr "Mac LC 3 (Default) (4Mb RAM, Color, 2 HD Floppies/CD/HDD)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Mac Plus (4Mb RAM, 2 LD Floppies/HDD)"
 msgstr "Mac Plus (4Mb RAM, 2 LD Floppies/HDD)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Mac SE (4Mb RAM, 2 LD Floppies/HDD)"
 msgstr "Mac SE (4Mb RAM, 2 LD Floppies/HDD)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Macintosh 400K/800K Disk images"
 msgstr "Macintosh 400K/800K Disk images"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Macintosh High Density Disk images"
 msgstr "Macintosh High Density Disk images"
@@ -9408,22 +9505,22 @@ msgctxt "game_options"
 msgid "Maximum"
 msgstr "Maximaal"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Maximum (Very Slow)"
 msgstr "Maximum (Erg Traag)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Maximum 2 Players (Default)"
 msgstr "Maximaal 2 spelers (standaard)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Maximum 4 Players"
 msgstr "Maximaal 4 spelers"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Maximum 8 Players"
 msgstr "Maximaal 8 spelers"
@@ -9485,7 +9582,7 @@ msgctxt "game_options"
 msgid "May result in a sharper image in some 2D games."
 msgstr "Kan in sommige 2D-games resulteren in een scherper beeld."
 
-#. TRANSLATION: libretro/mesen, libretro/mesen-s, mupen64plus, pcsx2
+#. TRANSLATION: aethersx2, libretro/mesen, libretro/mesen-s, mupen64plus, pcsx2
 msgctxt "game_options"
 msgid "Medium"
 msgstr "Gemiddeld"
@@ -9569,7 +9666,7 @@ msgctxt "game_options"
 msgid "Minimal"
 msgstr "Minimaal"
 
-#. TRANSLATION: pcsx2, rpcs3
+#. TRANSLATION: aethersx2, pcsx2, rpcs3
 msgctxt "game_options"
 msgid "Minimum"
 msgstr "Minimum"
@@ -9579,7 +9676,7 @@ msgctxt "game_options"
 msgid "Mirrored"
 msgstr "Mirrored"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Model of emulated Apple II."
 msgstr "Model van geëmuleerde Apple II."
@@ -9589,7 +9686,7 @@ msgctxt "game_options"
 msgid "Moderate"
 msgstr "Gematigd"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Modern Fightstick Style"
 msgstr "Moderne Fightstick Stijl"
@@ -9636,7 +9733,12 @@ msgctxt "game_options"
 msgid "Most games use port 2, some use port 1."
 msgstr "Meeste spellen gebruiken poort2, sommigen gebruiken poort 1."
 
-#. TRANSLATION: mame/pcsx2
+#. TRANSLATION: libretro/vba-m
+msgctxt "game_options"
+msgid "Motion Blur"
+msgstr ""
+
+#. TRANSLATION: mame/aethersx2
 msgctxt "game_options"
 msgid "Mount a floppy for user data, creates if needed"
 msgstr "Mount een floppy voor gebruikersgegevens, maak deze aan indien nodig"
@@ -9718,7 +9820,7 @@ msgctxt "game_options"
 msgid "NETWORK TYPE"
 msgstr "NETWERK TYPE"
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid "NEW 3DS MODE"
 msgstr "NIEUWE 3DS MODUS"
@@ -9870,7 +9972,7 @@ msgctxt "game_options"
 msgid "Native (720p/1080p)"
 msgstr "Native (720p/1080p)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Native (PS2)(Default)"
 msgstr "Native (PS2)(Standaard)"
@@ -9895,7 +9997,7 @@ msgctxt "game_options"
 msgid "NeGcon (Rumble)"
 msgstr "NeGcon (Rumble)"
 
-#. TRANSLATION: libretro/duckstation, libretro/melondsds, libretro/parallel_n64, libretro/swanstation, pcsx2, ...
+#. TRANSLATION: aethersx2, libretro/duckstation, libretro/melondsds, libretro/parallel_n64, libretro/swanstation, ...
 msgctxt "game_options"
 msgid "Nearest"
 msgstr "Meest dichtbij"
@@ -9915,7 +10017,7 @@ msgctxt "game_options"
 msgid "Nearest-neighbor"
 msgstr ""
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid ""
 "Necessary for some guns to replace fog textures as a workaround in Time "
@@ -9930,12 +10032,12 @@ msgid "Needed by some games that use special unicode characters."
 msgstr ""
 "Benodigd bij sommige spellen die speciale unicode characters gebruiken."
 
-#. TRANSLATION: libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Neo Geo CD Pad"
 msgstr "Neo Geo CD Pad"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Neo Geo Mini Pad"
 msgstr "Neo Geo Mini Pad"
@@ -9995,12 +10097,12 @@ msgctxt "game_options"
 msgid "No skipping"
 msgstr "Niet overslaan"
 
-#. TRANSLATION: dolphin, dolphin, dolphin, dolphin, drastic, ...
+#. TRANSLATION: aethersx2, aethersx2, aethersx2, dolphin, dolphin, ...
 msgctxt "game_options"
 msgid "None"
 msgstr "Geen"
 
-#. TRANSLATION: cgenius, iortcw, libretro/mame, mame/pcsx2
+#. TRANSLATION: cgenius, iortcw, libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "None (Default)"
 msgstr "Geen (Standaard)"
@@ -10102,7 +10204,7 @@ msgctxt "game_options"
 msgid "OPTIMAL FRAME PACING"
 msgstr "OPTIMALE FRAME PACING"
 
-#. TRANSLATION: libretro/dolphin, pcsx2
+#. TRANSLATION: aethersx2, libretro/dolphin, pcsx2
 msgctxt "game_options"
 msgid "OSD MESSAGES"
 msgstr "OSD BERICHTEN"
@@ -10132,12 +10234,12 @@ msgctxt "game_options"
 msgid "October"
 msgstr "Oktober"
 
-#. TRANSLATION: cannonball, cemu, citra, citra, citra, ...
+#. TRANSLATION: aethersx2, aethersx2, aethersx2, aethersx2, aethersx2, ...
 msgctxt "game_options"
 msgid "Off"
 msgstr "Uit"
 
-#. TRANSLATION: cemu, cemu, flycast/dolphin, flycast/dolphin, libretro/dosbox_pure, ...
+#. TRANSLATION: aethersx2, cemu, cemu, flycast/dolphin, flycast/dolphin, ...
 msgctxt "game_options"
 msgid "Off (Default)"
 msgstr "Uit (Standaard)"
@@ -10147,7 +10249,7 @@ msgctxt "game_options"
 msgid "Off (Noisy)"
 msgstr "Uit (Noisy)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Off (None)"
 msgstr "Uit (Geen)"
@@ -10167,7 +10269,7 @@ msgctxt "game_options"
 msgid "Off is safer, On for specific games."
 msgstr "Uit is veiliger, Aan voor specifieke spellen."
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid "Off will help some games, others will run too fast."
 msgstr ""
@@ -10192,7 +10294,7 @@ msgctxt "game_options"
 msgid "Olivetti Prodest PC 128S disks (BBC Master Compact)"
 msgstr "Olivetti Prodest PC 128S disks (BBC Master Compact)"
 
-#. TRANSLATION: cannonball, citra, citra, citra, citra, ...
+#. TRANSLATION: aethersx2, aethersx2, azahar, azahar, azahar, ...
 msgctxt "game_options"
 msgid "On"
 msgstr "Aan"
@@ -10304,12 +10406,12 @@ msgid "Only supported games. Higher settings increase system requirements."
 msgstr ""
 "Alleen ondersteunde spellen. Hogere instellingen verhogen systeem vereisten."
 
-#. TRANSLATION: cemu, dolphin, duckstation, hypseus-singe, libretro, ...
+#. TRANSLATION: aethersx2, cemu, dolphin, duckstation, hypseus-singe, ...
 msgctxt "game_options"
 msgid "OpenGL"
 msgstr "OpenGL"
 
-#. TRANSLATION: citra, flycast, gzdoom, play, scummvm
+#. TRANSLATION: azahar, citra, flycast, gzdoom, play, ...
 msgctxt "game_options"
 msgid "OpenGL (Default)"
 msgstr "OpenGL (Standaard)"
@@ -10474,7 +10576,7 @@ msgctxt "game_options"
 msgid "PCjr"
 msgstr "PCjr"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "PDP-1 Paper Tape Reader Images"
 msgstr "PDP-1 Paper Tape Reader Images"
@@ -10514,7 +10616,12 @@ msgctxt "game_options"
 msgid "PINMAME DMD"
 msgstr "PINMAME DMD"
 
-#. TRANSLATION: lexaloffle/pcsx2
+#. TRANSLATION: advanced_drastic
+msgctxt "game_options"
+msgid "PIP CORNER"
+msgstr ""
+
+#. TRANSLATION: lexaloffle/aethersx2
 msgctxt "game_options"
 msgid "PIXEL PERFECT"
 msgstr ""
@@ -10694,7 +10801,7 @@ msgstr ""
 "Een deel van het host textuur geheugenbudget (in megabytes) dat wordt "
 "geschaald volgens de huidige tekenresolutieschaal."
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Partial"
 msgstr "Gedeeltelijk"
@@ -10818,7 +10925,7 @@ msgctxt "game_options"
 msgid "Performance"
 msgstr "Prestatie"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Philips CD-i CD-ROMs"
 msgstr "Philips CD-i CD-ROMs"
@@ -10848,7 +10955,7 @@ msgctxt "game_options"
 msgid "Play (Default)"
 msgstr "Spelen (standaard)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Play a coin drop sound effect when an insert coin button is pressed"
 msgstr ""
@@ -10999,7 +11106,7 @@ msgstr ""
 "Prefereer \"Voor NMI\", verander alleen naar Na NMI als het spel het nodig "
 "heeft."
 
-#. TRANSLATION: citra, duckstation
+#. TRANSLATION: azahar, citra, duckstation
 msgctxt "game_options"
 msgid "Preload"
 msgstr "Voorladen"
@@ -11009,7 +11116,7 @@ msgctxt "game_options"
 msgid "Preload requires more RAM."
 msgstr "Voorladen benodigd meer RAM."
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid "Preloading is impossible from ES."
 msgstr "Voorladen is onmogelijk vanuit ES."
@@ -11074,7 +11181,7 @@ msgctxt "game_options"
 msgid "QUIT ON HOST"
 msgstr "STOP OP HOST"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Quickload"
 msgstr "Snellaad"
@@ -11084,7 +11191,7 @@ msgctxt "game_options"
 msgid "RAM EXPANSION UNIT"
 msgstr "RAM UITBREIDINGSEENHEID"
 
-#. TRANSLATION: libretro/mame, libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "RAM SIZE"
 msgstr "RAM GROOTTE"
@@ -11174,7 +11281,7 @@ msgctxt "game_options"
 msgid "RENDERER MODE"
 msgstr "RENDERAARMODUS"
 
-#. TRANSLATION: dolphin, dolphin, dolphin, dolphin, dolphin, ...
+#. TRANSLATION: aethersx2, aethersx2, aethersx2, aethersx2, aethersx2, ...
 msgctxt "game_options"
 msgid "RENDERING"
 msgstr "RENDEREN"
@@ -11184,7 +11291,7 @@ msgctxt "game_options"
 msgid "RENDERING MODE"
 msgstr "RENDERMODUS"
 
-#. TRANSLATION: citra, dolphin, dolphin_triforce, duckstation, libretro/desmume, ...
+#. TRANSLATION: aethersx2, azahar, citra, dolphin, dolphin_triforce, ...
 msgctxt "game_options"
 msgid "RENDERING RESOLUTION"
 msgstr "RENDERRESOLUTIE"
@@ -11224,7 +11331,7 @@ msgctxt "game_options"
 msgid "RF"
 msgstr "RF"
 
-#. TRANSLATION: libretro/snes9x, libretro/snes9x_next, redream
+#. TRANSLATION: libretro/mednafen_supergrafx, libretro/pce, libretro/pce_fast, libretro/snes9x, libretro/snes9x_next, ...
 msgctxt "game_options"
 msgid "RGB"
 msgstr "RGB"
@@ -11254,22 +11361,22 @@ msgctxt "game_options"
 msgid "ROK"
 msgstr "ROK"
 
-#. TRANSLATION: mame/pcsx2
+#. TRANSLATION: mame/aethersx2
 msgctxt "game_options"
 msgid "ROM (Slot 1)"
 msgstr "ROM (Slot 1)"
 
-#. TRANSLATION: mame/pcsx2
+#. TRANSLATION: mame/aethersx2
 msgctxt "game_options"
 msgid "ROM (Slot 2)"
 msgstr "ROM (Slot 2)"
 
-#. TRANSLATION: mame/pcsx2
+#. TRANSLATION: mame/aethersx2
 msgctxt "game_options"
 msgid "ROM (Slot 3)"
 msgstr "ROM (Slot 3)"
 
-#. TRANSLATION: mame/pcsx2
+#. TRANSLATION: mame/aethersx2
 msgctxt "game_options"
 msgid "ROM (Slot 4)"
 msgstr "ROM (Slot 4)"
@@ -11283,6 +11390,16 @@ msgstr "DRAAI"
 msgctxt "game_options"
 msgid "ROTATE FACE BUTTONS"
 msgstr "DRAAI FACE KNOPPEN"
+
+#. TRANSLATION: yabasanshiro
+msgctxt "game_options"
+msgid "ROTATE SCREEN"
+msgstr ""
+
+#. TRANSLATION: yabasanshiro
+msgctxt "game_options"
+msgid "ROTATE SCREEN RESOLUTION"
+msgstr ""
 
 #. TRANSLATION: xenia, xenia-canary
 msgctxt "game_options"
@@ -11356,12 +11473,12 @@ msgctxt "game_options"
 msgid "Reduce load time at the cost of accuracy."
 msgstr "Verminder de laadtijd ten koste van de nauwkeurigheid."
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid "Reduce stutter that happens when compiling shaders."
 msgstr "Verminder stotteren wanneer shaderes gecompileerd worden."
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid ""
 "Reduces banding between colours and improves the preceived colour depth."
@@ -11540,12 +11657,12 @@ msgctxt "game_options"
 msgid "Right stick"
 msgstr "Rechter stick"
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid "Right/Left"
 msgstr "Rechts/Links"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Robo Bitstik 2"
 msgstr "Robo Bitstik 2"
@@ -11581,7 +11698,7 @@ msgid "Rotate the screen, useful for certain vertical gameplay homebrews."
 msgstr ""
 "Draai het scherm, handig voor sommige verticaal georiënteerde homebrews."
 
-#. TRANSLATION: libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Rotated 4-Way Stick (Q*Bert)"
 msgstr "Rotated 4-Way Stick (Q*Bert)"
@@ -11601,6 +11718,11 @@ msgstr ""
 #. TRANSLATION: libretro/mame078plus
 msgctxt "game_options"
 msgid "Rotates the display and remaps inputs for device to be used sideways."
+msgstr ""
+
+#. TRANSLATION: yabasanshiro
+msgctxt "game_options"
+msgid "Rotates the screen."
 msgstr ""
 
 #. TRANSLATION: melonds
@@ -11717,7 +11839,7 @@ msgctxt "game_options"
 msgid "SCREEN INCLINATION"
 msgstr "SCHERM HELLING"
 
-#. TRANSLATION: citra, drastic, libretro/desmume, libretro/melonds, melonds
+#. TRANSLATION: azahar, citra, drastic, libretro/desmume, libretro/melonds, ...
 msgctxt "game_options"
 msgid "SCREEN LAYOUT"
 msgstr "SCHERM LAY-OUT"
@@ -11736,6 +11858,11 @@ msgstr "SCHERM SPELER Y"
 msgctxt "game_options"
 msgid "SCREEN PLAYER Z"
 msgstr "SCHERM SPELER Z"
+
+#. TRANSLATION: azahar
+msgctxt "game_options"
+msgid "SCREEN PROPORTION"
+msgstr ""
 
 #. TRANSLATION: openbor
 msgctxt "game_options"
@@ -11822,7 +11949,7 @@ msgctxt "game_options"
 msgid "SHADER QUALITY"
 msgstr "SHADER KWALITEIT"
 
-#. TRANSLATION: pcsx2, shared
+#. TRANSLATION: aethersx2, pcsx2, shared
 msgctxt "game_options"
 msgid "SHADER SET"
 msgstr "SHADER SET"
@@ -11832,12 +11959,12 @@ msgctxt "game_options"
 msgid "SHARE MAME ARTWORK"
 msgstr "DEEL MAME ARTWORK"
 
-#. TRANSLATION: duckstation, libretro/duckstation, libretro/gambatte, libretro/mednafen_psx, libretro/mgba, ...
+#. TRANSLATION: aethersx2, duckstation, libretro/duckstation, libretro/gambatte, libretro/mednafen_psx, ...
 msgctxt "game_options"
 msgid "SHOW BIOS BOOTLOGO"
 msgstr "TOON BIOS BOOTLOGO"
 
-#. TRANSLATION: lexaloffle/pcsx2
+#. TRANSLATION: lexaloffle/aethersx2
 msgctxt "game_options"
 msgid "SHOW FPS"
 msgstr ""
@@ -11952,7 +12079,7 @@ msgctxt "game_options"
 msgid "SNES Multitap"
 msgstr "SNES Multitap"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "SNES Style"
 msgstr "SNES Stijl"
@@ -11997,7 +12124,7 @@ msgctxt "game_options"
 msgid "SOUNDBLASTER TYPE"
 msgstr "SOUNDBLASTER TYPE"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "SPECIAL CONTROL LAYOUTS"
 msgstr "SPECIALE CONTROL LAYOUTS"
@@ -12007,7 +12134,7 @@ msgctxt "game_options"
 msgid "SPECIFIC GAME FIXES"
 msgstr "FIXES VOOR SPECIFIEKE SPELLEN"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "SPEECH MODULE"
 msgstr "Spraakmodule"
@@ -12022,7 +12149,7 @@ msgctxt "game_options"
 msgid "SPINDASH TYPE"
 msgstr "SPINDASH TYPE"
 
-#. TRANSLATION: lexaloffle/pcsx2
+#. TRANSLATION: lexaloffle/aethersx2
 msgctxt "game_options"
 msgid "SPLORE FILTER"
 msgstr ""
@@ -12207,7 +12334,7 @@ msgctxt "game_options"
 msgid "ScaleForce"
 msgstr "ScaleForce"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Scaled"
 msgstr ""
@@ -12262,7 +12389,7 @@ msgctxt "game_options"
 msgid "Select Keyboard, Joystick or Gamepad mode"
 msgstr "Selecteer Keyboard, Joystick of Controller modus"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Select a boot disk or hard drive if needed"
 msgstr "Selecteer een opstartschijf of harde schijf indien nodig"
@@ -12295,7 +12422,7 @@ msgstr ""
 "De geselecteerde taal wordt gebruikt als 'Gebruik firmware-instellingen' is "
 "uitgeschakeld of als er geen firmwarebestand is gevonden."
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid ""
 "Select model of Mac (Recommendations are Mac Plus for B&W, Mac LC 3 for "
@@ -12304,7 +12431,7 @@ msgstr ""
 "Selecteer Mac-model (aanbevelingen zijn Mac Plus voor zwart-wit, Mac LC 3 "
 "voor kleur)"
 
-#. TRANSLATION: libretro/mame, libretro/mame, libretro/mame, libretro/mame, mame/pcsx2, ...
+#. TRANSLATION: libretro/mame, libretro/mame, libretro/mame, libretro/mame, mame/aethersx2, ...
 msgctxt "game_options"
 msgid "Select model to emulate"
 msgstr "Selecteer het model dat u wilt emuleren"
@@ -12327,7 +12454,7 @@ msgctxt "game_options"
 msgid "Select the input type to navigate the touch screen"
 msgstr "Selecteer het invoertype om op het aanraakscherm te navigeren"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Select the model of Color Computer to emulate"
 msgstr "Selecteer het model kleurencomputer dat u wilt emuleren"
@@ -12342,7 +12469,12 @@ msgctxt "game_options"
 msgid "Select which Intel CPU to emulate."
 msgstr "Selecteer welke Intel CPU te emuleren."
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: advanced_drastic
+msgctxt "game_options"
+msgid "Select which corner the Picture-in-Picture (PIP) screen appears in."
+msgstr ""
+
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Select which joystick to emulate."
 msgstr "Selecteer welke joystick u wilt emuleren."
@@ -12352,7 +12484,7 @@ msgctxt "game_options"
 msgid "Selfie"
 msgstr "Selfie"
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid "Separate Windows"
 msgstr "Aparte Windows"
@@ -12426,7 +12558,7 @@ msgstr ""
 "Stel de resolutie van het beeldscherm in. Heeft geen invloed op de "
 "weergaveresolutie."
 
-#. TRANSLATION: lexaloffle/pcsx2
+#. TRANSLATION: lexaloffle/aethersx2
 msgctxt "game_options"
 msgid ""
 "Set the number of milliseconds to wait each frame to reduce power usage."
@@ -12506,7 +12638,7 @@ msgctxt "game_options"
 msgid "Show (Default)"
 msgstr "Toon (Standaard)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Show (specific games)"
 msgstr "Toon (specifieke spellen)"
@@ -12526,7 +12658,7 @@ msgctxt "game_options"
 msgid "Show context-sensitive info over the game."
 msgstr "Toon contextuele informatie over het spel."
 
-#. TRANSLATION: lexaloffle/pcsx2
+#. TRANSLATION: lexaloffle/aethersx2
 msgctxt "game_options"
 msgid "Show current FPS during gameplay."
 msgstr ""
@@ -12612,6 +12744,18 @@ msgctxt "game_options"
 msgid "Simulate LCD color inaccuracy."
 msgstr "Simuleer LCD kleur onnauwkeurigheid."
 
+#. TRANSLATION: libretro/gpsp, libretro/vba-m
+msgctxt "game_options"
+msgid ""
+"Simulates the LCD ghosting used for transparency effects on the original "
+"hardware."
+msgstr ""
+
+#. TRANSLATION: libretro/gpsp, libretro/vba-m
+msgctxt "game_options"
+msgid "Simulates the color display of the original hardware."
+msgstr ""
+
 #. TRANSLATION: libretro/mame078plus
 msgctxt "game_options"
 msgid "Simultaneous"
@@ -12647,7 +12791,7 @@ msgctxt "game_options"
 msgid "Single"
 msgstr "Enkel"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Sirius/Atari (2x 1-button Digital, II+ Only)"
 msgstr "Sirius/Atari (2x 1-button Digitaal, Alleen II+)"
@@ -12657,7 +12801,7 @@ msgctxt "game_options"
 msgid "Skip"
 msgstr "Overslaan"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Skip (safer)"
 msgstr "Overslaan (veiliger)"
@@ -12736,27 +12880,27 @@ msgctxt "game_options"
 msgid "Skynet"
 msgstr "Skynet"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Slot A (Default)"
 msgstr "Slot A (Standaard)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Slot B"
 msgstr "Slot B"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Slot C"
 msgstr "Slot C"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Slot D"
 msgstr "Slot D"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Slot E"
 msgstr "Slot E"
@@ -12796,7 +12940,7 @@ msgctxt "game_options"
 msgid "Smaller"
 msgstr "Sleiner"
 
-#. TRANSLATION: shared
+#. TRANSLATION: libretro/vba-m, shared
 msgctxt "game_options"
 msgid "Smart"
 msgstr ""
@@ -12846,12 +12990,17 @@ msgctxt "game_options"
 msgid "Smooth textures."
 msgstr "Gladde textures."
 
+#. TRANSLATION: advanced_drastic
+msgctxt "game_options"
+msgid "Smooths image using bilinear filtering. May reduce sharpness."
+msgstr ""
+
 #. TRANSLATION: libretro/desmume
 msgctxt "game_options"
 msgid "Smooths out textures on 3D objects."
 msgstr "Maakt textures op 3D objecter gladder."
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid ""
 "Smooths the overall picture as it is displayed on the screen. Corrects "
@@ -12860,7 +13009,7 @@ msgstr ""
 "Maakt het totaalbeeld glad zoals het op het scherm wordt weergegeven. "
 "Corrigeert de positionering tussen pixels."
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Snapshot"
 msgstr "Snapshot"
@@ -12875,7 +13024,7 @@ msgctxt "game_options"
 msgid "Soften the hash sound effect from some games."
 msgstr "Maak het hash geluid effect wat zachter in sommige games."
 
-#. TRANSLATION: citra, duckstation, libretro/melondsds, melonds, pcsx2, ...
+#. TRANSLATION: aethersx2, azahar, citra, duckstation, libretro/melondsds, ...
 msgctxt "game_options"
 msgid "Software"
 msgstr "Software"
@@ -12899,7 +13048,7 @@ msgctxt "game_options"
 msgid "Some games and homebrews require more RAM"
 msgstr "Sommige spellen en homebrews vereisen meer RAM"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Some games have issues when the animation is shown, others require it."
 msgstr ""
@@ -13046,7 +13195,7 @@ msgctxt "game_options"
 msgid "Spectrum SE"
 msgstr "Spectrum SE"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Speech module installed"
 msgstr "Spraakmodule geïnstalleerd"
@@ -13086,7 +13235,7 @@ msgctxt "game_options"
 msgid "Square pixel"
 msgstr "Vierkante pixel"
 
-#. TRANSLATION: pcsx2, pcsx2
+#. TRANSLATION: aethersx2, aethersx2, pcsx2, pcsx2
 msgctxt "game_options"
 msgid "Standard (4:3)"
 msgstr "Standaard (4:3)"
@@ -13290,37 +13439,37 @@ msgid ""
 msgstr ""
 "Sync GB2Player/GBC2Player saves met saves in \"saves/gb\" of \"saves/gbc\"."
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "System 3.0 (LD Floppy)"
 msgstr "System 3.0 (LD Floppy)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "System 6.0.8 (Hard Drive)"
 msgstr "System 6.0.8 (Harde Schijf)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "System 6.0.8 (LD Floppy)"
 msgstr "System 6.0.8 (LD Floppy)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "System 7.0.1 (HD Floppy)"
 msgstr "System 7.0.1 (HD Floppy)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "System 7.0.1 (Hard Drive)"
 msgstr "System 7.0.1 (Harde Schijf)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "System 7.5 (HD Floppy)"
 msgstr "System 7.5 (HD Floppy)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "System 7.5.5 (Hard Drive)"
 msgstr "System 7.5.5 (Harde Schijf)"
@@ -13355,7 +13504,7 @@ msgctxt "game_options"
 msgid "TEXTURE DEPOSTERIZE"
 msgstr "TEXTURE DEPOSTERIZEN"
 
-#. TRANSLATION: duckstation, dxx-rebirth, libretro/duckstation, libretro/mupen64plus-next, libretro/parallel_n64, ...
+#. TRANSLATION: aethersx2, duckstation, dxx-rebirth, libretro/duckstation, libretro/mupen64plus-next, ...
 msgctxt "game_options"
 msgid "TEXTURE FILTERING"
 msgstr "TEXTURE FILTEREN"
@@ -13375,12 +13524,12 @@ msgctxt "game_options"
 msgid "TEXTURE MIP-MAPPING (BLUR)"
 msgstr "TEXTURE MIP-MAPPING (VERVAGEN)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "TEXTURE PRELOADING"
 msgstr "TEXTUUR VOORLADEN"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "TEXTURE REPLACEMENTS"
 msgstr "TEXTUURVERVANGINGEN"
@@ -13430,12 +13579,12 @@ msgctxt "game_options"
 msgid "THREADED VIDEO"
 msgstr "THREADED VIDEO"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "TI-99/4A Cartridges"
 msgstr "TI-99/4A Cartridges"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "TIME CRISIS FOG HACK"
 msgstr "TIME CRISIS MIST HACK"
@@ -13485,7 +13634,7 @@ msgctxt "game_options"
 msgid "TRAINER MODE"
 msgstr "TRAINER MODUS"
 
-#. TRANSLATION: model2emu, pcsx2
+#. TRANSLATION: aethersx2, model2emu, pcsx2
 msgctxt "game_options"
 msgid "TRILINEAR FILTERING"
 msgstr "TRILINEAIR FILTEREN"
@@ -13540,22 +13689,22 @@ msgctxt "game_options"
 msgid "Tandy"
 msgstr "Tandy"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Tandy Radio Shack Color Computer cartridges"
 msgstr "Tandy Radio Shack Color Computer cartridges"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Tandy Radio Shack Color Computer cassettes"
 msgstr "Tandy Radio Shack Color Computer cassettes"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Tandy Radio Shack Color Computer disk images"
 msgstr "Tandy Radio Shack Color Computer disk images"
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid "The New 3DS has a faster processor, ZL/ZR buttons and a C-stick."
 msgstr ""
@@ -13587,7 +13736,7 @@ msgstr ""
 "Het uiteindelijke output beeld, ongerelateerd aan de Wii geemuleerde NAND "
 "instelling."
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid ""
 "The higher the setting, the more blending is emulated in the shader "
@@ -13661,14 +13810,14 @@ msgstr ""
 "Dit zou niet nodig moeten zijn, tenzij u niet de standaard pad2key-"
 "toewijzing gebruikt."
 
-#. TRANSLATION: lexaloffle/pcsx2
+#. TRANSLATION: lexaloffle/aethersx2
 msgctxt "game_options"
 msgid ""
 "Threads used for pre-fetching carts in Splore (0 = disabled, download only "
 "when selected)."
 msgstr ""
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Tiger Game.com cartridges"
 msgstr "TI-99/4A Cartridges"
@@ -13718,7 +13867,7 @@ msgctxt "game_options"
 msgid "Toggle with hotkey + D-pad up or Scroll Lock in-game."
 msgstr "Schakel met hotkey + D-pad omhoog of Scroll Lock in het spel."
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Tomy Tutor & Pyuuta cartridge"
 msgstr "Tomy Tutor & Pyuuta cartridge"
@@ -13728,7 +13877,7 @@ msgctxt "game_options"
 msgid "Top"
 msgstr "Boven"
 
-#. TRANSLATION: citra
+#. TRANSLATION: azahar, citra
 msgctxt "game_options"
 msgid "Top Only"
 msgstr "Alleen boven"
@@ -13737,6 +13886,11 @@ msgstr "Alleen boven"
 msgctxt "game_options"
 msgid "Top only"
 msgstr "Alleen bovenkant"
+
+#. TRANSLATION: advanced_drastic
+msgctxt "game_options"
+msgid "Top-Left (Default)"
+msgstr ""
 
 #. TRANSLATION: vpinball, vpinball, vpinball
 msgctxt "game_options"
@@ -13752,6 +13906,11 @@ msgstr "Positie linksboven, Gemiddeld"
 msgctxt "game_options"
 msgid "Top-Left Position, Small"
 msgstr "Positie linksboven, Klein"
+
+#. TRANSLATION: advanced_drastic
+msgctxt "game_options"
+msgid "Top-Right"
+msgstr ""
 
 #. TRANSLATION: vpinball, vpinball, vpinball
 msgctxt "game_options"
@@ -13797,12 +13956,12 @@ msgstr ""
 "Probeert de Per-vertex (gouraud) te raden van de Model2 per-poly informatie "
 "(plat)."
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Trilinear (Forced)"
 msgstr "Trilineair (Geforceerd)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Trilinear (PS2)"
 msgstr "Trilineair (PS2)"
@@ -13832,7 +13991,7 @@ msgctxt "game_options"
 msgid "Turquoise"
 msgstr "Turquoise"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2, mame/aethersx2
 msgctxt "game_options"
 msgid "Twin Stick with Triggers"
 msgstr "Twin Stick met Triggers"
@@ -13847,7 +14006,7 @@ msgctxt "game_options"
 msgid "Type of ROM file to load."
 msgstr "Type ROM bestand om te laden."
 
-#. TRANSLATION: mame/pcsx2
+#. TRANSLATION: mame/aethersx2
 msgctxt "game_options"
 msgid "Type of ROM file to load. Disk Image requires Mac IIx and Image Reader"
 msgstr ""
@@ -13859,7 +14018,7 @@ msgctxt "game_options"
 msgid "Type of emulated SoundBlaster card."
 msgstr "Type geëmuleerde SoundBlaster-kaart."
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Type of joystick connected to the game port."
 msgstr "Type joystick aangesloten op de gamepoort."
@@ -13924,6 +14083,11 @@ msgctxt "game_options"
 msgid "USA (Default)"
 msgstr "USA (Standaard)"
 
+#. TRANSLATION: yabasanshiro
+msgctxt "game_options"
+msgid "USE COMPUTE SHADER"
+msgstr ""
+
 #. TRANSLATION: xemu
 msgctxt "game_options"
 msgid "USE DSP AUDIO"
@@ -13969,7 +14133,7 @@ msgctxt "game_options"
 msgid "USE SOFTWARE RENDERING"
 msgstr "GEBRUIK SOFTWARE RENDERING"
 
-#. TRANSLATION: mame/pcsx2
+#. TRANSLATION: mame/aethersx2
 msgctxt "game_options"
 msgid "USER DISK"
 msgstr "GEBRUIKERS DISK"
@@ -14134,7 +14298,7 @@ msgctxt "game_options"
 msgid "Unsaturated v6 (FirebrandX)"
 msgstr "Unsaturated v6 (FirebrandX)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Unscaled (Default)"
 msgstr "Niet geschaald (Standaard)"
@@ -14144,7 +14308,7 @@ msgctxt "game_options"
 msgid "Until Timeout"
 msgstr "Tot time-out"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid ""
 "Uploads entire textures at once instead of small pieces. Improves "
@@ -14242,6 +14406,11 @@ msgid ""
 msgstr ""
 "Gebruik als u grafische problemen of GPU-problemen ondervindt met deze "
 "emulator."
+
+#. TRANSLATION: yabasanshiro
+msgctxt "game_options"
+msgid "Use internal emulated BIOS. May affect compatibility with some games."
+msgstr ""
 
 #. TRANSLATION: libretro/melonds
 msgctxt "game_options"
@@ -14346,7 +14515,7 @@ msgctxt "game_options"
 msgid "Usually not much faster than single core mode."
 msgstr "Gewoonlijk niet veel sneller dan single core modus."
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "V-Tech Creativision cartridges"
 msgstr "V-Tech Creativision cartridges"
@@ -14486,7 +14655,7 @@ msgctxt "game_options"
 msgid "VISUAL NUDGE STRENGTH"
 msgstr "VISUELE NUDGE-STERKTE"
 
-#. TRANSLATION: bigpemu, cemu, citra, demul, dolphin, ...
+#. TRANSLATION: aethersx2, azahar, bigpemu, cemu, citra, ...
 msgctxt "game_options"
 msgid "VSYNC"
 msgstr "V-SYNC"
@@ -14506,12 +14675,12 @@ msgctxt "game_options"
 msgid "VSync and Audio Resampling need to be enabled."
 msgstr "V-SYNC en Audio Resampling moeten aan staan."
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "VTech V.Smile Motion cartridges"
 msgstr "VTech V.Smile Motion cartridges"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "VTech V.Smile cartridges"
 msgstr "VTech V.Smile cartridges"
@@ -14541,12 +14710,12 @@ msgctxt "game_options"
 msgid "Very High"
 msgstr "Erg Hoog"
 
-#. TRANSLATION: libretro/mamevirtual, mame/pcsx2
+#. TRANSLATION: libretro/mamevirtual, mame/aethersx2
 msgctxt "game_options"
 msgid "Video Game Music Files"
 msgstr "Video Game Muziek Bestanden"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Video Technology Socrates cartridges"
 msgstr "Video Technology Socrates cartridges"
@@ -14566,7 +14735,7 @@ msgctxt "game_options"
 msgid "Videopac+ G7400 (France)"
 msgstr "Videopac+ G7400 (Frankrijk)"
 
-#. TRANSLATION: libretro/mame, mame/pcsx2
+#. TRANSLATION: libretro/mame, mame/aethersx2
 msgctxt "game_options"
 msgid "Voltmace Delta 3b Twin Joysticks"
 msgstr "Voltmace Delta 3b Twin Joysticks"
@@ -14576,7 +14745,7 @@ msgctxt "game_options"
 msgid "Vsync"
 msgstr "V-SYNC"
 
-#. TRANSLATION: citra, dolphin, duckstation, flycast, gzdoom, ...
+#. TRANSLATION: aethersx2, azahar, citra, dolphin, duckstation, ...
 msgctxt "game_options"
 msgid "Vulkan"
 msgstr "Vulkan"
@@ -14661,12 +14830,12 @@ msgctxt "game_options"
 msgid "WRX HIGH RESOLUTION"
 msgstr "WRX HOGE RESOLUTIE"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Weave (Bottom Field First)"
 msgstr "Weave (Onderste Veld Eerst)"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "Weave (Top Field First)"
 msgstr "Weave (Bovenste Veld Eerst)"
@@ -14707,7 +14876,7 @@ msgctxt "game_options"
 msgid "While Touching"
 msgstr "Tijdens aanraking"
 
-#. TRANSLATION: pcsx2, pcsx2
+#. TRANSLATION: aethersx2, aethersx2, pcsx2, pcsx2
 msgctxt "game_options"
 msgid "Widescreen (16:9)"
 msgstr "Breedbeeld (16:9)"
@@ -14991,7 +15160,7 @@ msgctxt "game_options"
 msgid "dark knight"
 msgstr "dark knight"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "diagonal filter"
 msgstr ""
@@ -15130,7 +15299,7 @@ msgctxt "game_options"
 msgid "linear"
 msgstr "lineair"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "lottes crt"
 msgstr ""
@@ -15160,6 +15329,11 @@ msgctxt "game_options"
 msgid "minimum"
 msgstr "minimum"
 
+#. TRANSLATION: yabasanshiro, yabasanshiro
+msgctxt "game_options"
+msgid "native"
+msgstr ""
+
 #. TRANSLATION: cgenius, mupen64plus
 msgctxt "game_options"
 msgid "nearest"
@@ -15175,7 +15349,7 @@ msgctxt "game_options"
 msgid "nxagss"
 msgstr ""
 
-#. TRANSLATION: libretro/kronos, libretro/puae, libretro/puae2021, libretro/vb
+#. TRANSLATION: libretro/kronos, libretro/puae, libretro/puae2021, libretro/vb, yabasanshiro
 msgctxt "game_options"
 msgid "original"
 msgstr "origineel"
@@ -15184,6 +15358,11 @@ msgstr "origineel"
 msgctxt "game_options"
 msgid "original gameboy"
 msgstr "originele gameboy"
+
+#. TRANSLATION: yabasanshiro, yabasanshiro
+msgctxt "game_options"
+msgid "original(default)"
+msgstr ""
 
 #. TRANSLATION: libretro/vba-m
 msgctxt "game_options"
@@ -15235,7 +15414,7 @@ msgctxt "game_options"
 msgid "right/left"
 msgstr "rechts/links"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "scanlines"
 msgstr ""
@@ -15265,7 +15444,7 @@ msgctxt "game_options"
 msgid "top/bottom"
 msgstr "boven/onder"
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "triangular filter"
 msgstr ""
@@ -15280,7 +15459,7 @@ msgctxt "game_options"
 msgid "up"
 msgstr ""
 
-#. TRANSLATION: pcsx2
+#. TRANSLATION: aethersx2, pcsx2
 msgctxt "game_options"
 msgid "wave filter"
 msgstr ""
@@ -15415,6 +15594,10 @@ msgstr "geel/blauw"
 #~ msgid "Casebook"
 #~ msgstr "Casebook"
 
+#~ msgctxt "game_options"
+#~ msgid "Center (Default)"
+#~ msgstr "Midden (Standaard)"
+
 #~ msgctxt "keys_files"
 #~ msgid "Coin"
 #~ msgstr "Munt"
@@ -15530,6 +15713,10 @@ msgstr "geel/blauw"
 #~ msgctxt "keys_files"
 #~ msgid "FastForward"
 #~ msgstr "Vooruitspoelen"
+
+#~ msgctxt "game_options"
+#~ msgid "Fit resolution scale"
+#~ msgstr "Pas de resolutieschaal aan"
 
 #~ msgctxt "game_options"
 #~ msgid "GT Force"

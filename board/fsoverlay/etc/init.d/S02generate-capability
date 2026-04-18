@@ -63,14 +63,15 @@ case "$ARCH" in
     rk3568)
         # Technically the flip has a lid/hall sensor but it's just wired to the power button
         #BOARD_CAPABILITIES[lid]="miyoo-flip"
+	    BOARD_CAPABILITIES[lid]="rg-ds"
         BOARD_CAPABILITIES[hdmi]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip"
-        BOARD_CAPABILITIES[wifi]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip"
-        BOARD_CAPABILITIES[bluetooth]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip"
-        BOARD_CAPABILITIES[analogstick]="powkiddy-x55 powkiddy-rgb30"
-        BOARD_CAPABILITIES[rumble]="rg-arc-s powkiddy-x55 powkiddy-rgb30"
-        BOARD_CAPABILITIES[adb]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip"
-        BOARD_CAPABILITIES[hud]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip"
-	BOARD_CAPABILITIES[pwrled]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip"
+        BOARD_CAPABILITIES[wifi]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip rg-ds"
+        BOARD_CAPABILITIES[bluetooth]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip rg-ds"
+        BOARD_CAPABILITIES[analogstick]="powkiddy-x55 powkiddy-rgb30 rg-ds"
+        BOARD_CAPABILITIES[rumble]="rg-arc-s powkiddy-x55 powkiddy-rgb30 rg-ds"
+        BOARD_CAPABILITIES[adb]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip rg-ds"
+        BOARD_CAPABILITIES[hud]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip rg-ds"
+	    BOARD_CAPABILITIES[pwrled]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip rg-ds"
         ;;
     rk3576)
         BOARD_CAPABILITIES[rgb]="rg-vita-pro"
@@ -84,15 +85,15 @@ case "$ARCH" in
         BOARD_CAPABILITIES[fan]="rg-vita-pro"
         ;;
     sm8250)
-        BOARD_CAPABILITIES[rgb]="rp5"
-        BOARD_CAPABILITIES[hdmi]="rp5"
-        BOARD_CAPABILITIES[wifi]="rp5"
-        BOARD_CAPABILITIES[bluetooth]="rp5"
-        BOARD_CAPABILITIES[analogstick]="rp5"
-        BOARD_CAPABILITIES[rumble]="rp5"
-        BOARD_CAPABILITIES[adb]="rp5"
-        BOARD_CAPABILITIES[hud]="rp5"
-        BOARD_CAPABILITIES[fan]="rp5"
+        BOARD_CAPABILITIES[rgb]="rp5 rpflip2 rpmini rpminiv2"
+        BOARD_CAPABILITIES[hdmi]="rp5 rpflip2 rpmini rpminiv2"
+        BOARD_CAPABILITIES[wifi]="rp5 rpflip2 rpmini rpminiv2"
+        BOARD_CAPABILITIES[bluetooth]="rp5 rpflip2 rpmini rpminiv2"
+        BOARD_CAPABILITIES[analogstick]="rp5 rpflip2 rpmini rpminiv2"
+        BOARD_CAPABILITIES[rumble]="rp5 rpflip2 rpmini rpminiv2"
+        BOARD_CAPABILITIES[adb]="rp5 rpflip2 rpmini rpminiv2"
+        BOARD_CAPABILITIES[hud]="rp5 rpflip2 rpmini rpminiv2"
+        BOARD_CAPABILITIES[fan]="rp5 rpflip2 rpmini rpminiv2"
         ;;
     a527)
         BOARD_CAPABILITIES[rgb]="trimui-smart-pro-s"
