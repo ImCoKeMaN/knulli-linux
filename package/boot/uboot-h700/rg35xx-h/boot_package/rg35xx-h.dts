@@ -2740,6 +2740,8 @@
 					pmu_usbad_vol = <0x1068>;
 					pmu_usbad_cur = <0x9c4>;
 					pmu_usb_typec_used = <0x01>;
+					wakeup_usb_in;
+					wakeup_usb_out;
 					det_acin_supply = <0x4a>;
 					pmu_acin_usbid_drv = <0x4b 0x07 0x0c 0x01>;
 					pmu_vbus_det_gpio = <0x4b 0x07 0x0d 0x01>;
