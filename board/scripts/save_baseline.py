@@ -259,31 +259,46 @@ def save_boot_files(board, arch, partitions, output_dir, boot_files_dir):
 # Allwinner BSP partition files
 # ---------------------------------------------------------------------------
 
-def save_partition_files(board, arch, partitions, source_dir, partitions_dir):
-    """Copy Allwinner BSP partition images to updates/partitions/{board}/ if changed."""
+def save_partition_files(board, arch, partitions, source_dir, output_dir, partitions_dir):
+    """Copy Allwinner BSP partition images to updates/partitions/{board}/ if changed.
+
+    boot0.img, boot.img, env.img — source_dir/board/allwinner/{arch}/{board}/partitions/
+    boot_package.fex             — output_dir/images/{arch}-boot-packages/{board}_boot_package.fex
+    """
     board_src = source_dir / "board" / "allwinner" / arch / board / "partitions"
-    if not board_src.is_dir():
-        print(f"  [partitions] WARNING: {board_src} not found — skipping", file=sys.stderr)
-        return
+
+    part_sources = {
+        "boot0.img":        board_src / "boot0.img",
+        "boot_package.fex": output_dir / "images" / f"{arch}-boot-packages" / f"{board}_boot_package.fex",
+        "boot.img":         board_src / "boot.img",
+        "env.img":          board_src / "env.img",
+    }
 
     dest_dir = partitions_dir / board
     dest_dir.mkdir(parents=True, exist_ok=True)
 
     for part in ALLWINNER_PARTITIONS:
-        src = board_src / part
-        if not src.exists():
-            continue
-
         expected_md5 = partitions.get(f"{part}_md5", "MISSING")
         if expected_md5 == "MISSING":
             continue
 
+        src = part_sources[part]
+        if not src.exists():
+            print(f"  [partitions] WARNING: {src} not found — skipping", file=sys.stderr)
+            continue
+
+        src_md5 = md5_file(src)
+        if src_md5 != expected_md5:
+            print(f"  [partitions] WARNING: {board}/{part} MD5 mismatch — "
+                  f"firmware.sig says {expected_md5[:8]}… but source file is {src_md5[:8]}…",
+                  file=sys.stderr)
+
         dest = dest_dir / part
-        if dest.exists() and md5_file(dest) == expected_md5:
+        if dest.exists() and md5_file(dest) == src_md5:
             print(f"  [partitions] {board}/{part}: unchanged")
             continue
 
-        print(f"  [partitions] {board}/{part}: storing {expected_md5[:8]}…")
+        print(f"  [partitions] {board}/{part}: storing {src_md5[:8]}…")
         shutil.copy2(src, dest)
 
 
@@ -359,7 +374,7 @@ def main():
         if is_allwinner_bsp(p):
             print(f"\n[{board}]")
             if source_dir:
-                save_partition_files(board, arch, p, source_dir, partitions_dir)
+                save_partition_files(board, arch, p, source_dir, output_dir, partitions_dir)
             else:
                 print(f"  [partitions] --source-dir not provided — skipping partition copy")
 

@@ -181,16 +181,9 @@ def merge_updates(current, subtargets, channel, base_url, patches_dir):
             rootfs_done.add(arch)
 
         # --- Allwinner BSP: partition images (boot0.img, etc.) ---
-        if is_allwinner_bsp(p):
-            for part in ("boot0.img", "boot_package.fex", "boot.img", "env.img"):
-                md5 = p.get(f"{part}_md5")
-                if md5 and md5 != "MISSING":
-                    old_md5 = updated["devices"][channel].get(part, {}).get(board)
-                    updated["devices"][channel].setdefault(part, {})[board] = md5
-                    if old_md5 != md5:
-                        summary.append(
-                            f"  partition [{board}] {part}: {(old_md5 or 'none')[:8]}… → {md5[:8]}…"
-                        )
+        # NOTE: partition MD5s are intentionally NOT written to updated["devices"] here.
+        # They are applied in main() only after the source file is confirmed to exist
+        # in the upload plan, preventing phantom MD5 updates when a file can't be found.
 
         # --- Boot-FAT platforms: kernel, DTBs, boot config ---
         else:
@@ -246,17 +239,20 @@ def check_baselines_exist(subtargets, releases_dir):
         sys.exit(1)
 
 
-def build_upload_plan(subtargets, output_dir, channel, updated, base_url, current_updates):
-    """Return a list of (local_path, remote_rel_path) tuples to upload via SCP.
+def build_upload_plan(subtargets, output_dir, channel, updated, base_url, current_updates, baseline_dir=None, force_partitions=False):
+    """Return (upload_list, partition_md5_updates).
 
-    remote_rel_path is relative to the SSH home directory on the server
-    (i.e., the web root of updates.knulli.org).
-    Deduplicates by remote path — if two boards produce the same remote file
-    (same arch + same MD5), it's only uploaded once.
-    Boot files are skipped when their MD5 already matches what is recorded in
-    the pre-merge updates.json (i.e. they were uploaded in a previous run).
+    upload_list: list of (local_path, remote_rel_path) to upload via SCP.
+    partition_md5_updates: dict {(board, part): md5} for Allwinner partition
+        files that are confirmed to have a source and will be uploaded.
+        Applied to updated_updates in main() AFTER the plan is built, so that
+        partition MD5s are never written to updates.json unless the file exists.
+
+    Deduplicates by remote path. Boot/partition files are skipped when their
+    MD5 already matches what is recorded in the pre-merge updates.json.
     """
     plan = {}  # remote_rel_path → local_path
+    partition_md5_updates = {}  # (board, part) → md5
 
     patches_dir = output_dir / "updates" / "patches"
 
@@ -276,14 +272,50 @@ def build_upload_plan(subtargets, output_dir, channel, updated, base_url, curren
             suffix = f"_to_{new_md5}.patch"
             for patch in patches_dir.glob(f"*{suffix}"):
                 from_md5 = patch.name[: -len(suffix)]
-                if from_md5 in prev_patches:
-                    continue  # already on server
+                if prev_patches.get(from_md5, {}).get("target_md5") == new_md5:
+                    continue  # this exact from→to patch already on server
                 remote = f"updates/patches/{patch.name}"
                 plan[remote] = patch
 
-        # Allwinner BSP: no individual boot files to upload (partitions are
-        # written via dd — their images live in the board's source tree, not
-        # produced as standalone upload artifacts here)
+        # Allwinner BSP: upload partition images when their MD5 has changed.
+        # Source priority: baseline_dir copy → build-output path (boot_package.fex only).
+        # boot0.img / boot.img / env.img are static source-tree files only available
+        # via baseline_dir; boot_package.fex is always findable in the build output.
+        #
+        # We compare against current_updates (pre-merge state) NOT the merged dict,
+        # because partition MD5s are only written to updates.json in main() after a
+        # source file is confirmed to exist — preventing phantom MD5 updates where
+        # updates.json advances past what the server actually has.
+        if is_allwinner_bsp(p):
+            partitions_baseline = (baseline_dir / "updates" / "partitions" / board
+                                   if baseline_dir else None)
+            prev_devices = (current_updates
+                            .get("devices", {})
+                            .get(channel, {}))
+            for part in ("boot0.img", "boot_package.fex", "boot.img", "env.img"):
+                new_part_md5 = p.get(f"{part}_md5", "MISSING")
+                if new_part_md5 == "MISSING":
+                    continue
+                prev_md5 = prev_devices.get(part, {}).get(board)
+                if prev_md5 == new_part_md5 and not force_partitions:
+                    continue  # server already has this version
+                # Resolve source file
+                local = None
+                if partitions_baseline:
+                    candidate = partitions_baseline / part
+                    if candidate.exists():
+                        local = candidate
+                if local is None and part == "boot_package.fex":
+                    candidate = output_dir / "images" / f"{arch}-boot-packages" / f"{board}_{part}"
+                    if candidate.exists():
+                        local = candidate
+                if local is not None:
+                    remote = f"updates/partitions/{board}/{channel}/{part}"
+                    plan[remote] = local
+                    partition_md5_updates[(board, part)] = new_part_md5
+                else:
+                    print(f"  WARNING: {board}/{part}: source file not found — "
+                          f"provide --baseline-dir to upload this file", file=sys.stderr)
 
         # Boot-FAT platforms: upload each tracked boot file, but only if its
         # MD5 differs from what was already stored in updates.json before this run
@@ -309,7 +341,7 @@ def build_upload_plan(subtargets, output_dir, channel, updated, base_url, curren
                     remote = f"updates/boot_files/{arch}/{channel}/{board}/{file_key}"
                     plan[remote] = local
 
-    return list(plan.items())
+    return list(plan.items()), partition_md5_updates
 
 
 # ---------------------------------------------------------------------------
@@ -422,6 +454,12 @@ def main():
         "--dry-run", action="store_true",
         help="Show what would be uploaded/changed without doing anything"
     )
+    parser.add_argument(
+        "--force-partitions", action="store_true",
+        help="Re-upload Allwinner BSP partition files even if updates.json already "
+             "records the same MD5 (use when a previous run updated updates.json "
+             "without actually uploading the files)"
+    )
 
     args = parser.parse_args()
 
@@ -448,15 +486,25 @@ def main():
     if releases_dir:
         check_baselines_exist(subtargets, releases_dir)
 
-    # --- Merge ---
+    # --- Merge (rootfs, patches, boot_files — NOT Allwinner partition MD5s yet) ---
     updated_updates, summary = merge_updates(
         current_updates, subtargets, args.channel, args.base_url, patches_dir
     )
 
-    # --- Upload plan ---
-    upload_plan = build_upload_plan(
-        subtargets, output_dir, args.channel, updated_updates, args.base_url, current_updates
+    # --- Upload plan + confirmed partition MD5 updates ---
+    upload_plan, partition_md5_updates = build_upload_plan(
+        subtargets, output_dir, args.channel, updated_updates, args.base_url, current_updates,
+        baseline_dir=baseline_dir, force_partitions=args.force_partitions
     )
+
+    # Apply partition MD5 updates only for files that have a confirmed source.
+    # This prevents updates.json from advancing past what's actually on the server.
+    updated_updates.setdefault("devices", {}).setdefault(args.channel, {})
+    for (board, part), md5 in partition_md5_updates.items():
+        old_md5 = current_updates.get("devices", {}).get(args.channel, {}).get(part, {}).get(board)
+        updated_updates["devices"][args.channel].setdefault(part, {})[board] = md5
+        if old_md5 != md5:
+            summary.append(f"  partition [{board}] {part}: {(old_md5 or 'none')[:8]}… → {md5[:8]}…")
 
     # --- Show summary ---
     print()

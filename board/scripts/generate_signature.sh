@@ -80,17 +80,19 @@ add_file_entry() {
 # by filename only (no _path entry needed — the upgrade script has hardcoded
 # dd offsets for each known partition name).
 generate_signature_allwinner_bsp() {
-    local partition_files=(
+    local board_name arch_name
+    board_name=$(basename "$BOARD_DIR")
+    arch_name=$(basename "$(dirname "$BOARD_DIR")")   # h700 or a133 — from path, not knulli.arch
+
+    # Static partition images from source tree (basename == key name)
+    local static_partitions=(
         "${BOARD_DIR}/partitions/boot0.img"
-        "${BOARD_DIR}/partitions/boot_package.fex"
         "${BOARD_DIR}/partitions/boot.img"
         "${BOARD_DIR}/partitions/env.img"
     )
 
-    for file in "${partition_files[@]}"; do
-        local md5
-        local size
-        local bn
+    for file in "${static_partitions[@]}"; do
+        local md5 size bn
         md5=$(calculate_md5 "$file")
         size=$(get_file_size "$file")
         bn=$(basename "$file")
@@ -102,6 +104,21 @@ generate_signature_allwinner_bsp() {
             log_info "Signed partition: $file (MD5: ${md5:0:8}..., Size: ${size} bytes)"
         fi
     done
+
+    # boot_package.fex is built per-board into BINARIES_DIR with a board prefix in the
+    # filename (e.g. rg35xx-pro_boot_package.fex), but must be recorded under the fixed
+    # key "boot_package.fex" so the upgrade script and OTA tools can find it.
+    local boot_pkg="${BINARIES_DIR}/${arch_name}-boot-packages/${board_name}_boot_package.fex"
+    local md5 size
+    md5=$(calculate_md5 "$boot_pkg")
+    size=$(get_file_size "$boot_pkg")
+    echo "boot_package.fex_md5=${md5}"   >> "$SIGNATURE_FILE"
+    echo "boot_package.fex_size=${size}" >> "$SIGNATURE_FILE"
+    if [[ "$md5" == "MISSING" ]]; then
+        log_warn "Partition file missing: $boot_pkg"
+    else
+        log_info "Signed partition: $boot_pkg (MD5: ${md5:0:8}..., Size: ${size} bytes)"
+    fi
 
     # rootfs — no _path entry for backward compatibility; handled specially by the upgrade script
     local rootfs="${BINARIES_DIR}/rootfs.squashfs"
