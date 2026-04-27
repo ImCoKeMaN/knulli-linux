@@ -3,6 +3,77 @@
 DAEMON="/usr/bin/batteryplus"
 PIDFILE="/var/run/batteryplus.pid"
 DAEMON_NAME=$(basename "$DAEMON")
+CONF_FILE="/etc/batteryplus/batteryplus.conf"
+
+# Ensure config exists with defaults if empty
+ensure_conf() {
+  if [ ! -f "$CONF_FILE" ]; then
+    mkdir -p "$(dirname "$CONF_FILE")"
+    cat >"$CONF_FILE" <<'EOF'
+# data_dir is required and should be an absolute path to a persistent directory
+# possible modes: voltage(default) and pmic
+[Config]
+mode=voltage
+data_dir=/userdata/system/configs/batteryplus
+V_EMPTY_CHG=3400
+V_EMPTY_DIS=3250
+EOF
+  fi
+}
+
+set_mode() {
+    MODE="$(/usr/bin/knulli-settings-get system.batteryplus.mode 2>/dev/null)"
+
+    case "$MODE" in
+        voltage|pmic)
+            ;;
+        *)
+            MODE="voltage"
+            /usr/bin/knulli-settings-set-queue system.batteryplus.mode "$MODE"
+            ;;
+    esac
+
+    if grep -qE '^[[:space:]]*mode[[:space:]]*=' "$CONF_FILE"; then
+        sed -i -E "s|^[[:space:]]*mode[[:space:]]*=.*|mode=$MODE|" "$CONF_FILE"
+    else
+        sed -i "/^\[Config\]/a mode=$MODE" "$CONF_FILE"
+    fi
+}
+
+do_initialize() {
+    BOOT_BOARD="/boot/boot/knulli.board"
+
+    [ -f "$CONF_FILE" ] || return 0
+
+    DATA_DIR=$(sed -nE 's/^[[:space:]]*data_dir[[:space:]]*=[[:space:]]*(.+)[[:space:]]*$/\1/p' "$CONF_FILE" | head -n 1)
+
+    [ -n "$DATA_DIR" ] || return 0
+    [ -f "$BOOT_BOARD" ] || return 0
+
+    mkdir -p "$DATA_DIR"
+
+    DATA_BOARD="$DATA_DIR/knulli.board"
+    CAL_FLAG="$DATA_DIR/batteryplus-calibrated"
+    MAP_FILE="$DATA_DIR/batteryplus-voltage.map"
+    PERCENT_FILE="/tmp/battery.percent"
+    RESTORE_FILE="$DATA_DIR/batteryplus-restore.state"
+
+    if [ ! -f "$DATA_BOARD" ]; then
+        cp -f "$BOOT_BOARD" "$DATA_BOARD"
+    else
+        if ! cmp -s "$BOOT_BOARD" "$DATA_BOARD"; then
+            cp -f "$BOOT_BOARD" "$DATA_BOARD"
+
+            # Device changed, remove learned calibration and device specific data
+            rm -f "$CAL_FLAG"
+            rm -f "$MAP_FILE"
+            rm -f "$RESTORE_FILE"
+        fi
+    fi
+
+    # Always remove file in case mode changed so generates new
+    rm -f "$PERCENT_FILE"
+}
 
 start_daemon() {
     echo "Starting $DAEMON_NAME."
@@ -18,7 +89,7 @@ start_daemon() {
 stop_daemon() {
     echo "Stopping $DAEMON_NAME."
     start-stop-daemon --stop --quiet --pidfile "$PIDFILE" \
-        && { echo "$DAEMON_NAME stopped"; rm -f "$PIDFILE"; } || { echo "$DAEMON_NAME is not running."; exit 1; }
+        && { echo "$DAEMON_NAME stopped"; rm -f "$PIDFILE"; } || { echo "$DAEMON_NAME is not running."; }
 }
 
 # Sanity check
@@ -26,6 +97,9 @@ stop_daemon() {
 
 case "$1" in
     start)
+        ensure_conf
+        set_mode
+        do_initialize
         start_daemon
         ;;
     stop)
@@ -34,6 +108,9 @@ case "$1" in
     restart)
         stop_daemon
         sleep 0.5
+        ensure_conf
+        set_mode
+        do_initialize
         start_daemon
         ;;
     *)
