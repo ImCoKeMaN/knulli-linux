@@ -787,6 +787,17 @@ def createLibretroConfig(generator: Generator, system: Emulator, controllers: Co
     else:
         retroarchConfig['rewind_enable'] = 'false'
 
+    # Display syncronization
+    if system.isOptSet('vsync') and system.getOptBoolean('vsync') == False:
+        retroarchConfig['video_vsync'] = 'false'
+    else:
+        retroarchConfig['video_vsync'] = 'true'
+
+    if system.isOptSet('gpusync') and system.getOptBoolean('gpusync') == True:
+        retroarchConfig['video_hard_sync'] = 'true'
+    else:
+        retroarchConfig['video_hard_sync'] = 'false'
+
     # Run-ahead option (latency reduction)
     retroarchConfig['run_ahead_enabled'] = 'false'
     retroarchConfig['preemptive_frames_enable'] = 'false'
