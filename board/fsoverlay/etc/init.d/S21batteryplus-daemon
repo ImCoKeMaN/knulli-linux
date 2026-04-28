@@ -29,7 +29,7 @@ set_mode() {
             ;;
         *)
             MODE="voltage"
-            /usr/bin/knulli-settings-set-queue system.batteryplus.mode "$MODE"
+            /usr/bin/knulli-settings-set system.batteryplus.mode "$MODE"
             ;;
     esac
 
