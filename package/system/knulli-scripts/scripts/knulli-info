@@ -48,6 +48,21 @@ fi
 # Detect voltage
 VOLT=$(knulli-battery-check voltage)
 
+# Battery calibrated?
+CAL=""
+
+CONF_FILE="/etc/batteryplus/batteryplus.conf"
+
+if [ -f "$CONF_FILE" ]; then
+    DATA_DIR=$(sed -nE 's/^[[:space:]]*data_dir[[:space:]]*=[[:space:]]*(.+)[[:space:]]*$/\1/p' "$CONF_FILE" | head -n 1)
+
+    if [ -n "$DATA_DIR" ] && [ -e "$DATA_DIR/batteryplus-calibrated" ]; then
+        CAL="Yes"
+    else
+        CAL="No"
+    fi
+fi
+
 ### short version (for osd)
 if test "$1" = "--short"; then
     DT=$(date +%H:%M)
@@ -224,6 +239,10 @@ fi
 
 if test -n "${VOLT}"; then
     echo "Voltage: ${VOLT}V"
+fi
+
+if test -n "${CAL}"; then
+    echo "Battery Calibrated: ${CAL}"
 fi
 
 # battery health

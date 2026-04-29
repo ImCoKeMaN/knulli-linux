@@ -15,7 +15,7 @@ unpause() {
 }
 
 # If device is discharging, remove the batterysaver unpause and exit.
-if [ "$1" = "Discharging" ]; then
+if [ "$2" = "Discharging" ]; then
     unpause
     exit 0
 fi
