@@ -14,12 +14,12 @@ case "$ARCH" in
 esac
 
 # Wait for emulationstation to be ready so this runs after everything else has initialized
-for i in {1..20}; do
+for i in {1..100}; do
     [ -f /tmp/emulationstation.ready ] && break
-    sleep 0.5
+    sleep 0.25
 done
 
-sleep 0.25
+sleep 0.25 # This is needed
 
 # Export GPIO if not already exported
 if [ ! -d "/sys/class/gpio/gpio${GPIO}" ]; then
