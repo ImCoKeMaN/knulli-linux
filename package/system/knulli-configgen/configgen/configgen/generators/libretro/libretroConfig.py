@@ -1437,7 +1437,8 @@ def writeBezelConfig(generator: Generator, bezel: str | None, shaderBezel: bool,
             create_new_bezel_file = True
         else:
             # The logic to cache system bezels is not always true anymore now that we have tattoos
-            output_png_file = Path("/tmp") / f"{overlay_png_file.stem}_adapted.png"
+            bezelset = system.config['bezel']
+            output_png_file = Path("/tmp") / f"{bezelset}_{overlay_png_file.stem}_adapted.png"
             if system.isOptSet('bezel.tattoo') and system.config['bezel.tattoo'] != "0":
                 create_new_bezel_file = True
             else:
