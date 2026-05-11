@@ -365,7 +365,7 @@ class KnulliUpgrader:
         print(f"Writing {partition_name}...")
 
         try:
-            if self.arch_name in ("h700", "a133"):
+            if self.arch_name in ("h700", "a133", "a527"):
                 return self._update_partition_allwinner_bsp(partition_name, partition_file)
             else:
                 print(f"ERROR: Partition updates via dd are not supported on arch '{self.arch_name}'")
@@ -375,7 +375,7 @@ class KnulliUpgrader:
             return False
 
     def _update_partition_allwinner_bsp(self, partition_name, partition_file):
-        """Update Allwinner BSP partitions (h700 / a133) via dd"""
+        """Update Allwinner BSP partitions (h700 / a133 / a527) via dd"""
         if partition_name == "boot0.img":
             subprocess.run([
                 "dd", f"if={partition_file}", "of=/dev/mmcblk0",

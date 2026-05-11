@@ -267,9 +267,16 @@ def save_partition_files(board, arch, partitions, source_dir, output_dir, partit
     """
     board_src = source_dir / "board" / "allwinner" / arch / board / "partitions"
 
+    # boot_package.fex: h700/a133 build it per-board into the images dir; a527 and
+    # similar keep a static copy in the source tree.  Prefer the built file; fall back
+    # to the source-tree copy so both cases resolve to the canonical file.
+    boot_pkg_built = output_dir / "images" / f"{arch}-boot-packages" / f"{board}_boot_package.fex"
+    boot_pkg_src   = board_src / "boot_package.fex"
+    boot_pkg = boot_pkg_built if boot_pkg_built.exists() else boot_pkg_src
+
     part_sources = {
         "boot0.img":        board_src / "boot0.img",
-        "boot_package.fex": output_dir / "images" / f"{arch}-boot-packages" / f"{board}_boot_package.fex",
+        "boot_package.fex": boot_pkg,
         "boot.img":         board_src / "boot.img",
         "env.img":          board_src / "env.img",
     }
