@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import re
 import shutil
+import subprocess
 from typing import TYPE_CHECKING
 
 import ruamel.yaml
@@ -17,6 +19,53 @@ if TYPE_CHECKING:
 vitaConfig = CONFIGS / 'vita3k'
 vitaSaves = SAVES / 'psvita'
 vitaConfigFile = vitaConfig / 'config.yml'
+
+# SDL3 enumerates evdev buttons with code >= BTN_JOYSTICK (288) first (ascending),
+# then code < BTN_JOYSTICK (ascending). SDL2 enumerates all buttons 0..KEY_MAX.
+# When a device has buttons below BTN_JOYSTICK (e.g. KEY_F4=68, KEY_VOLUMEDOWN=114),
+# SDL3 pushes those to higher indices while SDL2 assigns them the lowest indices.
+_BTN_JOYSTICK = 288
+
+def _generate_sdl_config_for_sdl3(controllers) -> str:
+    """
+    Generate SDL_GAMECONTROLLERCONFIG with button IDs corrected for SDL3's
+    enumeration order. Vita3k bundles SDL3 which numbers buttons differently
+    from SDL2 when the device has evdev button codes below BTN_JOYSTICK (288).
+    """
+    sdl2_config = generate_sdl_game_controller_config(controllers)
+    lines = sdl2_config.split('\n')
+    fixed_lines = []
+
+    for line, ctrl in zip(lines, controllers.values()):
+        # Collect (evdev_code, sdl2_button_id) for all button inputs
+        buttons = []
+        for inp in ctrl.inputs.values():
+            if inp.type == 'button' and inp.code is not None:
+                try:
+                    buttons.append((int(inp.code), int(inp.id)))
+                except ValueError:
+                    pass
+
+        # If all buttons are above BTN_JOYSTICK, SDL2 and SDL3 order is identical
+        if not buttons or all(code >= _BTN_JOYSTICK for code, _ in buttons):
+            fixed_lines.append(line)
+            continue
+
+        # Build SDL2 -> SDL3 index map
+        sdl2_order = sorted(buttons, key=lambda x: x[0])  # ascending by code = SDL2 order
+        high = [(c, i) for c, i in sdl2_order if c >= _BTN_JOYSTICK]
+        low  = [(c, i) for c, i in sdl2_order if c <  _BTN_JOYSTICK]
+        id_map = {sdl2_idx: sdl3_idx for sdl3_idx, (_, sdl2_idx) in enumerate(high + low)}
+
+        def remap_button(m):
+            return f'b{id_map.get(int(m.group(1)), int(m.group(1)))}'
+
+        fixed_lines.append(re.sub(r'\bb(\d+)', remap_button, line))
+
+    # Preserve any trailing lines beyond the controller count
+    fixed_lines.extend(lines[len(fixed_lines):])
+    return '\n'.join(fixed_lines)
+
 
 class Vita3kGenerator(Generator):
 
@@ -125,7 +174,8 @@ class Vita3kGenerator(Generator):
         return Command.Command(
             array=commandArray,
             env={
-                "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers),
+#                "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers),
+                "SDL_GAMECONTROLLERCONFIG": _generate_sdl_config_for_sdl3(playersControllers),
                 "SDL_JOYSTICK_HIDAPI": "0",
                 "XDG_CONFIG_HOME": CONFIGS,
                 "XDG_DATA_HOME": SAVES,
