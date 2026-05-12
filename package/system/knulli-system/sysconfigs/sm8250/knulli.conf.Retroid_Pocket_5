@@ -4,4 +4,4 @@
 display.rotate.DSI-1=1
 
 # default suspend on handled boards
-system.suspendmode=suspend
+system.suspendmode=fakesuspend

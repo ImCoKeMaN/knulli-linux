@@ -5,6 +5,9 @@ SHUTDOWN_FLAG="/var/run/shutdown.flag"
 IDLE_STATE_FILE="/var/run/idle.state"
 LOCK_FILE="/var/run/knulli-suspend.lock"
 
+FAKE_FLAG="/var/run/knulli-suspend-fake.active"
+SUSPEND_MODE="$(/usr/bin/knulli-settings-get-master system.suspendmode)"
+
 exec 9>"${LOCK_FILE}"
 if ! flock -n 9; then
   exit 0
@@ -109,26 +112,49 @@ check_idle_modes() {
   return 1
 }
 
-RTC_TIMER=""
+do_fake_suspend() {
+  action="$1"
+
+  [ "$SUSPEND_MODE" = "fakesuspend" ] || return 1
+
+  knulli-suspend-fake "$action"
+}
+
+do_suspend(){
+  pm-is-supported --suspend >/dev/null 2>&1 && pm-suspend
+}
+
+if [ "$SUSPEND_MODE" = "fakesuspend" ] && [ -f "$FAKE_FLAG" ]; then
+  do_fake_suspend wake
+
+  rm -f "$WAKE_TIME"
+
+  clear_rtcs
+  sleep 0.5
+  exit 0
+fi
 
 if rtc_secs="$(check_idle_modes)"; then
-  clear_rtcs
-  if arm_rtcs "$rtc_secs"; then
-    RTC_TIMER="$rtc_secs"
-    save_time "$RTC_TIMER"
-  else
-    rm -f "$WAKE_TIME" 2>/dev/null
+  save_time "$rtc_secs"
+
+  if [ "$SUSPEND_MODE" != "fakesuspend" ]; then
+    clear_rtcs
+    if ! arm_rtcs "$rtc_secs"; then
+      rm -f "$WAKE_TIME"
+    fi
   fi
 else
   clear_rtcs
-  rm -f "$WAKE_TIME" 2>/dev/null
+  rm -f "$WAKE_TIME"
 fi
 
-pm-is-supported --suspend >/dev/null 2>&1 && pm-suspend
-
-clear_rtcs # Make sure any timers are cleared after suspending
-
-check_auto_shutdown
+if [ "$SUSPEND_MODE" = "fakesuspend" ]; then
+  do_fake_suspend sleep
+else
+  do_suspend
+  clear_rtcs
+  check_auto_shutdown
+fi
 
 sleep 0.5 # For a small debounce
 
