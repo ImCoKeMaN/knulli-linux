@@ -20,7 +20,7 @@ curl_kill() {
 
 wait_es() {
     i=0
-    while [ "$i" -lt 250 ]; do
+    while [ "$i" -lt 500 ]; do
         [ -f /tmp/emulationstation.ready ] && return 0
         sleep 0.1
         i=$((i + 1))
