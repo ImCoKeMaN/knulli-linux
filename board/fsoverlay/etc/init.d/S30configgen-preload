@@ -1,0 +1,31 @@
+#!/bin/sh
+
+READY="/tmp/emulationstation.ready"
+
+case "$1" in
+  start)
+    i=0
+    while [ ! -e "$READY" ] && [ "$i" -lt 250 ]; do
+      i=$((i + 1))
+      sleep 0.1
+    done
+
+    python3 - <<'PY' >/dev/null 2>&1
+import sys
+sys.path.insert(0, "/usr/lib/python3.12/site-packages")
+
+mods = [
+    "configgen.emulatorlauncher",
+    "configgen.utils.evmapy",
+]
+
+for m in mods:
+    try:
+        __import__(m)
+    except Exception:
+        pass
+PY
+    ;;
+esac
+
+exit 0

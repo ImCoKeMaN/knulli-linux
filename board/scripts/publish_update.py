@@ -306,6 +306,9 @@ def build_upload_plan(subtargets, output_dir, channel, updated, base_url, curren
                     if candidate.exists():
                         local = candidate
                 if local is None and part == "boot_package.fex":
+                    # h700/a133: built per-board into images/{arch}-boot-packages/
+                    # a527 and similar: static source-tree file; not accessible here
+                    # without --source-dir, but will be in baseline after save_baseline.py
                     candidate = output_dir / "images" / f"{arch}-boot-packages" / f"{board}_{part}"
                     if candidate.exists():
                         local = candidate

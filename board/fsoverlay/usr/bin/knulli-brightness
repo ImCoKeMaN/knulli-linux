@@ -5,36 +5,55 @@ XMIN=3
 VALPATH=/var/run/$(basename "$0") # Stored brightness value when the display is turned off
 LOCK=/var/run/$(basename "$0").lock # Mainly needed because of the dim animation
 
-exec 9>"$LOCK"
-flock -n 9 || exit 0
-trap 'flock -u 9; exec 9>&-' EXIT INT TERM
-
 BACKLIGHT_DIR=
 for d in /sys/class/backlight/*; do
-  [ -d "$d" ] && { BACKLIGHT_DIR="$d"; break; }
+    if [ -d "$d" ] && [ -f "$d/brightness" ] && [ -f "$d/max_brightness" ]; then
+        BACKLIGHT_DIR="$d"
+        break
+    fi
 done
 
-if [ -n "$BACKLIGHT_DIR" ] && [ -f "$BACKLIGHT_DIR/brightness" ] && [ -f "$BACKLIGHT_DIR/max_brightness" ]; then
-  if [ -f "$BACKLIGHT_DIR/max_brightness" ]; then
-  read -r XMAX < "$BACKLIGHT_DIR/max_brightness"
-  else
-    XMAX=
-  fi
-  [ -z "$XMAX" ] && XMAX=255
-  bl_get() { read -r v < "$BACKLIGHT_DIR/brightness"; printf '%s\n' "$v"; }
-  bl_set() { printf '%s' "$1" > "$BACKLIGHT_DIR/brightness"; }
+if [ -n "$BACKLIGHT_DIR" ]; then
+    read -r XMAX < "$BACKLIGHT_DIR/max_brightness"
+    [ -n "$XMAX" ] || XMAX=255
+
+    bl_get() {
+        read -r v < "$BACKLIGHT_DIR/brightness"
+        printf '%s\n' "$v"
+    }
+
+    bl_set() {
+        printf '%s' "$1" > "$BACKLIGHT_DIR/brightness"
+    }
 else
-  XMAX=255
-  bl_get() { brightness get; }
-  bl_set() { brightness set "$1"; }
+    # Some devices don't like a max of 255 for some reason.
+    XMAX=254
+
+    bl_get() {
+        brightness get
+    }
+
+    bl_set() {
+        brightness set "$1"
+    }
 fi
 
 FB_BLANK=/sys/class/graphics/fb0/blank
 
+do_lock() {
+    exec 9>"$LOCK"
+    flock -n 9 || exit 0
+    "$@"
+    ret=$?
+    flock -u 9
+    exec 9>&-
+    return "$ret"
+}
+
 update_rgb_brightness() {
     [ -n "$1" ] || return 0
 
-    knulli-board-capability "rgb" || return 0
+    knulli-board-capability "rgb" >/dev/null 2>&1 || return 0
 
     [ "$(knulli-settings-get led.brightness.adaptive 2>/dev/null)" = "1" ] || return 0
 
@@ -46,57 +65,61 @@ update_rgb_brightness() {
 animate_brightness() {
     current=$1
     target=$2
-    duration=250   # total ms
+    duration=250 # ms
     min_steps=3
     max_steps=9
 
     distance=$(( target - current ))
     abs_distance=$(( distance < 0 ? -distance : distance ))
 
+    [ "$distance" -eq 0 ] && return 0
+
     steps=$abs_distance
     [ "$steps" -lt "$min_steps" ] && steps=$min_steps
     [ "$steps" -gt "$max_steps" ] && steps=$max_steps
-    [ "$steps" -eq 0 ] && steps=$min_steps
 
-    step=$(( distance / steps ))
-    [ "$step" -eq 0 ] && step=$(( distance > 0 ? 1 : -1 ))
-    remainder=$(( distance - step*steps ))
+    start_ms=$(date +%s%3N)
 
-    # fractional seconds per step
-    sleep_s=$(awk -v d="$duration" -v s="$steps" 'BEGIN{printf("%.4f", d/(s*1000.0))}')
+    i=1
+    while [ "$i" -le "$steps" ]; do
+        next=$(( current + (distance * i) / steps ))
 
-    i=0
-    while [ "$i" -lt "$steps" ]; do
-        extra=0
-        if [ "$remainder" -ne 0 ]; then
-            if [ "$remainder" -gt 0 ]; then extra=1; else extra=-1; fi
-            remainder=$(( remainder - extra ))
+        bl_set "$next" >/dev/null 2>&1
+
+        target_ms=$(( start_ms + (duration * i) / steps ))
+        now_ms=$(date +%s%3N)
+        sleep_ms=$(( target_ms - now_ms ))
+
+        if [ "$sleep_ms" -gt 0 ]; then
+            sleep_s=$(awk -v ms="$sleep_ms" 'BEGIN { printf "%.4f", ms / 1000.0 }')
+            sleep "$sleep_s"
         fi
-
-        current=$(( current + step + extra ))
-
-        # clamp overshoot
-        if [ "$step" -gt 0 ] && [ "$current" -gt "$target" ]; then current=$target; fi
-        if [ "$step" -lt 0 ] && [ "$current" -lt "$target" ]; then current=$target; fi
-
-        bl_set "$current"
-        sleep "$sleep_s"
 
         i=$(( i + 1 ))
     done
+
+    bl_set "$target" >/dev/null 2>&1
 }
 
 get_percent() {
     VAL=$1
-    printf '%d\n' $(( (VAL * 100 + XMAX / 2) / XMAX ))
+    PCT=$(( (VAL * 100 + XMAX / 2) / XMAX ))
+
+    [ "$PCT" -lt 0 ] && PCT=0
+    [ "$PCT" -gt 100 ] && PCT=100
+
+    printf '%d\n' "$PCT"
 }
 
 percent_to_abs() {
     PCT=$1
+
     if [ "$PCT" -le 0 ]; then
         printf '0\n'
     elif [ "$PCT" -eq 1 ]; then
         printf '%s\n' "$XMIN"
+    elif [ "$PCT" -ge 100 ]; then
+        printf '%s\n' "$XMAX"
     else
         printf '%d\n' $(( (PCT * XMAX + 50) / 100 ))
     fi
@@ -119,8 +142,40 @@ cycle() {
     NEWVAL=$(( FVALUE + CYCLESTEP ))
     [ "$NEWVAL" -gt 100 ] && NEWVAL=0
     echo "Brightness cycling to ${NEWVAL}%"
-    NEWVAL=$(( NEWVAL * XMAX / 100 ))
+    NEWVAL=$(percent_to_abs "$NEWVAL")
     setValue "$NEWVAL"
+    exit 0
+}
+
+do_dim() {
+    ABS=$(bl_get)
+    PERCENT=$(get_percent "$ABS")
+
+    if [ -e "${VALPATH}" ]; then
+        exit 0
+    fi
+
+    if [ "$PERCENT" -gt 1 ]; then
+        echo "${PERCENT}" > "${VALPATH}"
+        animate_brightness "$ABS" "$XMIN"
+    fi
+
+    update_rgb_brightness 1
+    exit 0
+}
+
+do_undim() {
+    ABS=$(bl_get)
+
+    if [ ! -e "${VALPATH}" ]; then
+        exit 0
+    fi
+
+    read -r PERCENT_SAVED < "$VALPATH"
+    RESTORE_ABS=$(percent_to_abs "$PERCENT_SAVED")
+    animate_brightness "$ABS" "$RESTORE_ABS"
+    rm -f "${VALPATH}"
+    update_rgb_brightness "$PERCENT_SAVED"
     exit 0
 }
 
@@ -147,6 +202,8 @@ display_on() {
         RESTORE_ABS=$(percent_to_abs "$PERCENT_SAVED")
         setValue "$RESTORE_ABS"
         rm -f "${VALPATH}"
+    else
+        PERCENT_SAVED="$(get_percent "$(bl_get)")"
     fi
 
     if [ -z "$BACKLIGHT_DIR" ] && [ -w "$FB_BLANK" ]; then
@@ -175,40 +232,17 @@ then
     elif [ "${1}" = "dispon" ]; then
         display_on
     elif [ "${1}" = "dim" ]; then
-        ABS=$(bl_get)
-        PERCENT=$(get_percent "$ABS")
-
-        if [ -e "${VALPATH}" ]; then
-            exit 0
-        fi
-
-        if [ "$PERCENT" -gt 1 ]; then
-            echo "${PERCENT}" > "${VALPATH}"
-            animate_brightness "$ABS" "$XMIN"
-        fi
-        update_rgb_brightness 1
-        exit 0
-   elif [ "${1}" = "undim" ]; then
-        ABS=$(bl_get)
-
-        if [ ! -e "${VALPATH}" ]; then
-            exit 0
-        fi
-
-        read -r PERCENT_SAVED < "$VALPATH"
-        RESTORE_ABS=$(percent_to_abs "$PERCENT_SAVED")
-        animate_brightness "$ABS" "$RESTORE_ABS"
-        rm -f "${VALPATH}"
-        update_rgb_brightness "$PERCENT_SAVED"
-        exit 0
+        do_lock do_dim
+    elif [ "${1}" = "undim" ]; then
+        do_lock do_undim
     else
         if [ "$1" -eq 1 ]; then
             NEWVAL=$XMIN
         else
             NEWVAL=$(( $1 * XMAX / 100 ))
         fi
-       setValue "${NEWVAL}"
-       exit 0
+        setValue "${NEWVAL}"
+        exit 0
     fi
 fi
 
@@ -220,7 +254,10 @@ then
     STEP="$2"
 
     if [ "$1" = "+" ]; then
-        if [ "$PCT" -eq 0 ]; then
+        # Already at max
+        if [ "$X" -ge "$XMAX" ] || [ "$PCT" -ge 100 ]; then
+            exit 0
+        elif [ "$PCT" -eq 0 ]; then
             # 0 -> 1%
             NEWPCT=1
         elif [ "$PCT" -eq 1 ]; then

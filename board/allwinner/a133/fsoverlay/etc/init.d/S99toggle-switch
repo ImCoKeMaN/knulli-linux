@@ -14,7 +14,7 @@ case "$ARCH" in
 esac
 
 # Wait for emulationstation to be ready so this runs after everything else has initialized
-for i in {1..100}; do
+for i in {1..200}; do
     [ -f /tmp/emulationstation.ready ] && break
     sleep 0.25
 done

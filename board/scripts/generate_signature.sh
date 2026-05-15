@@ -105,10 +105,13 @@ generate_signature_allwinner_bsp() {
         fi
     done
 
-    # boot_package.fex is built per-board into BINARIES_DIR with a board prefix in the
-    # filename (e.g. rg35xx-pro_boot_package.fex), but must be recorded under the fixed
-    # key "boot_package.fex" so the upgrade script and OTA tools can find it.
+    # boot_package.fex: h700/a133 build it per-board into BINARIES_DIR (with a board prefix);
+    # a527 and similar keep it as a static source-tree file.  Try the build-output path first
+    # and fall back to the source tree so both cases use the same key name.
     local boot_pkg="${BINARIES_DIR}/${arch_name}-boot-packages/${board_name}_boot_package.fex"
+    if [[ ! -f "$boot_pkg" ]]; then
+        boot_pkg="${BOARD_DIR}/partitions/boot_package.fex"
+    fi
     local md5 size
     md5=$(calculate_md5 "$boot_pkg")
     size=$(get_file_size "$boot_pkg")
@@ -210,7 +213,7 @@ build_date=$(date -Iseconds)
 EOF
 
     # Detect platform from the board directory path
-    if [[ "$BOARD_DIR" == */allwinner/h700/* ]] || [[ "$BOARD_DIR" == */allwinner/a133/* ]]; then
+    if [[ "$BOARD_DIR" == */allwinner/h700/* ]] || [[ "$BOARD_DIR" == */allwinner/a133/* ]] || [[ "$BOARD_DIR" == */allwinner/a527/* ]]; then
         generate_signature_allwinner_bsp
     else
         generate_signature_boot_fat

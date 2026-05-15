@@ -1,0 +1,214 @@
+#!/bin/bash
+# knulli-gen-sig — Regenerate /boot/boot/firmware.sig from what is installed.
+#
+# Useful when firmware.sig is missing, corrupted, or out of sync with the
+# files actually present on the device.
+#
+# Boot-FAT platforms (rk3326, rk3568, rk3576, sm8250, …):
+#   Scans /boot/boot/ for all tracked files, plus boot config files at their
+#   known locations (extlinux/extlinux.conf, EFI/BOOT/grub.cfg, boot.ini).
+#
+# Allwinner BSP platforms (h700, a133):
+#   Hashes rootfs from /boot/boot/knulli.
+#   Hashes partition data from the raw block device using sizes recorded in the
+#   existing firmware.sig. If no existing sig is present those raw partition
+#   entries are skipped — only rootfs is recorded.
+
+FIRMWARE_SIG="/boot/boot/firmware.sig"
+ARCH_FILE="/usr/share/knulli/knulli.arch"
+BOARD_FILE="/boot/boot/knulli.board"
+VERSION_FILE="/usr/share/knulli/knulli.version"
+ROOTFS_FILE="/boot/boot/knulli"
+SIG_BACKUP="/tmp/firmware.sig.bak"
+
+# Files to exclude when scanning /boot/boot/
+SKIP_PATTERN="^(knulli|knulli\.update|knulli\.board|firmware\.sig|autoresize)$"
+
+die() { echo "ERROR: $*" >&2; exit 1; }
+
+# ---------------------------------------------------------------------------
+# Validate prerequisites
+# ---------------------------------------------------------------------------
+[ -f "$ARCH_FILE" ]    || die "$ARCH_FILE not found"
+[ -f "$BOARD_FILE" ]   || die "$BOARD_FILE not found"
+[ -f "$VERSION_FILE" ] || die "$VERSION_FILE not found"
+[ -f "$ROOTFS_FILE" ]  || die "Rootfs not found at $ROOTFS_FILE"
+
+arch=$(cat "$ARCH_FILE")
+board=$(cat "$BOARD_FILE")
+version=$(cat "$VERSION_FILE")
+build_date=$(date -Iseconds)
+
+echo "Board:   $board"
+echo "Arch:    $arch"
+echo "Version: $version"
+echo ""
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+file_md5()  { md5sum "$1" | cut -d' ' -f1; }
+file_size() { stat -c%s "$1"; }
+
+# Accumulated [partitions] content
+partitions=""
+
+add_entry() {
+    # add_entry <key> <md5> <size> [path]
+    local key="$1" md5="$2" size="$3" path="${4:-}"
+    partitions="${partitions}${key}_md5=${md5}
+${key}_size=${size}
+"
+    [ -n "$path" ] && partitions="${partitions}${key}_path=${path}
+"
+}
+
+add_rootfs() {
+    local md5 size
+    md5=$(file_md5  "$ROOTFS_FILE")
+    size=$(file_size "$ROOTFS_FILE")
+    # rootfs has no _path entry (consistent with build-time generate_signature.sh)
+    partitions="${partitions}rootfs.squashfs_md5=${md5}
+rootfs.squashfs_size=${size}
+"
+    echo "  rootfs.squashfs: $md5"
+}
+
+# ---------------------------------------------------------------------------
+# Boot-FAT: scan files from the mounted FAT partition
+# ---------------------------------------------------------------------------
+gen_boot_fat() {
+    [ -d /boot/boot ] || die "/boot/boot not found — is /boot mounted?"
+
+    add_rootfs
+
+    # All files directly in /boot/boot/ (kernel, initrd, DTBs, …)
+    for f in /boot/boot/*; do
+        [ -f "$f" ] || continue
+        name=$(basename "$f")
+        echo "$name" | grep -qE "$SKIP_PATTERN" && continue
+        md5=$(file_md5  "$f")
+        size=$(file_size "$f")
+        add_entry "$name" "$md5" "$size" "boot/$name"
+        echo "  $name: $md5"
+    done
+
+    # Boot config files at well-known locations outside /boot/boot/
+    for cfg in "extlinux/extlinux.conf" "EFI/BOOT/grub.cfg" "boot.ini"; do
+        full="/boot/$cfg"
+        [ -f "$full" ] || continue
+        name=$(basename "$cfg")
+        md5=$(file_md5  "$full")
+        size=$(file_size "$full")
+        add_entry "$name" "$md5" "$size" "$cfg"
+        echo "  $name: $md5"
+    done
+}
+
+# ---------------------------------------------------------------------------
+# Allwinner BSP: hash rootfs + raw partition data from block device
+# ---------------------------------------------------------------------------
+get_old_size() {
+    # Read {key}_size from the backup sig
+    grep "^${1}_size=" "$SIG_BACKUP" 2>/dev/null | cut -d= -f2
+}
+
+hash_raw_bytes() {
+    # hash_raw_bytes <device> <offset_bytes> <count_bytes>
+    # Reads count_bytes starting at offset_bytes from device, returns MD5.
+    local dev="$1" offset="$2" count="$3"
+    # Use bs=512 so any offset/count is representable without remainder
+    dd if="$dev" bs=512 skip=$(( offset / 512 )) count=$(( (count + 511) / 512 )) 2>/dev/null \
+        | head -c "$count" | md5sum | cut -d' ' -f1
+}
+
+gen_allwinner_bsp() {
+    add_rootfs
+
+    if [ ! -f "$SIG_BACKUP" ]; then
+        echo "  WARNING: no existing firmware.sig — raw partition sizes unknown," >&2
+        echo "           skipping boot0/boot_package/boot/env entries." >&2
+        return
+    fi
+
+    # boot0.img  — at offset 8 * 1024 = 8192 bytes on /dev/mmcblk0
+    size=$(get_old_size "boot0.img")
+    if [ -n "$size" ] && [ "$size" -gt 0 ] 2>/dev/null; then
+        md5=$(hash_raw_bytes /dev/mmcblk0 8192 "$size")
+        add_entry "boot0.img" "$md5" "$size"
+        echo "  boot0.img: $md5"
+    else
+        echo "  WARNING: boot0.img size unknown — skipping" >&2
+    fi
+
+    # boot_package.fex — at offset 16400 * 1024 = 16793600 bytes on /dev/mmcblk0
+    size=$(get_old_size "boot_package.fex")
+    if [ -n "$size" ] && [ "$size" -gt 0 ] 2>/dev/null; then
+        md5=$(hash_raw_bytes /dev/mmcblk0 16793600 "$size")
+        add_entry "boot_package.fex" "$md5" "$size"
+        echo "  boot_package.fex: $md5"
+    else
+        echo "  WARNING: boot_package.fex size unknown — skipping" >&2
+    fi
+
+    # boot.img — first partition /dev/mmcblk0p1
+    size=$(get_old_size "boot.img")
+    if [ -n "$size" ] && [ "$size" -gt 0 ] 2>/dev/null; then
+        md5=$(head -c "$size" /dev/mmcblk0p1 | md5sum | cut -d' ' -f1)
+        add_entry "boot.img" "$md5" "$size"
+        echo "  boot.img: $md5"
+    else
+        echo "  WARNING: boot.img size unknown — skipping" >&2
+    fi
+
+    # env.img — second partition /dev/mmcblk0p2
+    size=$(get_old_size "env.img")
+    if [ -n "$size" ] && [ "$size" -gt 0 ] 2>/dev/null; then
+        md5=$(head -c "$size" /dev/mmcblk0p2 | md5sum | cut -d' ' -f1)
+        add_entry "env.img" "$md5" "$size"
+        echo "  env.img: $md5"
+    else
+        echo "  WARNING: env.img size unknown — skipping" >&2
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+# Stash the existing sig (Allwinner needs sizes from it; all platforms get backup)
+[ -f "$FIRMWARE_SIG" ] && cp "$FIRMWARE_SIG" "$SIG_BACKUP"
+
+echo "Remounting /boot read-write..."
+mount -o rw,remount /boot
+
+echo "Scanning..."
+case "$arch" in
+    h700|a133)
+        gen_allwinner_bsp
+        ;;
+    *)
+        gen_boot_fat
+        ;;
+esac
+
+# Write the new sig
+{
+    echo "[metadata]"
+    echo "version=$version"
+    echo "board=$board"
+    echo "arch=$arch"
+    echo "build_date=$build_date"
+    echo ""
+    echo "[partitions]"
+    printf '%s' "$partitions"
+} > "$FIRMWARE_SIG"
+
+echo ""
+echo "Written: $FIRMWARE_SIG"
+
+echo "Remounting /boot read-only..."
+mount -o ro,remount /boot
+
+rm -f "$SIG_BACKUP"
+echo "Done."

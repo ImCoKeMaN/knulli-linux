@@ -1,0 +1,75 @@
+default:
+  shader: presets/retrovibes_480p/generic_crt2
+  
+psx:
+  shader: presets/retrovibes_480p/psx
+snes: 
+  shader: presets/retrovibes_480p/snes
+megadrive:
+  shader: presets/retrovibes_480p/megadrive
+segacd:
+  shader: presets/retrovibes_480p/megadrive
+sega32x:
+  shader: presets/retrovibes_480p/megadrive
+gamegear:
+  shader: presets/retrovibes_480p/gamegear
+pokemini:
+  shader: none
+gb: 
+  shader: presets/retrovibes_480p/gb
+gbc:
+  shader: presets/retrovibes_480p/gbc
+gba:
+  shader: presets/retrovibes_480p/gba
+virtualboy: 
+  shader: none
+nds:
+  shader: none
+psp:
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
+lynx:
+  shader: presets/retrovibes_480p/lynx
+gamate:
+  shader: presets/retrovibes_480p/generic_lcd3x
+gmaster:
+  shader: presets/retrovibes_480p/generic_lcd3x
+supervision:
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
+megaduck: 
+  shader: presets/retrovibes_480p/generic_lcd3x
+gamecom:
+  shader: presets/retrovibes_480p/generic_lcd3x
+ngpc:
+  shader: presets/retrovibes_480p/ngpc
+ngp:
+  shader: presets/retrovibes_480p/generic_lcd3x
+wswan:
+  shader: presets/retrovibes_480p/generic_lcd3x
+wswanc:
+  shader: presets/retrovibes_480p/generic_lcd3x
+gp32:
+  shader: presets/retrovibes_480p/generic_lcd3x
+arduboy:
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
+lowresnx:
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
+lutro:
+  shader: none
+pico8:
+  shader: none
+tic80:
+  shader: presets/retrovibes_480p/generic_lcd3x
+uzebox:
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless
+vircon32:
+  shader: none
+scummvm:
+  shader: none
+zmachine:
+  shader: none
+gameandwatch:
+  shader: none
+lcdgames:
+  shader: none  
+gamepock:
+  shader: presets/retrovibes_480p/generic_lcd3x

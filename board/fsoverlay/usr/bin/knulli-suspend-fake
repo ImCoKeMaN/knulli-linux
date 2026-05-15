@@ -1,0 +1,346 @@
+#!/bin/sh
+
+FAKE_FLAG="/var/run/knulli-suspend-fake.active"
+
+CPU_GOV_STATE="/var/run/knulli-suspend-fake.cpu-governors"
+CPU_MAX_STATE="/var/run/knulli-suspend-fake.cpu-max-freqs"
+CPU_ONLINE_STATE="/var/run/knulli-suspend-fake.cpu-online"
+BT_STATE="/var/run/knulli-suspend-fake.bluetooth"
+BRIGHTNESS_STATE="/var/run/knulli-suspend-fake.brightness"
+MUTED_SINK_STATE_FILE="/var/run/knulli-suspend-fake-muted-sink.state"
+STOPPED_PIDS_FILE="/var/run/knulli-suspend-fake-stopped-pids"
+INPUT_BLOCKED_PIDS="/var/run/knulli-suspend-fake.input-blocked-pids"
+INPUT_WHITELIST_PATTERNS="Power power pwr gpio-keys axp2202-pek"
+MONITOR_SHUTDOWN_PID="/var/run/knulli-suspend-fake.shutdown.pid"
+WAKE_TIME="/var/run/rtc-wake.epoch"
+
+log() {
+  echo "knulli-suspend-fake: $*"
+}
+
+input_is_whitelisted() {
+  name="$1"
+
+  for pattern in $INPUT_WHITELIST_PATTERNS; do
+    case "$name" in
+      *"$pattern"*) return 0 ;;
+    esac
+  done
+
+  return 1
+}
+
+block_input() {
+  : > "$INPUT_BLOCKED_PIDS"
+
+  for dev in /dev/input/event*; do
+    [ -e "$dev" ] || continue
+
+    event="${dev##*/}"
+    name="$(cat "/sys/class/input/$event/device/name" 2>/dev/null)"
+
+    [ -n "$name" ] || continue
+
+    if input_is_whitelisted "$name"; then
+      log "Input whitelisted: $name ($dev)"
+      continue
+    fi
+
+    log "Input blocked: $name ($dev)"
+
+    evtest --grab "$dev" >/dev/null 2>&1 &
+    echo "$!" >> "$INPUT_BLOCKED_PIDS"
+  done
+}
+
+unblock_input() {
+  if [ -f "$INPUT_BLOCKED_PIDS" ]; then
+    while read -r pid; do
+      [ -n "$pid" ] && kill "$pid" >/dev/null 2>&1
+    done < "$INPUT_BLOCKED_PIDS"
+    rm -f "$INPUT_BLOCKED_PIDS"
+  fi
+}
+
+service_enabled() {
+  services="$(knulli-settings-get system.services 2>/dev/null)"
+  case " $services " in
+    *" $1 "*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+stop_user_services() {
+  service_enabled samba && knulli-services stop samba >/dev/null 2>&1
+  service_enabled ssh && knulli-services stop ssh >/dev/null 2>&1
+  service_enabled syncthing && knulli-services stop syncthing >/dev/null 2>&1
+  service_enabled gpu_boost && knulli-services stop gpu_boost >/dev/null 2>&1
+}
+
+start_user_services(){
+  service_enabled samba && knulli-services start samba >/dev/null 2>&1
+  service_enabled ssh && knulli-services start ssh >/dev/null 2>&1
+  service_enabled syncthing && knulli-services start syncthing >/dev/null 2>&1
+  service_enabled gpu_boost && knulli-services start gpu_boost >/dev/null 2>&1
+}
+
+stop_other_services() {
+  /etc/init.d/S49ntp stop >/dev/null 2>&1
+  /etc/init.d/S50avahi-daemon stop >/dev/null 2>&1
+  /etc/init.d/S60nfs stop >/dev/null 2>&1
+  /etc/init.d/S96idlewatcher-daemon stop >/dev/null 2>&1
+
+  if [ -f /etc/init.d/S06fan-control-daemon ]; then
+    /etc/init.d/S06fan-control-daemon stop >/dev/null 2>&1
+  fi
+}
+
+start_other_services() {
+  /etc/init.d/S49ntp start >/dev/null 2>&1
+  /etc/init.d/S50avahi-daemon start >/dev/null 2>&1
+  /etc/init.d/S60nfs start >/dev/null 2>&1
+  /etc/init.d/S96idlewatcher-daemon start >/dev/null 2>&1
+
+  if [ -f /etc/init.d/S06fan-control-daemon ]; then
+    /etc/init.d/S06fan-control-daemon start >/dev/null 2>&1
+  fi
+}
+
+suspend_led_daemon() {
+  [ -x /etc/init.d/S95silky-rgb ] && /etc/init.d/S95silky-rgb stop >/dev/null 2>&1
+}
+
+resume_led_daemon() {
+  [ "$(knulli-settings-get led.enabled 2>/dev/null)" = "1" ] || return 0
+  /etc/init.d/S95silky-rgb start >/dev/null 2>&1
+}
+
+disable_wifi() {
+  /etc/init.d/S08connman stop >/dev/null 2>&1
+}
+
+enable_wifi() {
+  [ "$(knulli-settings-get wifi.enabled 2>/dev/null)" = "1" ] || return 0
+  /etc/init.d/S08connman start >/dev/null 2>&1
+}
+
+disable_bluetooth() {
+  if rfkill list bluetooth 2>/dev/null | grep -q "Soft blocked: no"; then
+    touch "$BT_STATE"
+    rfkill block bluetooth >/dev/null 2>&1
+  fi
+}
+
+enable_bluetooth() {
+  if [ -f "$BT_STATE" ]; then
+    rfkill unblock bluetooth >/dev/null 2>&1
+    rm -f "$BT_STATE"
+  fi
+}
+
+set_low_power_governor() {
+  : > "$CPU_GOV_STATE"
+  : > "$CPU_MAX_STATE"
+
+  for p in /sys/devices/system/cpu/cpufreq/policy*; do
+    [ -d "$p" ] || continue
+
+    gov="$p/scaling_governor"
+    max="$p/scaling_max_freq"
+    min="$p/scaling_min_freq"
+
+    [ -r "$gov" ] && printf '%s %s\n' "$gov" "$(cat "$gov")" >> "$CPU_GOV_STATE"
+    [ -r "$max" ] && printf '%s %s\n' "$max" "$(cat "$max")" >> "$CPU_MAX_STATE"
+
+    [ -w "$gov" ] && echo powersave > "$gov" >/dev/null 2>&1
+    if [ -r "$min" ] && [ -w "$max" ]; then
+      cat "$min" > "$max" >/dev/null 2>&1
+    fi
+  done
+}
+
+restore_governor() {
+  if [ -f "$CPU_MAX_STATE" ]; then
+    while read -r file val; do
+      [ -w "$file" ] && echo "$val" > "$file" >/dev/null 2>&1
+    done < "$CPU_MAX_STATE"
+    rm -f "$CPU_MAX_STATE"
+  fi
+
+  if [ -f "$CPU_GOV_STATE" ]; then
+    while read -r file val; do
+      [ -w "$file" ] && echo "$val" > "$file" >/dev/null 2>&1
+    done < "$CPU_GOV_STATE"
+    rm -f "$CPU_GOV_STATE"
+  fi
+}
+
+park_cores() {
+  : > "$CPU_ONLINE_STATE"
+
+  for c in /sys/devices/system/cpu/cpu[1-9]*/online; do
+    [ -r "$c" ] || continue
+    printf '%s %s\n' "$c" "$(cat "$c")" >> "$CPU_ONLINE_STATE"
+    echo 0 > "$c" 2>/dev/null
+  done
+}
+
+unpark_cores() {
+  if [ -f "$CPU_ONLINE_STATE" ]; then
+    while read -r file val; do
+      [ "$val" = "1" ] || continue
+      echo 1 > "$file" 2>/dev/null
+    done < "$CPU_ONLINE_STATE"
+    rm -f "$CPU_ONLINE_STATE"
+  fi
+}
+
+mute_audio() {
+  local sink_name
+  sink_name="$(pactl get-default-sink 2>/dev/null)"
+
+  [ -n "$sink_name" ] || return 0
+
+  echo "$sink_name" > "$MUTED_SINK_STATE_FILE"
+  pactl set-sink-mute "$sink_name" true >/dev/null 2>&1
+}
+
+unmute_audio() {
+  if [ -f "$MUTED_SINK_STATE_FILE" ]; then
+    local sink_name
+    sink_name="$(cat "$MUTED_SINK_STATE_FILE" 2>/dev/null)"
+    rm -f "$MUTED_SINK_STATE_FILE"
+
+    if [ -n "$sink_name" ] && pactl list sinks short 2>/dev/null | grep -q "^[0-9][0-9]*[[:space:]]${sink_name}[[:space:]]"; then
+      pactl set-sink-mute "$sink_name" false >/dev/null 2>&1
+    fi
+  else
+    pactl set-sink-mute @DEFAULT_SINK@ false >/dev/null 2>&1
+  fi
+}
+
+display_off() {
+  knulli-brightness dispoff >/dev/null 2>&1
+}
+
+display_on() {
+  knulli-brightness dispon >/dev/null 2>&1
+}
+
+suspend_apps() {
+  : > "$STOPPED_PIDS_FILE"
+
+  # Pause emulator processes first
+  ps -eo pid,ni | awk '$2 == -4 {print $1}' | while read -r pid; do
+    [ -n "$pid" ] || continue
+    kill -STOP "$pid" >/dev/null 2>&1 && echo "$pid" >> "$STOPPED_PIDS_FILE"
+  done
+
+  # Pause ES
+  /etc/init.d/S31emulationstation suspend >/dev/null 2>&1
+}
+
+resume_apps() {
+  # Resume ES first so UI comes back
+  /etc/init.d/S31emulationstation resume >/dev/null 2>&1
+
+  # Resume only processes we stopped
+  if [ -f "$STOPPED_PIDS_FILE" ]; then
+    while read -r pid; do
+      [ -n "$pid" ] && kill -CONT "$pid" >/dev/null 2>&1
+    done < "$STOPPED_PIDS_FILE"
+    rm -f "$STOPPED_PIDS_FILE"
+  fi
+}
+
+start_auto_shutdown_monitor() {
+  [ -f "$WAKE_TIME" ] || return 0
+
+  # Kill any existing
+  if [ -f "$MONITOR_SHUTDOWN_PID" ]; then
+    pid="$(cat "$MONITOR_SHUTDOWN_PID" 2>/dev/null)"
+    [ -n "$pid" ] && kill "$pid" 2>/dev/null
+    rm -f "$MONITOR_SHUTDOWN_PID"
+  fi
+
+  (
+    read -r target < "$WAKE_TIME" 2>/dev/null || exit 0
+
+    while :; do
+      [ -f "$FAKE_FLAG" ] || exit 0
+
+      now=$(date +%s)
+      if [ "$now" -ge "$target" ]; then
+        knulli-shutdown -s
+        exit 0
+      fi
+
+      sleep 1
+    done
+  ) &
+
+  echo $! > "$MONITOR_SHUTDOWN_PID"
+}
+
+do_sleep() {
+  log "--- Entering Fake Suspend ---"
+  touch "$FAKE_FLAG"
+
+  mute_audio
+  display_off
+  block_input
+  suspend_apps
+
+  stop_user_services
+  stop_other_services
+  suspend_led_daemon
+  disable_wifi
+  disable_bluetooth
+  set_low_power_governor
+  park_cores
+
+  start_auto_shutdown_monitor
+
+  log "--- Fake Suspend Complete ---"
+}
+
+do_wake() {
+  log "--- Resuming from Fake Suspend ---"
+  rm -f "$FAKE_FLAG"
+  if [ -f "$MONITOR_SHUTDOWN_PID" ]; then
+    pid="$(cat "$MONITOR_SHUTDOWN_PID" 2>/dev/null)"
+    [ -n "$pid" ] && kill "$pid" 2>/dev/null
+    rm -f "$MONITOR_SHUTDOWN_PID"
+  fi
+
+  unpark_cores
+  restore_governor
+  resume_apps
+
+  enable_bluetooth
+  enable_wifi
+  resume_led_daemon
+  start_other_services
+  start_user_services
+  unblock_input
+
+  display_on
+  unmute_audio
+
+  log "--- Fake Resume Complete ---"
+}
+
+case "$1" in
+  sleep)
+    do_sleep
+    ;;
+  wake)
+    do_wake
+    ;;
+  *)
+    echo "Usage: $0 sleep|wake" >&2
+    exit 1
+    ;;
+esac
+
+exit 0

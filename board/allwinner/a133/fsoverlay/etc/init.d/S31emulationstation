@@ -36,7 +36,7 @@ case "$1" in
 			# This re-applies the saved volume after ES is ready because we use a wireplumber config that
 			# resets something and causes volume to be changed after all the normal volume boot stuff
 			i=0
-			while [ $i -lt 250 ]; do
+			while [ $i -lt 500 ]; do
 				[ -e /tmp/emulationstation.ready ] && break
 				i=$((i + 1))
 				sleep 0.1

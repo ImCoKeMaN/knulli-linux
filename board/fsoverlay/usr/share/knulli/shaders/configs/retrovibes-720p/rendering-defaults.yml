@@ -1,0 +1,77 @@
+default:
+  shader: presets/retrovibes_720p/generic_crt
+  
+psx:
+  shader: presets/retrovibes_720p/psx
+snes: 
+  shader: crt/crt-blurPi
+nes:
+  shader: crt/crt-blurPi
+megadrive:
+  shader: presets/retrovibes_720p/megadrive
+segacd:
+  shader: presets/retrovibes_720p/megadrive
+sega32x:
+  shader: presets/retrovibes_720p/megadrive
+gamegear:
+  shader: presets/retrovibes_720p/generic_lcd1x
+pokemini:
+  shader: none
+gb: 
+  shader: presets/retrovibes_720p/gb
+gbc:
+  shader: presets/retrovibes_720p/generic_lcd3x
+gba:
+  shader: presets/retrovibes_720p/gba
+virtualboy: 
+  shader: none
+nds:
+  shader: none
+psp:
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
+lynx:
+  shader: presets/retrovibes_720p/lynx
+gamate:
+  shader: handheld/dot
+gmaster:
+  shader: presets/retrovibes_720p/generic_lcd3x
+supervision:
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
+megaduck: 
+  shader: presets/retrovibes_720p/generic_lcd3x
+gamecom:
+  shader: presets/retrovibes_720p/generic_lcd3x
+ngpc:
+  shader: presets/retrovibes_720p/ngpc
+ngp:
+  shader: presets/retrovibes_720p/generic_lcd1x
+wswan:
+  shader: presets/retrovibes_720p/generic_lcd1x
+wswanc:
+  shader: presets/retrovibes_720p/wswanc
+gp32:
+  shader: presets/retrovibes_720p/generic_lcd3x
+arduboy:
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless-grid
+lowresnx:
+  shader: presets/retrovibes_720p/generic_lcd1x
+lutro:
+  shader: none
+pico8:
+  shader: none
+tic80:
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless
+uzebox:
+  shader: sharp-shimmerless/shaders_glsl/sharp-shimmerless
+vircon32:
+  shader: none
+scummvm:
+  shader: none
+zmachine:
+  shader: none
+gameandwatch:
+  shader: none
+lcdgames:
+  shader: none  
+gamepock:
+  shader: presets/retrovibes_480p/generic_lcd3x

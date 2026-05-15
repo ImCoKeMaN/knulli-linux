@@ -1,3 +1,91 @@
+# Knulli - SCARAB - (20260511)
+
+## Changelog
+
+#### ADDED
+* **Device Support:**
+    * Added support for revisioned devices of the **Anbernic RG XX series** (H700).
+    * Added support for **Miyoo Flip, Powkiddy X55 and RGB30, and Anbernic RG ARC-S** (Rockchip RK3566).
+    * Added support for **Retroid Pocket 5, Flip 2, Mini, and Mini V2** (Qualcomm SM8250).
+    * Added support for **GKD Pixel 2, BattleXP G350, MagicX Xu mini-m, and R36S** (Rockchip RK3326).
+    * Added initial alpha support for **TrimUI Smart Pro S (TSPS)** (Allwinner A527).
+    * Added initial alpha support for **Anbernic RG Vita Pro** (RK3576) and **RG-DS** (RK3568).
+* **OS Features:**
+    * **Syncthing Integration:** Added full menu support for Syncthing (Device Settings -> Sync Now) including "Scan on Game Exit" and ES notifications.
+    * **Battery HUD:** Added a new Head-Up Display setting to show real-time battery percentage during gameplay (Decorations -> HUD -> Battery).
+    * **GPU Boost:** New service to dynamically adjust GPU frequency based on CPU load for better performance.
+    * **SilkyRGB:** Integrated new LED management software for advanced effects and RetroAchievements animations (Thanks doughno!).
+    * **Terminal:** Added VaixTerm terminal program.
+    * **Advanced Fan Control:** Added fan modes (quiet/normal/performance) for supported devices like RP5 and TSP-S.
+    * Added new ES background music collection.
+    * New soft reset (hotkey + double-tap start) which will restart ES and/or force close of running application.
+* **Emulation:**
+    * Added support for **Saturn (Yabasanshiro)** standalone emulator for H700 and RK3566.
+    * Updated **RetroArch** to **1.22.2**.
+    * Added `libretro-geolith` core support for Neo-Geo (.neo format).
+    * Added `libretro melonDS-DS` core.
+    * Added support for **Gamecube (dolphin)** and **Wii (dolphin)**, **3DS (Azahar)**, and **PS2 (AetherSX2)** on compatible high-performance devices.
+
+#### IMPROVED
+* **System Architecture:** Restructured the repository using submodules for independent Buildroot and Batocera package management.
+* **Battery Logic:** Implemented BatteryPlus for more accurate and dynamic battery percentage calculation by learning device-specific “full” states, including calibration status and battery voltage reporting in System Information.
+* **Power Management:**
+    * New **idlewatcher** with configurable hooks for `idle`, `extended`, and `active` states.
+    * Enabled **RTC suspend** for auto-wake and safe shutdown, allowing **shutdown** after x minutes in **suspend**.
+    * Added option for bypassing power saving while the device is being charged/plugged to a power source.
+    * Applied general CPU undervolting for H700, a133, and RK3566 to improve thermals and battery life.
+    * Added CPU frequency script and init service that builds available frequency lists directly in ES.
+* **Connectivity:**
+    * Significant improvements to Bluetooth pairing stability, responsiveness, and multiple controller handling.
+    * Improved Wi-Fi auto-retry logic and internet connectivity checks.
+    * Improved detection of internet connection on boot when retroachievements and quick resume are enabled.
+* **Input:**
+    * Added new input driver for a133 devices which support auto calibrating joysticks and rumble(thanks jpe230!).
+* **Audio:**
+    * Improved max volume for sm8250.
+* **UI/ES:**
+    * Added display color temperature settings for compatible devices.
+    * Added power led setting for compatible devices(hotkey: hotkey + power).
+    * Added advanced audio gain settings (+14 to +18dB).
+    * Added RetroArch V-Sync and Hard GPU Sync settings to ES.
+    * Added PortMaster installation directly into Device Settings.
+    * Themes can now override notification Y-offsets to avoid overlap with battery/clock info.
+    * Improved brightness dim/undim animation.
+    * Added DSP ES setting for Flycast.
+    * Added ES setting for periodic SRM save dumping for libretro cores; when enabled, in-game saves are written to SD card every 10 seconds to help prevent data loss. Enabled by default.
+    * Added ES setting for max incremental save states.
+    * Added ES settings for advanced drastic PiP corner and bilinear filtering.
+    * Added ES settings for VBA/gpSP color correction and interframe blending.
+* **Misc:**
+    * SSH(dropbear) is now a service which can be enabled/disabled.
+    * Set I/O scheduler to noop/none for reduced scheduling overhead.
+    * Refactored and improved zramswap to prioritize lz4.
+    * Automatic migration of legacy SD2 data(batocera.conf) on applicable devices.
+    * Automatic pausing of battery saving features while scraping.
+    * Updated A133 kernel modules. Added ZRAM support, and several wifi usb adapter support for Powkiddy V90s/V20.
+#### FIXED
+* **Storage:**
+    * Fixed SHARE partition resize issues to ensure full compatibility with Windows and macOS.
+* **Graphics/Display:**
+    * Fixed screen and resume issues for newer RG40XX-V and RG40XX-H hardware revisions.
+    * Fixed display orientation regressions on RG28XX.
+    * Fixed HDMI switching and DRM connector issues for RK3566 devices.
+    * Added additional injection methods for MangoHud compatibility with A133, RK3566, etc.
+* **Audio:**
+    * Fixed audio desync on SM8250 after suspend/resume.
+    * Fixed headphone detection and audio routing on Miyoo Flip.
+    * Fixed reversed audio channels on TrimUI Smart Pro S.
+    * Fixed audio crashes when toggling Bluetooth states.
+    * Fixed low volume with stand alone Yabasanshiro.
+* **Emulation:**
+    * Fixed viewport issues with RetroArch v1.22.
+    * Fixed configuration and compilation flags for AetherSX2 and Azahar.
+    * Fixed Advanced Drastic config generation when the config folder is missing.
+* **General:**
+    * Fixed the TrimUI Smart Pro-S Bootloader so it no longer has issues with Windows corrupting the partition table.
+
+Full changelog can be seen [here](https://github.com/knulli-cfw/knulli-linux/compare/7dabcbbfaa93512530e99a130e40ab1e4166987a..6edb6906f0d2754f35259bad6e1d0de3eda7363a)
+
 # Knulli - Gladiator II - (20250813)
 
 ## ChangeLog
