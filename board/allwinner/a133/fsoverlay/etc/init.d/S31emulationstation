@@ -4,6 +4,15 @@ BOOTCONF="/boot/knulli-boot.conf"
 . /etc/profile.d/xdg.sh
 . /etc/profile.d/dbus.sh
 
+apply_saved_volume() {
+    VOLUME=$(/usr/bin/knulli-settings-get-master audio.volume 2>/dev/null)
+    case "$VOLUME" in
+        ''|*[!0-9]*) VOLUME=80 ;;
+    esac
+
+    /usr/bin/knulli-audio setSystemVolume "$VOLUME" >/dev/null 2>&1
+}
+
 case "$1" in
 	start)
 		enabled="$(/usr/bin/knulli-settings-get system.es.atstartup)"
@@ -23,6 +32,17 @@ case "$1" in
 			done
 
 			emulationstation-standalone &
+
+			# This re-applies the saved volume after ES is ready because we use a wireplumber config that
+			# resets something and causes volume to be changed after all the normal volume boot stuff
+			i=0
+			while [ $i -lt 500 ]; do
+				[ -e /tmp/emulationstation.ready ] && break
+				i=$((i + 1))
+				sleep 0.1
+			done
+
+			[ -e /tmp/emulationstation.ready ] && apply_saved_volume
 		fi
 		;;
 

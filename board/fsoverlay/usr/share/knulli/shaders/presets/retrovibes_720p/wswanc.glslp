@@ -1,0 +1,6 @@
+#reference "../../handheld/simpletex_lcd_720p.glslp"
+GRID_INTENSITY = "0.900000"
+GRID_WIDTH = "0.900000"
+GRID_BIAS = "0.500000"
+DARKEN_COLOUR = "0.000000"
+BACKGROUND_INTENSITY = "0.800000"
