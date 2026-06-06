@@ -87,7 +87,7 @@ shared:
         "Off": 0
     srm_dump_ingame:
       prompt: DUMP SRM SAVES WHILE IN GAME
-      description: Dumps your ingame saves every 10 seconds while in game. Might wear out your SD card faster if enabled. Works only on libretro cores.
+      description: Checks for updates of your in-game saves every 10 seconds and dumps them immediately instead of only on game exit. Works only on libretro cores.
       preset: switchauto
     shaderset:
       prompt: SHADER SET
