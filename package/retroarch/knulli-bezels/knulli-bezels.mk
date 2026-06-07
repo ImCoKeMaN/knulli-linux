@@ -4,7 +4,7 @@
 #
 ################################################################################
 # Version.: Committed on June 07, 2026
-KNULLI_BEZELS_VERSION = 5b057468bdd4f2d616c7aa7399f368986ad73ecc
+KNULLI_BEZELS_VERSION = d062469f128cd56581a9d4a45a3a8d6b6032b0f9
 KNULLI_BEZELS_SITE = $(call github,chrizzo-hb,knulli-bezels,$(KNULLI_BEZELS_VERSION))
 
 define KNULLI_BEZELS_INSTALL_TARGET_CMDS
