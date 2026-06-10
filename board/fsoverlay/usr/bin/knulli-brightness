@@ -5,6 +5,10 @@ XMIN=3
 VALPATH=/var/run/$(basename "$0") # Stored brightness value when the display is turned off
 LOCK=/var/run/$(basename "$0").lock # Mainly needed because of the dim animation
 
+exec 9>"$LOCK"
+flock 9
+trap 'flock -u 9; exec 9>&-' EXIT INT TERM
+
 BACKLIGHT_DIR=
 for d in /sys/class/backlight/*; do
     if [ -d "$d" ] && [ -f "$d/brightness" ] && [ -f "$d/max_brightness" ]; then
@@ -39,16 +43,6 @@ else
 fi
 
 FB_BLANK=/sys/class/graphics/fb0/blank
-
-do_lock() {
-    exec 9>"$LOCK"
-    flock -n 9 || exit 0
-    "$@"
-    ret=$?
-    flock -u 9
-    exec 9>&-
-    return "$ret"
-}
 
 update_rgb_brightness() {
     [ -n "$1" ] || return 0
@@ -197,6 +191,7 @@ display_off() {
 display_on() {
     if [ -z "$BACKLIGHT_DIR" ] && [ -w "$FB_BLANK" ]; then
         echo 0 > "$FB_BLANK"
+        sleep 0.05
     fi
 
     if [ -e "${VALPATH}" ]; then
@@ -230,9 +225,9 @@ then
     elif [ "${1}" = "dispon" ]; then
         display_on
     elif [ "${1}" = "dim" ]; then
-        do_lock do_dim
+        do_dim
     elif [ "${1}" = "undim" ]; then
-        do_lock do_undim
+        do_undim
     else
         if [ "$1" -eq 1 ]; then
             NEWVAL=$XMIN
