@@ -23,7 +23,7 @@ uptime_s() {
 
 # Reachability probe
 http_try() {
-  curl -sS --connect-timeout 1 -m 2 "http://$1/" >/dev/null 2>&1
+  curl -sS --connect-timeout 2 -m 3 "http://$1/" >/dev/null 2>&1
 }
 
 # Build probe order
@@ -31,10 +31,10 @@ PROBES=""
 
 case "$MODE" in
   cheevos)
-    PROBES="$HOST_CHEEVOS $HOST_GENERIC"
+    PROBES="$HOST_CHEEVOS"
     ;;
   updates)
-    PROBES="$HOST_UPDATES $HOST_GENERIC"
+    PROBES="$HOST_UPDATES"
     ;;
   *)
     PROBES="$HOST_GENERIC"
