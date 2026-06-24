@@ -16,10 +16,10 @@ esac
 wait_emulationstation_started() {
     local tries=0
 
-    while [ "$tries" -lt 100 ]; do
-        pidof emulationstation >/dev/null 2>&1 && return 0
-        tries=$((tries + 1))
+    while [ "$tries" -lt 600 ]; do
+        [ -f /tmp/emulationstation.ready ] && return 0
         sleep 0.1
+        tries=$((tries + 1))
     done
 
     return 1
@@ -36,15 +36,14 @@ for i in {1..20}; do
     sleep 0.1
 done
 
-[ -f "/sys/class/gpio/gpio${GPIO}/value" ] || exit 1
+[ -r "/sys/class/gpio/gpio${GPIO}/value" ] || exit 1
 
 SWITCH_STATE=$(cat /sys/class/gpio/gpio${GPIO}/value)
 
 case "$1" in
     start)
         if [ "$SWITCH_STATE" = "1" ]; then
-            wait_emulationstation_started
-            sleep 0.5
+            wait_emulationstation_started || exit 1
             toggle-switch enable
         else
             toggle-switch disable
