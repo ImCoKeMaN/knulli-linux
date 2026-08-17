@@ -37,12 +37,11 @@ BR2_LINUX_KERNEL_CUSTOM_REPO_URL="https://github.com/orangepi-xunlong/linux-oran
 BR2_LINUX_KERNEL_CUSTOM_REPO_VERSION="orange-pi-4.9-sun50iw9"
 BR2_LINUX_KERNEL_USE_CUSTOM_CONFIG=y
 BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE="$(BR2_EXTERNAL_KNULLI_PATH)/board/allwinner/h700/linux-sunxi64-legacy.config"
-BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_4_9=y
 BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="4.9.170"
 BR2_LINUX_KERNEL_VERSION="4.9.170"
 BR2_KERNEL_HEADERS_VERSION=y
-BR2_DEFAULT_KERNEL_VERSION="4.9.170"
 BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_4_9=y
+BR2_DEFAULT_KERNEL_VERSION="4.9.170"
 BR2_DEFAULT_KERNEL_HEADERS="4.9.170"
 BR2_TOOLCHAIN_HEADERS_AT_LEAST="4.9"
 
@@ -71,7 +70,6 @@ BR2_PACKAGE_HAS_LIBMALI=y
 BR2_PACKAGE_PROVIDES_LIBMALI="mali-g31-fbdev"
 BR2_PACKAGE_MALI_G31_FBDEV=y
 
-BR2_PACKAGE_UTIL_LINUX_MOUNT=y
 
 # ADB
 BR2_PACKAGE_ANDROID_TOOLS=y
@@ -90,12 +88,28 @@ BR2_PACKAGE_SDL_TTF=y
 BR2_PACKAGE_SDL12_COMPAT=y
 
 # GDISK
-BR2_PACKAGE_GPTFDISK=y
-BR2_PACKAGE_GPTFDISK_GDISK=y
-BR2_PACKAGE_GPTFDISK_SGDISK=y
 
 # MISC
-BR2_PACKAGE_PYTHON3_XZ=y
 BR2_PACKAGE_DHCPD=y
 
 BR2_PACKAGE_M8C=y
+
+# Libretro cores are NOT compiled by Buildroot.  The gate below turns off every
+# "select BR2_PACKAGE_LIBRETRO_*" in knulli-system/Config.in; the cores come
+# from the external libretro-super build instead (package/cores/libretro-super).
+#
+# The DEVICE names which devices/<name>.device file describes this board, and
+# that file names the ABI profile it consumes.  Boards sharing a profile share
+# the compiled cores: the drop is built once and reused, so only the first
+# board on a given ABI pays the compile.
+BR2_PACKAGE_KNULLI_EXTERNAL_LIBRETRO_CORES=y
+BR2_PACKAGE_LIBRETRO_SUPER_DEVICE="h700"
+
+# Standalone emulators and ports come from the emulators drop, not this build.
+BR2_PACKAGE_KNULLI_EXTERNAL_EMULATORS=y
+BR2_PACKAGE_IPUTILS=y
+
+# 32-bit (armhf) runtime for the 32-bit emulators this 64-bit image ships.
+# Installed from armhf-cache/drop/h700, built by "make h700-armhf-drop".
+BR2_PACKAGE_KNULLI_ARMHF_DROP=y
+BR2_PACKAGE_KNULLI_ARMHF_DROP_DEVICE="h700"

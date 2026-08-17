@@ -43,6 +43,11 @@ define MAKE_BUILDROOT
 		-C $(PROJECT_DIR)/buildroot
 endef
 
+# Where PROJECT_DIR appears to a command running in the build environment.  Used
+# by the drop targets, which run a script rather than buildroot and so have to
+# spell the path themselves.
+BUILD_ENV_DIR := $(PROJECT_DIR)
+
 else # DIRECT_BUILD
 	DOCKER         ?= docker
 
@@ -74,7 +79,13 @@ define MAKE_BUILDROOT
 			/build/buildroot
 endef
 
+BUILD_ENV_DIR := /build
+
 endif # DIRECT_BUILD
+
+# Prefix that puts a plain command in the same environment buildroot builds in:
+# the container, or nothing at all when building direct.
+RUN_IN_BUILD_ENV = $(if $(DIRECT_BUILD),,$(RUN_DOCKER))
 
 vars:
 	@echo "Supported targets:  $(TARGETS)"
@@ -125,8 +136,12 @@ dl-dir:
 %-clean: knulli-docker-image output-dir-%
 	@$(MAKE_BUILDROOT) clean
 
+# DEFCONFIG_SED edits the generated defconfig before buildroot reads it.  Used by
+# %-emulators-drop to build with the emulators back in, from the same board
+# config the images use -- so the drop cannot drift from the board it serves.
 %-config: knulli-docker-image output-dir-%
 	@$(PROJECT_DIR)/configs/createDefconfig.sh $(PROJECT_DIR)/configs/knulli-$*
+	$(if $(DEFCONFIG_SED),@sed -i '$(DEFCONFIG_SED)' $(PROJECT_DIR)/configs/knulli-$*_defconfig)
 	@for opt in $(EXTRA_OPTS); do \
 		echo $$opt >> $(PROJECT_DIR)/configs/knulli-$*_defconfig ; \
 	done
@@ -157,6 +172,193 @@ dl-dir:
 
 %-build-cmd:
 	@echo $(MAKE_BUILDROOT)
+
+CORES_DROP_PKGDIR  = $(PROJECT_DIR)/package/cores/libretro-super
+CORES_DROP_OVERLAY = $(CORES_DROP_PKGDIR)/overlay
+
+# In docker only PROJECT_DIR is mounted whole, so another board's output is
+# reachable only at its default place under it -- the same assumption
+# libretro-super.mk already documents for LIBRETRO_SUPER_SYSROOT_BIN.
+CORES_DROP_OUTPUT = $(if $(DIRECT_BUILD),$(OUTPUT_DIR),$(BUILD_ENV_DIR)/output)
+
+# Refresh the libretro core drop for the profile this board belongs to.
+#
+# The counterpart to %-emulators-drop, but deliberately WITHOUT a reference-board
+# gate.  An emulator is harvested FROM its reference board, so building it
+# anywhere else would bake the wrong board into the payload.  A core only LINKS
+# AGAINST that board's sysroot -- its ISA comes from the profile's wrapper
+# toolchain -- so the drop is identical whoever triggers it.  Here a gate would
+# be actively wrong rather than merely redundant: SYSROOT_BOARD is h700 for both
+# aarch64 profiles and h700 is a v8a board, so "run it on the reference board"
+# would leave aarch64-v8.2a with no board able to build it.
+#
+# So run it from any board ON the profile: "make t618-cores-drop" and
+# "make a527-cores-drop" produce the same aarch64-v8.2a drop.
+#
+# This does NOT build an image, and does not go through buildroot at all --
+# build-cores.sh takes plain arguments and needs no .config.  Going via
+# "%-build CMD=libretro-super" would build the TRIGGERING board's toolchain
+# first, which is wasted work when the sysroot comes from another board.
+#
+# Rare by design: cores change far less often than the image, which is the whole
+# reason they are not in it.  FORCE=1 rebuilds a drop that already exists.
+#
+# Cores that fail do not withhold the drop -- what did build is packaged, and
+# the drop records what is missing.  REQUIRE_ALL=1 asks for the opposite: any
+# failure and nothing is packaged.  See build-cores.sh.
+%-cores-drop: %-supported knulli-docker-image output-dir-%
+	@device_file=$(CORES_DROP_OVERLAY)/devices/$*.device; \
+	profile=$$(awk '$$1=="PROFILE"{print $$2}' $$device_file 2>/dev/null); \
+	test -n "$$profile" || { \
+		echo "cores-drop: no PROFILE for $* in $$device_file" >&2; \
+		exit 1; }; \
+	profile_file=$(CORES_DROP_OVERLAY)/profiles/$$profile.profile; \
+	sysroot_board=$$(awk '$$1=="SYSROOT_BOARD"{print $$2}' $$profile_file 2>/dev/null); \
+	test -n "$$sysroot_board" || { \
+		echo "cores-drop: no SYSROOT_BOARD in $$profile_file" >&2; \
+		exit 1; }; \
+	test -d $(OUTPUT_DIR)/$$sysroot_board/host/bin || { \
+		echo "cores-drop: profile $$profile builds against $$sysroot_board's sysroot," >&2; \
+		echo "  which has not been built: $(OUTPUT_DIR)/$$sysroot_board/host/bin" >&2; \
+		echo "" >&2; \
+		echo "  The reference board is named in the profile so the drop is the same" >&2; \
+		echo "  whichever board triggers it.  Run: make $$sysroot_board-build" >&2; \
+		exit 1; }; \
+	rev=$$(sed -n 's/^LIBRETRO_SUPER_VERSION *= *//p' \
+		$(CORES_DROP_PKGDIR)/libretro-super.mk); \
+	echo "cores-drop: $* -> profile $$profile (sysroot from $$sysroot_board)"; \
+	$(RUN_IN_BUILD_ENV) env LIBRETRO_SUPER_FORCE=$(FORCE) \
+		LIBRETRO_SUPER_UPDATE=$(UPDATE) \
+		LIBRETRO_SUPER_REQUIRE_ALL=$(REQUIRE_ALL) \
+		$(BUILD_ENV_DIR)/package/cores/libretro-super/build-cores.sh \
+		$$profile \
+		$(BUILD_ENV_DIR)/cores-cache \
+		$(CORES_DROP_OUTPUT)/$$sysroot_board/host/bin \
+		$(BUILD_ENV_DIR)/package/cores/libretro-super/overlay \
+		$(BUILD_ENV_DIR)/package/cores/libretro-super/super-patches \
+		$$rev
+
+# Refresh the emulator drop for the profile this board belongs to.
+#
+# This does NOT build an image.  It generates the board's config with
+# BR2_PACKAGE_KNULLI_EXTERNAL_EMULATORS unset -- so the emulators are back in and
+# every dependency resolves exactly as it does for the image -- and then asks
+# buildroot for those packages BY NAME.  Buildroot builds them and their
+# transitive dependencies and stops: no kernel, no rootfs, no kodi, no
+# emulationstation, none of the hundreds of packages an emulator does not need.
+# The closure still comes from buildroot rather than from a list maintained here,
+# which is the property worth keeping.
+#
+# It skips target-finalize as a result, which is where buildroot strips binaries
+# and deletes headers and static libs -- harvest-drop.py does both itself.
+#
+# Rare by design: the emulators change far less often than the image, which is
+# the whole reason they are not in it.  Keep the output dir between runs and a
+# refresh rebuilds only what changed.
+#
+# EMULATORS_DROP_DIR is a separate output dir on purpose, and must never be an
+# image build's: buildroot credits a file to a package by diffing target/ around
+# its install step, so a tree that has had the drop installed into it attributes
+# every unchanged payload file to nobody and harvests an incomplete payload.
+# harvest-drop.py refuses such a tree rather than trusting it.
+EMULATORS_DROP_OUTPUT ?= $(OUTPUT_DIR)/emulators-drop
+EMULATORS_DROP_DIR    ?= $(EMULATORS_DROP_OUTPUT)/$*
+
+EMULATORS_DROP_HARVEST = $(PROJECT_DIR)/package/emulators/knulli-emulators-drop/harvest-drop.py
+EMULATORS_DROP_SET     = $(PROJECT_DIR)/package/emulators/knulli-emulators-drop/emulators.set
+EMULATORS_DROP_PKGDIRS = \
+	--pkgdirs $(PROJECT_DIR)/batocera/package/batocera/emulators \
+	--pkgdirs $(PROJECT_DIR)/batocera/package/batocera/ports \
+	--pkgdirs $(PROJECT_DIR)/batocera/package/batocera/libraries \
+	--pkgdirs $(PROJECT_DIR)/package/emulators \
+	--pkgdirs $(PROJECT_DIR)/package/emulators/ports
+
+EMULATORS_DROP_GATE_OFF = DEFCONFIG_SED='/BR2_PACKAGE_KNULLI_EXTERNAL_EMULATORS/d'
+
+# Three steps: generate the gate-off config, work out which of emulators.set this
+# board actually enables, build exactly those.  The config has to exist before
+# the package list can be computed, which is why this is not one $(MAKE) call.
+%-emulators-drop: %-supported
+	@$(MAKE) $*-config OUTPUT_DIR=$(EMULATORS_DROP_OUTPUT) $(EMULATORS_DROP_GATE_OFF)
+	@targets=$$(python3 $(EMULATORS_DROP_HARVEST) --print-targets \
+		--config $(EMULATORS_DROP_DIR)/.config \
+		--set $(EMULATORS_DROP_SET) $(EMULATORS_DROP_PKGDIRS)); \
+	test -n "$$targets" || { echo "emulators-drop: no packages to build" >&2; exit 1; }; \
+	echo "emulators-drop: building $$(echo $$targets | wc -w) packages and their dependencies"; \
+	$(MAKE) $*-build OUTPUT_DIR=$(EMULATORS_DROP_OUTPUT) \
+		$(EMULATORS_DROP_GATE_OFF) CMD="$$targets"
+	@$(MAKE) $*-emulators-harvest
+
+# The drop must come from the PROFILE's reference board, not from whichever
+# board happens to run this.  The sysroot leaks into GL-linking emulators via the
+# sonames they record, and the aarch64-v8a boards are not all the same GPU stack
+# (a133 is PowerVR, the others Mali) -- harvesting from the triggering board
+# would make the drop's contents depend on build order.
+#
+# The reference is per (profile, GPU): EMULATORS_BOARD_<GPU> in the profile,
+# falling back to EMULATORS_BOARD then SYSROOT_BOARD for the Mali incumbent.
+# They are separate because a capability compiled out cannot be restored per
+# board: a Vulkan-less build makes ppsspp, flycast, gzdoom, raze and
+# mupen64plus Vulkan-less on every board on the ABI, however good their drivers
+# are.  So the emulator reference is the board with the richest capability set,
+# while SYSROOT_BOARD stays whatever the cores want to link against.
+%-emulators-reference: %-supported
+	@device=$(PROJECT_DIR)/package/cores/libretro-super/overlay/devices/$*.device; \
+	profile=$$(awk '$$1=="PROFILE"{print $$2}' $$device); \
+	gpu=$$(awk '$$1=="GPU"{print $$2}' $$device); \
+	pf=$(PROJECT_DIR)/package/cores/libretro-super/overlay/profiles/$$profile.profile; \
+	key=$$(echo "$$gpu" | tr 'a-z' 'A-Z'); \
+	ref=""; \
+	if [ -n "$$key" ] && [ "$$gpu" != "mali" ]; then \
+		ref=$$(awk -v k="EMULATORS_BOARD_$$key" '$$1==k{print $$2}' $$pf); \
+		test -n "$$ref" || { \
+			echo "emulators-drop: no EMULATORS_BOARD_$$key in $$pf" >&2; \
+			echo "  $* is $$gpu on $$profile and needs its own drop; name its" >&2; \
+			echo "  reference board in the profile before harvesting." >&2; \
+			exit 1; }; \
+	else \
+		ref=$$(awk '$$1=="EMULATORS_BOARD"{print $$2}' $$pf); \
+		test -n "$$ref" || ref=$$(awk '$$1=="SYSROOT_BOARD"{print $$2}' $$pf); \
+	fi; \
+	if [ "$$ref" != "$*" ]; then \
+		echo "emulators-drop: $* is not the reference board for $$profile/$$gpu ($$ref is)." >&2; \
+		echo "  Harvesting here would tie the drop to $*'s sysroot and GPU stack." >&2; \
+		echo "  Run: make $$ref-emulators-drop" >&2; \
+		exit 1; \
+	fi
+
+%-emulators-harvest: %-supported %-emulators-reference
+	@python3 $(EMULATORS_DROP_HARVEST) \
+		--output-dir $(EMULATORS_DROP_DIR) \
+		--profile $$(awk '$$1=="PROFILE"{p=$$2} $$1=="GPU"{g=$$2} \
+			END{if (g=="" || g=="mali") print p; else print p "-" g}' \
+			$(PROJECT_DIR)/package/cores/libretro-super/overlay/devices/$*.device) \
+		--cache $(PROJECT_DIR)/emulators-cache \
+		--set $(EMULATORS_DROP_SET) $(EMULATORS_DROP_PKGDIRS) \
+		--readelf $(EMULATORS_DROP_DIR)/host/bin/$$(ls $(EMULATORS_DROP_DIR)/host/bin | grep -m1 -- '-readelf$$')
+
+# Refresh the 32-bit (armhf) runtime drop for this board.
+#
+# Keyed on the BOARD, not on an ABI profile -- the one way this differs from the
+# cores and emulators drops.  Every <board>_armhf_libs config pins that board's
+# kernel headers (4.9.170 / 4.4.189 / 5.10.209 ...) and its own Mali userspace
+# (mali-g31-fbdev vs mali-g31-gbm ...), so two SoCs cannot share one payload.
+#
+# The build unit is the <board>_armhf_libs config that already exists, so this
+# is just "build that, then harvest it": no gate to flip, no package list.  The
+# harvest runs on the host like %-emulators-harvest -- it is rsync over two
+# directories under PROJECT_DIR and needs nothing from the container.
+ARMHF_DROP_PKGDIR  = $(PROJECT_DIR)/package/system/knulli-armhf-drop
+ARMHF_DROP_HARVEST = $(ARMHF_DROP_PKGDIR)/harvest-armhf.sh
+ARMHF_DROP_CACHE   = $(PROJECT_DIR)/armhf-cache
+
+%-armhf-drop: %-supported
+	@test -f $(PROJECT_DIR)/configs/knulli-$*_armhf_libs.board || { \
+		echo "armhf-drop: $* has no 32-bit companion config" >&2; \
+		echo "  expected: configs/knulli-$*_armhf_libs.board" >&2; \
+		exit 1; }
+	@$(MAKE) $*_armhf_libs-build
+	@$(ARMHF_DROP_HARVEST) $* $(OUTPUT_DIR)/$*_armhf_libs/target $(ARMHF_DROP_CACHE)
 
 %-cleanbuild: %-clean %-build
 	@echo

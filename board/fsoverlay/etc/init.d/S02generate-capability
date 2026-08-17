@@ -84,6 +84,19 @@ case "$ARCH" in
         BOARD_CAPABILITIES[hud]="rg-vita-pro"
         BOARD_CAPABILITIES[fan]="rg-vita-pro"
         ;;
+    sm8550)
+        # knulli.board holds KNULLI_SUBTARGET, and sm8550 ships one image for all
+        # its devices (unlike sm8250, which builds per device), so the board name
+        # is the SoC itself.  Split this list per device if that ever changes.
+        BOARD_CAPABILITIES[hdmi]="sm8550"
+        BOARD_CAPABILITIES[wifi]="sm8550"
+        BOARD_CAPABILITIES[bluetooth]="sm8550"
+        BOARD_CAPABILITIES[analogstick]="sm8550"
+        BOARD_CAPABILITIES[rumble]="sm8550"
+        BOARD_CAPABILITIES[adb]="sm8550"
+        BOARD_CAPABILITIES[hud]="sm8550"
+        BOARD_CAPABILITIES[fan]="sm8550"
+        ;;
     sm8250)
         BOARD_CAPABILITIES[rgb]="rp5 rpflip2 rpmini rpminiv2"
         BOARD_CAPABILITIES[hdmi]="rp5 rpflip2 rpmini rpminiv2"
@@ -106,6 +119,13 @@ case "$ARCH" in
         BOARD_CAPABILITIES[fan]="trimui-smart-pro-s"
         BOARD_CAPABILITIES[toggleswitch]="trimui-smart-pro-s"
         ;;
+    t618)
+        BOARD_CAPABILITIES[wifi]="t618"
+        BOARD_CAPABILITIES[bluetooth]="t618"
+        BOARD_CAPABILITIES[rumble]="t618"
+        BOARD_CAPABILITIES[adb]="t618"
+        BOARD_CAPABILITIES[hud]="t618"
+	;;
     *)
         echo "Unknown ARCH: $ARCH — skipping."
         exit 0

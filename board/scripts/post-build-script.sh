@@ -166,22 +166,27 @@ echo "###########################"
 echo "###########################"
 echo "###########################"
 
-# Begin 32bit package install
-if [ "${KNULLI_TARGET}" = "RK3326" ]; then
-    echo ""
-    echo "========================================"
-    echo "Installing 32-bit ARM libraries..."
-    echo "========================================"
-    
-    LIBS32_SCRIPT="${BR2_EXTERNAL_KNULLI_PATH}/board/scripts/install-32bit-libs.sh"
-    
-    if [ -f "${LIBS32_SCRIPT}" ]; then
-        bash "${LIBS32_SCRIPT}" "${TARGET_DIR}" "${BASE_DIR}"
-    else
-        echo "WARNING: 32-bit libs install script not found at: ${LIBS32_SCRIPT}"
-    fi
+# The 32-bit (armhf) runtime is installed by the knulli-armhf-drop package from
+# armhf-cache/, not from here.  What used to be in this spot reached into
+# output/<board>_armhf_libs/target, only ran for RK3326, and passed TARGET_DIR
+# where install-32bit-libs.sh expected a board name -- so it always took its
+# "not found" path and skipped.  See package/system/knulli-armhf-drop.
+
+# Check that the rootfs provides what the emulator drop's binaries link against.
+# Here rather than in the package: knulli-emulators-drop depends only on the
+# toolchain, so it can be installed before those libraries are, and the 32-bit
+# layer above lands later still.  This is the first point where the rootfs is
+# what the image will actually ship.
+#
+# Gated on the config symbol, not on the file existing: staging/ is not cleaned
+# between builds, so a build made with the gate off still finds the list a
+# previous gate-on build left behind and would check a drop it never installed.
+EMULATORS_SONAMES="${STAGING_DIR}/usr/share/knulli/emulators-drop-sonames.list"
+if grep -q "^BR2_PACKAGE_KNULLI_EMULATORS_DROP=y$" "${BR2_CONFIG}" && \
+   [ -f "${EMULATORS_SONAMES}" ]; then
+    CHECK_SONAMES="${BR2_EXTERNAL_KNULLI_PATH}/package/emulators/knulli-emulators-drop/check-sonames.sh"
+    bash "${CHECK_SONAMES}" "${EMULATORS_SONAMES}" "${TARGET_DIR}" || exit 1
 fi
-# -- end 32bit package install
 
 # remove kodi default joystick configuration files
 # while as a minimum, the file joystick.Sony.PLAYSTATION(R)3.Controller.xml makes references to PS4 controllers with axes which doesn't exist (making kodi crashing)
@@ -278,4 +283,28 @@ if [ -d "${TARGET_DIR}/usr/share/batocera" ]; then
     echo "Removed batocera directory"
 else
     echo "No batocera directory found, skipping..."
+fi
+
+# Guard: the real Vulkan loader must survive
+#
+# A vendor GPU blob that ships its own libvulkan.so.1 can overwrite
+# vulkan-loader's file, because the loader installs libvulkan.so.1 as a symlink
+# to libvulkan.so.1.4.x and a plain copy writes through it.  The replacement
+# still resolves every core entry point, so nothing fails to build or run --
+# but ICD manifests and Vulkan layers are silently ignored from then on.
+# The real loader is ~600K; a vendor stub is a few tens of K.
+LOADER=$(ls "${TARGET_DIR}"/usr/lib/libvulkan.so.1.* 2>/dev/null | head -1)
+if [ -n "$LOADER" ]; then
+    LOADER_SIZE=$(stat -c %s "$LOADER")
+    if [ "$LOADER_SIZE" -lt 262144 ]; then
+        echo "post-build: $LOADER is ${LOADER_SIZE} bytes -- too small to be the"
+        echo "            Khronos loader.  A GPU blob has overwritten it, so ICD"
+        echo "            manifests and Vulkan layers will be ignored at runtime."
+        echo "            On an incremental tree the loader is not reinstalled on"
+        echo "            its own -- force it:  make <board>-shell BATCH_MODE=1 \\"
+        echo "              CMD=\"make O=/<board> BR2_EXTERNAL=/build -C /build/buildroot \\"
+        echo "                   vulkan-loader-reinstall\""
+        exit 1
+    fi
+    echo "Vulkan loader intact (${LOADER_SIZE} bytes)"
 fi

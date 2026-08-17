@@ -92,3 +92,21 @@ BR2_PACKAGE_XUTIL_UTIL_MACROS=y
 # ADB
 BR2_PACKAGE_ANDROID_TOOLS=y
 BR2_PACKAGE_ANDROID_TOOLS_ADBD=y
+
+# Libretro cores are NOT compiled by Buildroot.  The gate below turns off every
+# "select BR2_PACKAGE_LIBRETRO_*" in knulli-system/Config.in; the cores come
+# from the external libretro-super build instead (package/cores/libretro-super).
+#
+# The DEVICE names which devices/<name>.device file describes this board, and
+# that file names the ABI profile it consumes.  Boards sharing a profile share
+# the compiled cores: the drop is built once and reused, so only the first
+# board on a given ABI pays the compile.
+BR2_PACKAGE_KNULLI_EXTERNAL_LIBRETRO_CORES=y
+BR2_PACKAGE_LIBRETRO_SUPER_DEVICE="rk3566"
+BR2_PACKAGE_IPUTILS=y
+BR2_PACKAGE_MPV=y
+
+# 32-bit (armhf) runtime for the 32-bit emulators this 64-bit image ships.
+# Installed from armhf-cache/drop/rk3566, built by "make rk3566-armhf-drop".
+BR2_PACKAGE_KNULLI_ARMHF_DROP=y
+BR2_PACKAGE_KNULLI_ARMHF_DROP_DEVICE="rk3566"

@@ -4,10 +4,8 @@
 #
 ################################################################################
 
-MALI_LIBS_VERSION = 5a4d5c16d51fdd8659af9072eaf6b83c52b1cd86
-#MALI_LIBS_VERSION = master
-#MALI_LIBS_SITE = https://github.com/knulli-cfw/libmali.git
-MALI_LIBS_SITE = https://github.com/ROCKNIX/libmali.git
+MALI_LIBS_VERSION = 746bafbc5eb7d52b68a71d1bd673d51730c31aae
+MALI_LIBS_SITE = https://github.com/knulli-cfw/libmali-next.git
 MALI_LIBS_SITE_METHOD = git
 MALI_LIBS_LICENSE = Proprietary
 MALI_LIBS_LICENSE_FILES = END_USER_LICENCE_AGREEMENT.txt
@@ -35,20 +33,33 @@ endif
 # Determine GPU and architecture
 ifeq ($(BR2_PACKAGE_BATOCERA_TARGET_RK3588),y)
 MALI_LIBS_GPU = valhall-g610
-MALI_LIBS_VERSION_GPU = g6p0
+MALI_LIBS_VERSION_GPU = g29p1
 else
 # Default to G52 (covers RK3566/RK3568)
 MALI_LIBS_GPU = bifrost-g52
-MALI_LIBS_VERSION_GPU = g13p0
+MALI_LIBS_VERSION_GPU = g29p1
 endif
 
 ifeq ($(BR2_aarch64),y)
 MALI_LIBS_ARCH = aarch64-linux-gnu
+MALI_LIBS_WSI_ARCH = aarch64
 else
 MALI_LIBS_ARCH = arm-linux-gnueabihf
+MALI_LIBS_WSI_ARCH = arm
 endif
 
-MALI_LIBS_SO_NAME = libmali-$(MALI_LIBS_GPU)-$(MALI_LIBS_VERSION_GPU)-wayland-gbm.so
+MALI_LIBS_SO_NAME = libmali-$(MALI_LIBS_GPU)-$(MALI_LIBS_VERSION_GPU).so
+
+# gbm.pc's Version is what consumers version-check against, so it has to match
+# the gbm.h actually installed -- upstream ships several, and the .pc used to
+# claim 21.0.0 regardless.  weston 14 requires >= 21.1.1 and failed configure on
+# that stale string.  Verified against the blob's exports: 21.1.0 and 23.1.3 are
+# fully implemented, 17.1.0 and older are not (gbm_surface_needs_lock_front_buffer
+# is missing), so picking the newest header is also picking a supported API.
+#
+# Used only if upstream ever flattens include/GBM/<version>/ to include/GBM/,
+# where the version stops being discoverable.  Re-check it against the blob then.
+MALI_LIBS_GBM_VERSION_FLAT = 23.1.3
 
 define MALI_LIBS_INSTALL_STAGING_CMDS
     # Install library
@@ -73,9 +84,28 @@ define MALI_LIBS_INSTALL_STAGING_CMDS
     # Install headers - copy all subdirectories from include/
     cp -r $(@D)/include/* $(STAGING_DIR)/usr/include/
     
-    # GBM header needs to be at the top level (gbm.h expects to be included as <gbm.h>)
-    if [ -f $(STAGING_DIR)/usr/include/GBM/gbm.h ]; then \
-        cp $(STAGING_DIR)/usr/include/GBM/gbm.h $(STAGING_DIR)/usr/include/; \
+    # gbm.h has to be includable as <gbm.h>.  Upstream has shipped it two ways:
+    # include/GBM/gbm.h, and include/GBM/<mesa-version>/gbm.h with several
+    # versions side by side.  Handle both, newest version when they are nested.
+    #
+    # Loud on failure on purpose.  As a silent "if the file exists" this cost an
+    # rk3576 build: no header was installed, and it surfaced much later as sdl2
+    # failing to compile its KMSDRM backend on "gbm.h: No such file or
+    # directory", with nothing pointing back to the GPU package.
+    if [ -f $(@D)/include/GBM/gbm.h ]; then \
+        $(INSTALL) -D -m 0644 $(@D)/include/GBM/gbm.h \
+            $(STAGING_DIR)/usr/include/gbm.h; \
+        echo "$(MALI_LIBS_GBM_VERSION_FLAT)" > $(@D)/.gbm-version; \
+    else \
+        gbmdir=$$(ls -1d $(@D)/include/GBM/*/ 2>/dev/null | sort -V | tail -1); \
+        if [ -z "$$gbmdir" ] || [ ! -f "$$gbmdir/gbm.h" ]; then \
+            echo "mali-libs: no gbm.h under include/GBM -- this package provides" >&2; \
+            echo "  libgbm, so every KMSDRM consumer will fail to build" >&2; \
+            exit 1; \
+        fi; \
+        echo "mali-libs: gbm.h from $$(basename $$gbmdir)"; \
+        $(INSTALL) -D -m 0644 "$$gbmdir/gbm.h" $(STAGING_DIR)/usr/include/gbm.h; \
+        basename "$$gbmdir" > $(@D)/.gbm-version; \
     fi
     
     # Create pkg-config files
@@ -90,7 +120,7 @@ define MALI_LIBS_INSTALL_STAGING_CMDS
         echo ''; \
         echo 'Name: gbm'; \
         echo 'Description: Generic Buffer Management'; \
-        echo 'Version: 21.0.0'; \
+        echo "Version: $$(cat $(@D)/.gbm-version)"; \
         echo 'Requires.private: libdrm'; \
         echo 'Libs: -L$${libdir} -lgbm'; \
         echo 'Cflags: -I$${includedir}'; \
@@ -126,6 +156,20 @@ define MALI_LIBS_INSTALL_STAGING_CMDS
         echo 'Cflags: -I$${includedir}'; \
     ) > $(STAGING_DIR)/usr/lib/pkgconfig/glesv2.pc
 
+    # Install Vulkan ICD to staging
+    mkdir -p $(STAGING_DIR)/etc/vulkan/icd.d
+    sed 's|@LIB@|/usr/lib/libmali.so.1|g' \
+        $(@D)/data/vulkan/mali.json.in > $(STAGING_DIR)/etc/vulkan/icd.d/mali.json
+
+    # Install Vulkan implicit layer (WSI) to staging
+    $(INSTALL) -D -m 0755 \
+        $(@D)/data/vulkan/lib/$(MALI_LIBS_WSI_ARCH)/libVkLayer_window_system_integration.so \
+        $(STAGING_DIR)/usr/lib/libVkLayer_window_system_integration.so
+    mkdir -p $(STAGING_DIR)/etc/vulkan/implicit_layer.d
+    sed 's|@LIB@|/usr/lib/libVkLayer_window_system_integration.so|g' \
+        $(@D)/data/vulkan/VkLayer_window_system_integration.json.in \
+        > $(STAGING_DIR)/etc/vulkan/implicit_layer.d/VkLayer_window_system_integration.json
+
 endef
 
 define MALI_LIBS_INSTALL_TARGET_CMDS
@@ -133,7 +177,10 @@ define MALI_LIBS_INSTALL_TARGET_CMDS
     $(INSTALL) -D -m 0755 $(@D)/lib/$(MALI_LIBS_ARCH)/$(MALI_LIBS_SO_NAME) \
         $(TARGET_DIR)/usr/lib/libmali.so.1
     ln -sf libmali.so.1 $(TARGET_DIR)/usr/lib/libmali.so
-    
+    # The aarch64-v8.2a emulator drop is built on a527, whose blob declares
+    # soname libmali.so.0, so its binaries need that filename to load here.
+    ln -sf libmali.so.1 $(TARGET_DIR)/usr/lib/libmali.so.0
+
     # Create symlinks for EGL
     ln -sf libmali.so.1 $(TARGET_DIR)/usr/lib/libEGL.so.1
     ln -sf libEGL.so.1 $(TARGET_DIR)/usr/lib/libEGL.so
@@ -147,6 +194,20 @@ define MALI_LIBS_INSTALL_TARGET_CMDS
     # Create symlinks for GBM
     ln -sf libmali.so.1 $(TARGET_DIR)/usr/lib/libgbm.so.1
     ln -sf libgbm.so.1 $(TARGET_DIR)/usr/lib/libgbm.so
+
+    # Install Vulkan ICD
+    mkdir -p $(TARGET_DIR)/etc/vulkan/icd.d
+    sed 's|@LIB@|/usr/lib/libmali.so.1|g' \
+        $(@D)/data/vulkan/mali.json.in > $(TARGET_DIR)/etc/vulkan/icd.d/mali.json
+
+    # Install Vulkan implicit layer (WSI)
+    $(INSTALL) -D -m 0755 \
+        $(@D)/data/vulkan/lib/$(MALI_LIBS_WSI_ARCH)/libVkLayer_window_system_integration.so \
+        $(TARGET_DIR)/usr/lib/libVkLayer_window_system_integration.so
+    mkdir -p $(TARGET_DIR)/etc/vulkan/implicit_layer.d
+    sed 's|@LIB@|/usr/lib/libVkLayer_window_system_integration.so|g' \
+        $(@D)/data/vulkan/VkLayer_window_system_integration.json.in \
+        > $(TARGET_DIR)/etc/vulkan/implicit_layer.d/VkLayer_window_system_integration.json
 endef
 
 $(eval $(generic-package))

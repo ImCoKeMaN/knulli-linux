@@ -54,3 +54,23 @@ BR2_PACKAGE_BATOCERA_SPLASH_MPV=n
 
 BR2_PACKAGE_XCB_UTIL_KEYSYMS=y
 
+
+# Libretro cores are NOT compiled by Buildroot.  The gate below turns off every
+# "select BR2_PACKAGE_LIBRETRO_*" in knulli-system/Config.in; the cores come
+# from the external libretro-super build instead (package/cores/libretro-super).
+#
+# The DEVICE names which devices/<name>.device file describes this board, and
+# that file names the ABI profile it consumes.  Boards sharing a profile share
+# the compiled cores: the drop is built once and reused, so only the first
+# board on a given ABI pays the compile.
+BR2_PACKAGE_KNULLI_EXTERNAL_LIBRETRO_CORES=y
+BR2_PACKAGE_LIBRETRO_SUPER_DEVICE="sm8250"
+BR2_PACKAGE_IPUTILS=y
+BR2_PACKAGE_MPV=y
+
+# NO emulators drop for this board.  The drop is keyed on the ABI profile alone,
+# and aarch64-v8.2a is harvested from a527 -- a MALI board.  sm8250/sm8550 are
+# Adreno/freedreno and ship no libmali at all, so the payload fails the soname
+# check on libmali.so.0 (plus ffmpeg/icu drift).  Emulators link the GPU stack,
+# so an emulators drop has to be keyed on ABI *and* GPU vendor, the same reason
+# knulli-armhf-drop is keyed per board.  Until that exists, build them here.

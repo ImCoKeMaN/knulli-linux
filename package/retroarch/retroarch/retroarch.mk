@@ -45,8 +45,13 @@ else
     RETROARCH_CONF_OPTS += --disable-videocore
 endif
 
-ifeq ($(BR2_PACKAGE_LIBDRM),y)
+# KMS needs GBM as well as libdrm.  libdrm is selected everywhere now, but the
+# fbdev Mali boards have no GBM provider, and retroarch's configure hard-errors
+# on "GBM is disabled and forced to build with KMS support".
+ifeq ($(BR2_PACKAGE_LIBDRM)$(BR2_PACKAGE_HAS_LIBGBM),yy)
     RETROARCH_CONF_OPTS += --enable-kms
+else
+    RETROARCH_CONF_OPTS += --disable-kms
 endif
 
 ifeq ($(BR2_ARM_FPU_NEON_VFPV4)$(BR2_ARM_FPU_NEON)$(BR2_ARM_FPU_NEON_FP_ARMV8),y)

@@ -22,6 +22,9 @@ DOLPHIN_EMU_DEPENDENCIES += dolphin-triforce
 endif
 
 DOLPHIN_EMU_CONF_OPTS  = -DCMAKE_BUILD_TYPE=Release
+# cmake 4 dropped compatibility with cmake_minimum_required(VERSION < 3.5);
+# Externals/pugixml at this dolphin revision declares 2.8.12
+DOLPHIN_EMU_CONF_OPTS += -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 DOLPHIN_EMU_CONF_OPTS += -DBUILD_SHARED_LIBS=OFF
 DOLPHIN_EMU_CONF_OPTS += -DDISTRIBUTOR='batocera.linux'
 DOLPHIN_EMU_CONF_OPTS += -DUSE_DISCORD_PRESENCE=OFF

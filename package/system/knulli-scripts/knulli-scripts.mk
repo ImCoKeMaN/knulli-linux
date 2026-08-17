@@ -29,7 +29,9 @@ ifeq ($(BR2_PACKAGE_BATOCERA_WAYLAND_LABWC),y)
 endif
 ###
 
-ifeq ($(BR2_PACKAGE_BATOCERA_TARGET_SM8250),y)
+# Both Qualcomm targets: sm8550's fsoverlay ships etc/init.d/S06qcom-fan, which
+# runs this binary.
+ifneq ($(BR2_PACKAGE_BATOCERA_TARGET_SM8250)$(BR2_PACKAGE_BATOCERA_TARGET_SM8550),)
   KNULLI_SCRIPTS_POST_INSTALL_TARGET_HOOKS += KNULLI_SCRIPTS_INSTALL_QCOM
 endif
 

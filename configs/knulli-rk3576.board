@@ -74,3 +74,26 @@ BR2_PACKAGE_VITA_PRO_MODULES=y
 # ADB
 BR2_PACKAGE_ANDROID_TOOLS=y
 BR2_PACKAGE_ANDROID_TOOLS_ADBD=y
+
+# Libretro cores are NOT compiled by Buildroot.  The gate below turns off every
+# "select BR2_PACKAGE_LIBRETRO_*" in knulli-system/Config.in; the cores come
+# from the external libretro-super build instead (package/cores/libretro-super).
+#
+# The DEVICE names which devices/<name>.device file describes this board, and
+# that file names the ABI profile it consumes.  Boards sharing a profile share
+# the compiled cores: the drop is built once and reused, so only the first
+# board on a given ABI pays the compile.
+BR2_PACKAGE_KNULLI_EXTERNAL_LIBRETRO_CORES=y
+BR2_PACKAGE_LIBRETRO_SUPER_DEVICE="rk3576"
+
+# Vulkan via the loader shim and the mali blob's ICD, as on a133 and a527 -- not
+# batocera's mesa-driver path.  Reference board for the aarch64-v8a emulator
+# drop, so this is also what compiles the payload's Vulkan backends.
+BR2_PACKAGE_KNULLI_MALI_G52_VULKAN=y
+
+# Consumes the drop like every other board on the profile.  Being the reference
+# board is not a reason to compile them twice: make rk3576-emulators-drop strips
+# this symbol for its own build, so producing the drop still works.
+BR2_PACKAGE_KNULLI_EXTERNAL_EMULATORS=y
+BR2_PACKAGE_IPUTILS=y
+BR2_PACKAGE_MPV=y

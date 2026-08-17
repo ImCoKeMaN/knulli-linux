@@ -374,10 +374,6 @@ nds:
       desmume:    { requireAnyOf: [BR2_PACKAGE_LIBRETRO_DESMUME] }
       melonds:    { requireAnyOf: [BR2_PACKAGE_LIBRETRO_MELONDS] }
       melondsds:  { requireAnyOf: [BR2_PACKAGE_LIBRETRO_MELONDS_DS] }
-    melonds:
-      melonds: { requireAnyOf: [BR2_PACKAGE_MELONDS] }
-    drastic:
-      drastic: { requireAnyOf: [BR2_PACKAGE_DRASTIC], incompatible_extensions: [7z] }
     advanced_drastic:
       advanced_drastic: { requireAnyOf: [BR2_PACKAGE_ADVANCED_DRASTIC], incompatible_extensions: [7z] }
 
@@ -922,6 +918,7 @@ mame:
       mame078plus:  { requireAnyOf: [BR2_PACKAGE_LIBRETRO_MAME2003_PLUS]  }
       mame0139:     { requireAnyOf: [BR2_PACKAGE_LIBRETRO_MAME2010]       }
       mame:         { requireAnyOf: [BR2_PACKAGE_LIBRETRO_MAME]           }
+      mame2003_xtreme: { requireAnyOf: [BR2_PACKAGE_LIBRETRO_MAME2003_XTREME] }
     mame:
       mame:         { requireAnyOf: [BR2_PACKAGE_MAME]                    }
 
@@ -999,6 +996,7 @@ colecovision:
   emulators:
     libretro:
       bluemsx: { requireAnyOf: [BR2_PACKAGE_LIBRETRO_BLUEMSX] }
+      gearcoleco: { requireAnyOf: [BR2_PACKAGE_LIBRETRO_GEARCOLECO] }
     openmsx:
       openmsx: { requireAnyOf: [BR2_PACKAGE_OPENMSX] }
   comment_en: |
@@ -2216,10 +2214,9 @@ x1:
   emulators:
     azahar:
       azahar: { requireAnyOf: [BR2_PACKAGE_AZAHAR] }
-    citra:
-      citra: { requireAnyOf: [BR2_PACKAGE_CITRA]          }
     libretro:
-      citra: { requireAnyOf: [BR2_PACKAGE_LIBRETRO_CITRA] }
+      azahar: { requireAnyOf: [BR2_PACKAGE_LIBRETRO_AZAHAR] }
+      panda3ds: { requireAnyOf: [BR2_PACKAGE_LIBRETRO_PANDA3DS] }
 
 openbor:
   name: OpenBOR
