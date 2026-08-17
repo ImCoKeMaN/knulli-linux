@@ -38,6 +38,3 @@ batocera-mok.key
 /cores-cache
 /emulators-cache
 /armhf-cache
-
-# convenience symlink into the batocera submodule
-/python-src
