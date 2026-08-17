@@ -7,7 +7,8 @@ KNULLI_OVERRIDE_PACKAGES = libretro-flycastvl es-background-musics retroarch-ass
 							batocera-triggerhappy azahar zramswap syncthing \
 							libretro-gpsp libretro-melonds-ds dolphin-emu vita3k gzdoom \
 							rocknix-abl rocknix-joypad libretro-gearcoleco \
-							cargo-c sdl3 wildmidi
+							cargo-c sdl3 wildmidi \
+							ppsspp
 
 # Knulli packages
 include $(sort $(wildcard $(BR2_EXTERNAL_KNULLI_PATH)/package/audio/*/*.mk \
