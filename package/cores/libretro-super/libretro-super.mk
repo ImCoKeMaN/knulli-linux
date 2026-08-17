@@ -103,14 +103,33 @@ define LIBRETRO_SUPER_INSTALL_STAGING_CMDS
 		$(LIBRETRO_SUPER_ES_CORELIST)
 endef
 
+# The cores do NOT go into the rootfs.  They are staged here and turned into
+# their own squashfs by post-image-script.sh, which the image mounts over
+# /usr/lib/libretro at boot (board/fsoverlay/etc/init.d/S07mount-cores).  The
+# squashfs root IS that directory, so the cores sit at the top level of it.
+LIBRETRO_SUPER_CORES_ROOT = $(BINARIES_DIR)/cores-root
+LIBRETRO_SUPER_MANIFEST = $(BINARIES_DIR)/cores.manifest
+
 # The drop is laid out so this is a plain recursive copy.  Every per-core
 # decision -- renames (mednafen_pce -> pce), exclude rules (fbneo's "light"
 # DATs), which payload comes from which checkout -- was already resolved by
 # make-drop.sh, where the core checkouts are.  Nothing here knows about
 # individual cores, which is what stops this file rotting as cores come and go.
+#
+# assets/ and the knulli.list payload stay in the rootfs: they are datainit,
+# .info files and evmapy keys, none of which the mount point covers.
 define LIBRETRO_SUPER_INSTALL_TARGET_CMDS
+	rm -rf $(LIBRETRO_SUPER_CORES_ROOT)
+	mkdir -p $(LIBRETRO_SUPER_CORES_ROOT)
+	cp -a $(LIBRETRO_SUPER_DROP)/cores/. $(LIBRETRO_SUPER_CORES_ROOT)/
+	$(LIBRETRO_SUPER_PKGDIR)/gen-cores-manifest.sh \
+		$(LIBRETRO_SUPER_CORES_ROOT) \
+		$(LIBRETRO_SUPER_PROFILE) \
+		$(LIBRETRO_SUPER_VERSION) \
+		$(LIBRETRO_SUPER_MANIFEST)
+	$(INSTALL) -D -m 0644 $(LIBRETRO_SUPER_MANIFEST) \
+		$(LIBRETRO_SUPER_CORES_ROOT)/cores.manifest
 	mkdir -p $(TARGET_DIR)/usr/lib/libretro
-	cp -a $(LIBRETRO_SUPER_DROP)/cores/. $(TARGET_DIR)/usr/lib/libretro/
 	if [ -d $(LIBRETRO_SUPER_DROP)/assets ]; then \
 		cp -a $(LIBRETRO_SUPER_DROP)/assets/. $(TARGET_DIR)/; \
 	fi

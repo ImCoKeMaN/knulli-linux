@@ -51,6 +51,41 @@ SUFFIXVERSION=$(awk '{if ($1 ~ /^[0-9\.]+$/) print $1; else print $1}' "${TARGET
 
 SUFFIXDATE=$(date +%Y%m%d)
 
+##### build the cores squashfs ##
+# The libretro cores are staged outside TARGET_DIR by libretro-super and shipped
+# as their own image beside the rootfs one, mounted over /usr/lib/libretro by
+# S07mount-cores.  Absent on boards that build cores into the rootfs.
+CORES_ROOT="${BINARIES_DIR}/cores-root"
+CORES_SQUASHFS="${BINARIES_DIR}/cores.squashfs"
+if test -d "${CORES_ROOT}"
+then
+    # Match the rootfs compressor so the two images behave the same on a board.
+    CORES_COMP=gzip
+    for c in zstd xz lz4 lzo gzip
+    do
+        if grep -qE "^BR2_TARGET_ROOTFS_SQUASHFS4_$(echo "$c" | tr '[:lower:]' '[:upper:]')=y$" "${BR2_CONFIG}"
+        then
+            CORES_COMP="$c"
+            break
+        fi
+    done
+    echo "creating cores.squashfs (${CORES_COMP})"
+    rm -f "${CORES_SQUASHFS}" || exit 1
+    "${HOST_DIR}/bin/mksquashfs" "${CORES_ROOT}" "${CORES_SQUASHFS}" \
+        -noappend -all-root -comp "${CORES_COMP}" || exit 1
+elif grep -qE "^BR2_PACKAGE_KNULLI_EXTERNAL_LIBRETRO_CORES=y$" "${BR2_CONFIG}"
+then
+    # Same rule as a missing drop: shipping an image with no cores at all is a
+    # build error, not something to discover on the device.
+    echo "post-image: ${CORES_ROOT} is missing, but this board uses external" >&2
+    echo "libretro cores -- the image would ship without any.  Rebuild the" >&2
+    echo "package that stages them:  make <board>-pkg PKG=libretro-super" >&2
+    exit 1
+else
+    rm -f "${CORES_SQUASHFS}"
+fi
+################################
+
 #### build the images ###########
 for KNULLI_PATHSUBTARGET in ${KNULLI_IMAGES_TARGETS}
 do
@@ -64,6 +99,13 @@ do
     # add some common files
     cp     "${BINARIES_DIR}/knulli-boot.conf" "${KNULLI_BINARIES_DIR}/boot/" || exit 1
     echo   "${KNULLI_SUBTARGET}" > "${KNULLI_BINARIES_DIR}/boot/boot/knulli.board" || exit 1
+
+    # the cores image, beside the rootfs one
+    if test -f "${CORES_SQUASHFS}"
+    then
+        cp "${CORES_SQUASHFS}" "${KNULLI_BINARIES_DIR}/boot/boot/cores" || exit 1
+        cp "${BINARIES_DIR}/cores.manifest" "${KNULLI_BINARIES_DIR}/boot/boot/cores.manifest" || exit 1
+    fi
 
     #### create the update signatures (after boot dir is assembled so we hash the actual on-device files) #####
     KNULLI_SIGNATURES_SCRIPT="${BR2_EXTERNAL_KNULLI_PATH}/board/scripts/generate_signature.sh"
