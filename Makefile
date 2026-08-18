@@ -275,10 +275,26 @@ EMULATORS_DROP_PKGDIRS = \
 
 EMULATORS_DROP_GATE_OFF = DEFCONFIG_SED='/BR2_PACKAGE_KNULLI_EXTERNAL_EMULATORS/d'
 
+EMULATORS_DROP_REFERENCE = \
+	$(PROJECT_DIR)/package/emulators/knulli-emulators-drop/reference-board.sh \
+	$(PROJECT_DIR)/package/cores/libretro-super/overlay
+
+# A drop is shared by every board on its (profile, GPU), so asking for one from a
+# consumer board is a reasonable thing to do -- it just has to be refreshed on
+# the reference board.  So redirect there instead of refusing, and decide BEFORE
+# building: the gate below used to be reached only at harvest time, after the
+# whole package set had been compiled for a board that could never keep it.
+%-emulators-drop: %-supported
+	@ref=$$($(EMULATORS_DROP_REFERENCE) $*) || exit 1; \
+	if [ "$$ref" != "$*" ]; then \
+		echo "emulators-drop: $* consumes the drop built on $$ref -- refreshing it there."; \
+	fi; \
+	$(MAKE) $$ref-emulators-drop-run
+
 # Three steps: generate the gate-off config, work out which of emulators.set this
 # board actually enables, build exactly those.  The config has to exist before
 # the package list can be computed, which is why this is not one $(MAKE) call.
-%-emulators-drop: %-supported
+%-emulators-drop-run: %-supported %-emulators-reference
 	@$(MAKE) $*-config OUTPUT_DIR=$(EMULATORS_DROP_OUTPUT) $(EMULATORS_DROP_GATE_OFF)
 	@targets=$$(python3 $(EMULATORS_DROP_HARVEST) --print-targets \
 		--config $(EMULATORS_DROP_DIR)/.config \
@@ -303,25 +319,9 @@ EMULATORS_DROP_GATE_OFF = DEFCONFIG_SED='/BR2_PACKAGE_KNULLI_EXTERNAL_EMULATORS/
 # are.  So the emulator reference is the board with the richest capability set,
 # while SYSROOT_BOARD stays whatever the cores want to link against.
 %-emulators-reference: %-supported
-	@device=$(PROJECT_DIR)/package/cores/libretro-super/overlay/devices/$*.device; \
-	profile=$$(awk '$$1=="PROFILE"{print $$2}' $$device); \
-	gpu=$$(awk '$$1=="GPU"{print $$2}' $$device); \
-	pf=$(PROJECT_DIR)/package/cores/libretro-super/overlay/profiles/$$profile.profile; \
-	key=$$(echo "$$gpu" | tr 'a-z' 'A-Z'); \
-	ref=""; \
-	if [ -n "$$key" ] && [ "$$gpu" != "mali" ]; then \
-		ref=$$(awk -v k="EMULATORS_BOARD_$$key" '$$1==k{print $$2}' $$pf); \
-		test -n "$$ref" || { \
-			echo "emulators-drop: no EMULATORS_BOARD_$$key in $$pf" >&2; \
-			echo "  $* is $$gpu on $$profile and needs its own drop; name its" >&2; \
-			echo "  reference board in the profile before harvesting." >&2; \
-			exit 1; }; \
-	else \
-		ref=$$(awk '$$1=="EMULATORS_BOARD"{print $$2}' $$pf); \
-		test -n "$$ref" || ref=$$(awk '$$1=="SYSROOT_BOARD"{print $$2}' $$pf); \
-	fi; \
+	@ref=$$($(EMULATORS_DROP_REFERENCE) $*) || exit 1; \
 	if [ "$$ref" != "$*" ]; then \
-		echo "emulators-drop: $* is not the reference board for $$profile/$$gpu ($$ref is)." >&2; \
+		echo "emulators-drop: $* is not the reference board ($$ref is)." >&2; \
 		echo "  Harvesting here would tie the drop to $*'s sysroot and GPU stack." >&2; \
 		echo "  Run: make $$ref-emulators-drop" >&2; \
 		exit 1; \
