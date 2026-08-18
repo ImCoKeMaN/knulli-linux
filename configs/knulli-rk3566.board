@@ -26,15 +26,15 @@ BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE="$(BR2_EXTERNAL_KNULLI_PATH)/board/rockchip/
 BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="$(BR2_EXTERNAL_KNULLI_PATH)/board/rockchip/rk3566/linux-defconfig-fragment.config"
 BR2_LINUX_KERNEL_NEEDS_HOST_OPENSSL=y
 
-# U-Boot blobs for RK3566 BSP boards
+# U-Boot, built from source (knulli-cfw/rk356x-uboot) with the pinned Linaro 6.3.1
 BR2_PACKAGE_UBOOT_RK3566=y
+BR2_TOOLCHAIN_OPTIONAL_LINARO_AARCH64=y
 
 # Build the DTB from the kernel sources
 BR2_LINUX_KERNEL_DTS_SUPPORT=y
 BR2_LINUX_KERNEL_INTREE_DTS_NAME="rockchip/rk3566-anbernic-rg-arc-s rockchip/rk3566-anbernic-rg-ds rockchip/rk3566-miniloong rockchip/rk3566-miyoo-flip rockchip/rk3566-powkiddy-rgb30 rockchip/rk3566-powkiddy-x55"
 
 # Bootloader
-BR2_PACKAGE_UBOOT_ANBERNIC_RGXX3=y
 
 # U-Boot
 BR2_PACKAGE_HOST_UBOOT_TOOLS_FIT_SUPPORT=y

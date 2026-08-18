@@ -42,7 +42,6 @@ menu "System"
   endmenu
 
   menu "Toolchain"
-    source "$BR2_EXTERNAL_KNULLI_PATH/batocera/package/batocera/toolchain/toolchain-optional-linaro-aarch64/Config.in"
   endmenu
 
   menu "Fonts"
@@ -671,6 +670,7 @@ menu "Knulli Packages"
 
   menu "Toolchains"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/toolchain/toolchain-optional-linaro-arm/Config.in"
+    source "$BR2_EXTERNAL_KNULLI_PATH/package/toolchain/toolchain-optional-linaro-aarch64/Config.in"
   endmenu
 
   menu "Misc"
