@@ -24,6 +24,10 @@ define MALI_G57_SUNXI_INSTALL_STAGING_CMDS
         $(INSTALL) -D -m 0644 $(BR2_EXTERNAL_KNULLI_PATH)/package/gpu/mali-g57-sunxi/include/EGL/eglplatform.h \
                 $(STAGING_DIR)/usr/include/EGL/eglplatform.h
 
+        # The blob ships gl3.h/gl31.h/gl32.h but not gl3ext.h. GLES3 extension tokens live in gl2ext.h
+        $(INSTALL) -D -m 0644 $(BR2_EXTERNAL_KNULLI_PATH)/package/gpu/mali-g57-sunxi/include/GLES3/gl3ext.h \
+                $(STAGING_DIR)/usr/include/GLES3/gl3ext.h
+
         # Install main mali library
         $(INSTALL) -D -m 0755 $(@D)/fbdev/arm64/libmali.so.0.32.0 $(STAGING_DIR)/usr/lib/libmali.so.1
         ln -sf libmali.so.1 $(STAGING_DIR)/usr/lib/libmali.so
@@ -55,8 +59,9 @@ define MALI_G57_SUNXI_INSTALL_STAGING_CMDS
                 $(STAGING_DIR)/usr/lib/pkgconfig/gbm.pc
         $(INSTALL) -D -m 0644  $(BR2_EXTERNAL_KNULLI_PATH)/package/gpu/mali-g57-sunxi/mali.pc \
                 $(STAGING_DIR)/usr/lib/pkgconfig/mali.pc
-        $(INSTALL) -D -m 0644  $(BR2_EXTERNAL_KNULLI_PATH)/package/gpu/mali-g57-sunxi/wayland-egl.pc \
-                $(STAGING_DIR)/usr/lib/pkgconfig/wayland-egl.pc
+
+# No wayland-egl.pc. libmali exports no wl_egl_window_* at all
+# Wayland package's libwayland-egl provides the necessary wayland-egl.pc.
 endef
 
 define MALI_G57_SUNXI_INSTALL_TARGET_CMDS
