@@ -16,12 +16,22 @@ UBOOT_T618_PKGDIR = $(BR2_EXTERNAL_KNULLI_PATH)/package/boot/uboot-t618
 UBOOT_T618_DEFCONFIG = ums512_rg_rotate_defconfig
 UBOOT_T618_DEVICE_TREE = ums512_rg_rotate
 
+# U-Boot 2015.07 against gcc 14 requires some additional error checks to be disabled 
+UBOOT_T618_KCFLAGS = \
+	-Wno-error=implicit-function-declaration \
+	-Wno-error=implicit-int \
+	-Wno-error=int-conversion \
+	-Wno-error=incompatible-pointer-types \
+	-Wno-error=return-mismatch \
+	-Wno-error=declaration-missing-parameter-type
+
 # ARCH=arm, not arm64: the vendor BSP predates the rename and its Makefile keys
 # off the 32-bit name even for this aarch64 SoC.
 UBOOT_T618_MAKE_OPTS = \
 	ARCH=arm \
 	DEVICE_TREE=$(UBOOT_T618_DEVICE_TREE) \
 	CROSS_COMPILE=$(TARGET_CROSS) \
+	KCFLAGS="$(UBOOT_T618_KCFLAGS)" \
 	O=$(@D)/build
 
 define UBOOT_T618_BUILD_CMDS
@@ -40,11 +50,7 @@ define UBOOT_T618_INSTALL_IMAGES_CMDS
 		$(BINARIES_DIR)/u-boot.img
 endef
 
-# This package produces an image, not a target or staging payload.  INSTALL_IMAGES
-# must be YES or pkg-generic.mk:900 defaults it to NO and the step above is simply
-# never run -- the build succeeds, leaves no u-boot.img, and the failure only
-# surfaces at genimage time as "stat(.../u-boot.img) failed".  Same three lines as
-# uboot-a133 and uboot-h700.
+# This package produces an image, not a target or staging payload.
 UBOOT_T618_INSTALL_TARGET = NO
 UBOOT_T618_INSTALL_STAGING = NO
 UBOOT_T618_INSTALL_IMAGES = YES

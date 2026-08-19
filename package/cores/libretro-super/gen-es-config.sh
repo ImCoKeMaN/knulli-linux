@@ -10,7 +10,7 @@
 # datainit/roms/<system> for systems that have at least one usable core, so
 # without this fragment the folders go missing too.
 #
-# Usage: gen-es-config.sh DROP_DIR CORES_SYMBOLS OUTPUT OUTPUT_LIST
+# Usage: gen-es-config.sh DROP_DIR CORES_SYMBOLS OUTPUT OUTPUT_LIST [EXCLUDE]
 #
 # DROP_DIR       drop/<profile> -- its cores/ dir is the ground truth
 # CORES_SYMBOLS  core .so -> symbol table (cores.symbols)
@@ -21,11 +21,23 @@
 #                carry only some of them.  knulli-es-system uses this list to
 #                drop the cores that are not really there, so es_systems.cfg
 #                never offers a core RetroArch would fail to load.
+# EXCLUDE        core names (no _libretro.so) this device must not offer.  The
+#                drop is keyed on the ABI profile, so a board that should not
+#                run a core still receives it; those are dropped here, and
+#                libretro-super.mk prunes the same list out of the squashfs.
 
 DROP_DIR=$1
 CORES_SYMBOLS=$2
 OUTPUT=$3
 OUTPUT_LIST=$4
+EXCLUDE=$5
+
+excluded() {
+    for x in ${EXCLUDE}; do
+        [ "$1" = "$x" ] && return 0
+    done
+    return 1
+}
 
 set -e
 
@@ -48,13 +60,16 @@ mkdir -p "$(dirname "${OUTPUT}")"
     echo "# libretro cores present in $(basename "${DROP_DIR}")."
     grep -vE '^[[:space:]]*(#|$)' "${CORES_SYMBOLS}" | while read -r so symbol; do
         [ -n "$symbol" ] || continue
+        excluded "${so%_libretro.so}" && continue
         [ -e "${DROP_DIR}/cores/${so}" ] && echo "${symbol}=y"
     done | sort -u
 } > "${OUTPUT}"
 
 if [ -n "${OUTPUT_LIST}" ]; then
     mkdir -p "$(dirname "${OUTPUT_LIST}")"
-    ( cd "${DROP_DIR}/cores" && ls -1 *_libretro.so 2>/dev/null ) | sort > "${OUTPUT_LIST}"
+    ( cd "${DROP_DIR}/cores" && ls -1 *_libretro.so 2>/dev/null ) | sort | \
+        while read -r so; do excluded "${so%_libretro.so}" || echo "${so}"; done \
+        > "${OUTPUT_LIST}"
 fi
 
 COUNT=$(grep -c '=y$' "${OUTPUT}" || true)
@@ -68,10 +83,15 @@ UNMAPPED=""
 for core in "${DROP_DIR}"/cores/*_libretro.so; do
     [ -e "$core" ] || continue
     bn=$(basename "$core")
+    excluded "${bn%_libretro.so}" && continue
     grep -qE "^[[:space:]]*${bn//./\\.}[[:space:]]" "${CORES_SYMBOLS}" || UNMAPPED="${UNMAPPED} ${bn%_libretro.so}"
 done
 if [ -n "${UNMAPPED}" ]; then
     echo "[INFO] libretro-super: cores with no es_systems.yml symbol:${UNMAPPED}"
+fi
+
+if [ -n "${EXCLUDE}" ]; then
+    echo "[INFO] libretro-super: cores excluded for this device: ${EXCLUDE}"
 fi
 
 exit 0

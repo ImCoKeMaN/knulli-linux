@@ -51,6 +51,16 @@ KNULLI_EMULATORS_DROP_KEY = $(KNULLI_EMULATORS_DROP_PROFILE)$(if \
 
 KNULLI_EMULATORS_DROP_DROP = $(KNULLI_EMULATORS_DROP_CACHE)/drop/$(KNULLI_EMULATORS_DROP_KEY)
 
+# EXCLUDE_EMULATOR lines in the .device file, naming BR2_PACKAGE_* symbols
+# without the prefix.  The drop is keyed on the profile and the GPU, so it
+# carries every emulator the reference board built -- which is how a board picks
+# up emulators the "select BR2_PACKAGE_* if <target>" lines in
+# knulli-system/Config.in never granted it.  Those selects are gated off by
+# BR2_PACKAGE_KNULLI_EXTERNAL_EMULATORS, so the policy has to be reasserted
+# here, against the fragment rather than against Kconfig.
+KNULLI_EMULATORS_DROP_EXCLUDE = \
+	$(shell awk '$$1=="EXCLUDE_EMULATOR"{print $$2}' $(KNULLI_EMULATORS_DROP_DEVICE_FILE) 2>/dev/null)
+
 # A missing drop is a hard error, not a warning.  An image that silently builds
 # without emulators looks fine until someone tries to launch one, and by then it
 # has been flashed.
@@ -114,6 +124,11 @@ KNULLI_EMULATORS_DROP_ES_CONFIG = $(STAGING_DIR)/usr/share/knulli/emulators-drop
 define KNULLI_EMULATORS_DROP_INSTALL_STAGING_CMDS
 	$(INSTALL) -D -m 0644 $(KNULLI_EMULATORS_DROP_DROP)/emulators.config \
 		$(KNULLI_EMULATORS_DROP_ES_CONFIG)
+	$(Q)for sym in "" $(KNULLI_EMULATORS_DROP_EXCLUDE); do \
+		[ -n "$$sym" ] || continue; \
+		sed -i "/^BR2_PACKAGE_$$sym=y\$$/d" $(KNULLI_EMULATORS_DROP_ES_CONFIG); \
+		echo "knulli-emulators-drop: $$sym excluded for $(KNULLI_EMULATORS_DROP_DEVICE)"; \
+	done
 	$(INSTALL) -D -m 0644 $(KNULLI_EMULATORS_DROP_DROP)/sonames.list \
 		$(STAGING_DIR)/usr/share/knulli/emulators-drop-sonames.list
 endef

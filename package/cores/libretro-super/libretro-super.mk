@@ -50,6 +50,13 @@ LIBRETRO_SUPER_PROFILE = $(shell awk '$$1=="PROFILE"{print $$2}' $(LIBRETRO_SUPE
 
 LIBRETRO_SUPER_DROP = $(LIBRETRO_SUPER_CACHE)/drop/$(LIBRETRO_SUPER_PROFILE)
 
+# EXCLUDE_CORE lines in the .device file: cores this device must not offer.  The
+# drop is keyed on the ABI profile, so a board receives every core its profile
+# builds -- this is where the per-board policy that used to live in the
+# "select BR2_PACKAGE_LIBRETRO_* if <target>" lines comes back.  Excluded cores
+# are left out of the symbol fragment and pruned from the cores squashfs.
+LIBRETRO_SUPER_EXCLUDE = $(shell awk '$$1=="EXCLUDE_CORE"{print $$2}' $(LIBRETRO_SUPER_DEVICE_FILE) 2>/dev/null)
+
 # The profile's reference sysroot is resolved by %-cores-drop, not here -- this
 # package never compiles, so it has no use for it.
 
@@ -100,7 +107,8 @@ define LIBRETRO_SUPER_INSTALL_STAGING_CMDS
 		$(LIBRETRO_SUPER_DROP) \
 		$(LIBRETRO_SUPER_PKGDIR)/cores.symbols \
 		$(LIBRETRO_SUPER_ES_CONFIG) \
-		$(LIBRETRO_SUPER_ES_CORELIST)
+		$(LIBRETRO_SUPER_ES_CORELIST) \
+		"$(LIBRETRO_SUPER_EXCLUDE)"
 endef
 
 # The cores do NOT go into the rootfs.  They are staged here and turned into
@@ -122,6 +130,9 @@ define LIBRETRO_SUPER_INSTALL_TARGET_CMDS
 	rm -rf $(LIBRETRO_SUPER_CORES_ROOT)
 	mkdir -p $(LIBRETRO_SUPER_CORES_ROOT)
 	cp -a $(LIBRETRO_SUPER_DROP)/cores/. $(LIBRETRO_SUPER_CORES_ROOT)/
+	cd $(LIBRETRO_SUPER_CORES_ROOT) && for so in *_libretro.so; do \
+		grep -qx "$$so" $(LIBRETRO_SUPER_ES_CORELIST) || rm -f "$$so"; \
+	done
 	$(LIBRETRO_SUPER_PKGDIR)/gen-cores-manifest.sh \
 		$(LIBRETRO_SUPER_CORES_ROOT) \
 		$(LIBRETRO_SUPER_PROFILE) \
