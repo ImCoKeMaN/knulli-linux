@@ -212,6 +212,10 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: str, romConfigur
                 if (system.isOptSet('hud') and system.config['hud'] != "" and system.config['hud'] != "none") or hud_bezel is not None:
                     gameinfos = extractGameInfosFromXml(args.gameinfoxml)
                     cmd.env["MANGOHUD_DLSYM"] = "1"
+                    # libEGL.so.1 is a symbol-less stub in front of libmali on the mali
+                    # boards, and mangohud's elfhacks lookup only reads one object's own
+                    # symbol table.  Simple load uses dlopen/dlsym, which follows NEEDED.
+                    cmd.env["MANGOHUD_EGL_SIMPLE_LOAD"] = "1"
                     hudconfig = getHudConfig(system, args.systemname, system.config['emulator'], effectiveCore, rom, gameinfos, hud_bezel, gameResolution)
                     hud_config_file = Path('/var/run/hud.config')
                     with hud_config_file.open('w') as f:

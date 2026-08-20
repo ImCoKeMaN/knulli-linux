@@ -17,6 +17,7 @@ eslog = logging.getLogger(__name__)
 ppssppConfig: Final   = PPSSPP_PSP_SYSTEM_DIR / 'ppsspp.ini'
 ppssppControls: Final = PPSSPP_PSP_SYSTEM_DIR / 'controls.ini'
 ppssppRetroach: Final = PPSSPP_PSP_SYSTEM_DIR / 'ppsspp_retroachievements.dat'
+ppssppFailedGfx: Final = PPSSPP_PSP_SYSTEM_DIR / 'FailedGraphicsBackends.txt'
 
 def writePPSSPPConfig(system: Emulator):
     iniConfig = CaseSensitiveConfigParser(interpolation=None)
@@ -44,13 +45,21 @@ def createPPSSPPConfig(iniConfig, system):
         iniConfig.add_section("Graphics")
 
     # Graphics Backend
+    # PPSSPP records the backend it is about to try in FailedGraphicsBackends.txt and
+    # only removes it after 10 rendered frames, so any early exit leaves it behind and
+    # the next run silently switches backend.  We pick the backend here, so drop it.
+    ppssppFailedGfx.unlink(missing_ok=True)
+
     have_vulkan = subprocess.run(["/usr/bin/knulli-vulkan", "hasVulkan"], text=True, capture_output=True).stdout.strip()
     if have_vulkan == "true":
         eslog.debug("Vulkan driver is available on the system.")
         iniConfig.set("Graphics", "GraphicsBackend", "3 (VULKAN)")
+        iniConfig.set("Graphics", "DisabledGraphicsBackends", "")
     else:
         eslog.debug("Vulkan driver is not available on the system. Falling back to OpenGL")
         iniConfig.set("Graphics", "GraphicsBackend", "0 (OPENGL)")
+        # Without this PPSSPP falls back to Vulkan on its own and dies in SDL_CreateWindow
+        iniConfig.set("Graphics", "DisabledGraphicsBackends", "VULKAN")
 
     # Display FPS
     if system.isOptSet('showFPS') and system.getOptBoolean('showFPS') == True:
