@@ -741,6 +741,7 @@ menu "Knulli Packages"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/utils/allwinner-utils/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/utils/silkyrgb/Config.in"
     source "$BR2_EXTERNAL_KNULLI_PATH/package/utils/mangohud/Config.in"
+    source "$BR2_EXTERNAL_KNULLI_PATH/package/utils/knulli-overlay/Config.in"
   endmenu
 
   menu "Kernels"

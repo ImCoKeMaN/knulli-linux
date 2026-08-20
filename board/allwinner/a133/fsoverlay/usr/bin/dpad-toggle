@@ -17,7 +17,10 @@ check_ingame() {
 
 do_notification() {
     NOTIFICATION=$1
-    curl -s http://localhost:1234/notify -d "$NOTIFICATION" >/dev/null
+
+    # The overlay draws over a running game; ES is only on screen when none is.
+    knulli-overlay notification "$NOTIFICATION"
+    check_ingame || curl -s http://localhost:1234/notify -d "$NOTIFICATION" >/dev/null
 }
 
 announce_state() {
@@ -26,9 +29,7 @@ announce_state() {
         knulli-rumble 0.1
         echo 1 > "$DPAD_STATE_FILE"
 
-        if ! check_ingame; then
-            do_notification "Virtual Joystick ON"
-        fi
+        do_notification "Virtual Joystick ON"
         ;;
       off)
         knulli-rumble 0.1
@@ -36,9 +37,7 @@ announce_state() {
         knulli-rumble 0.1
         echo 0 > "$DPAD_STATE_FILE"
 
-        if ! check_ingame; then
-            do_notification "Virtual Joystick OFF"
-        fi
+        do_notification "Virtual Joystick OFF"
         ;;
     esac
 }

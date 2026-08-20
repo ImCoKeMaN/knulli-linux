@@ -47,6 +47,9 @@ if TYPE_CHECKING:
 
 eslog = logging.getLogger(__name__)
 
+# By soname, not by path: the loader then picks /usr/lib32 for a 32-bit emulator.
+OVERLAY_LIB = "libknulli-overlay.so"
+
 def main(args: argparse.Namespace, maxnbplayers: int) -> int:
     # squashfs roms if squashed
     if Path(args.rom).suffix == ".squashfs":
@@ -207,19 +210,39 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: str, romConfigur
 
             cmd = generator.generate(system, rom, player_controllers, metadata, guns, wheels, gameResolution)
 
-            if device.hasBoardCapability('hud') and system.isOptSet('hud_support') and system.getOptBoolean('hud_support'):
-                hud_bezel = getHudBezel(system, generator, rom, gameResolution, controllers.gunsBordersSizeName(guns, system.config), controllers.gunsBorderRatioType(guns, system.config))
-                if (system.isOptSet('hud') and system.config['hud'] != "" and system.config['hud'] != "none") or hud_bezel is not None:
-                    gameinfos = extractGameInfosFromXml(args.gameinfoxml)
+            # knulli-overlay draws the status panels in every emulator and the
+            # bezel in the ones that do not draw their own.  Preloaded by soname
+            # so a 32-bit emulator picks up the copy in /usr/lib32.
+            if not (system.isOptSet('overlay.enabled') and not system.getOptBoolean('overlay.enabled')):
+                preload = [OVERLAY_LIB]
+                previous = cmd.env.get("LD_PRELOAD", os.environ.get("LD_PRELOAD"))
+                if previous:
+                    preload.append(str(previous))
+                cmd.env["LD_PRELOAD"] = ":".join(preload)
+
+            # The bezel is knulli-overlay's to draw, so it is resolved whatever
+            # the board can do about a performance HUD.
+            hud_bezel = getHudBezel(system, generator, rom, gameResolution, controllers.gunsBordersSizeName(guns, system.config), controllers.gunsBorderRatioType(guns, system.config))
+            want_hud = (
+                device.hasBoardCapability('hud')
+                and system.isOptSet('hud_support') and system.getOptBoolean('hud_support')
+                and system.isOptSet('hud') and system.config['hud'] != "" and system.config['hud'] != "none"
+            )
+
+            if want_hud or hud_bezel is not None:
+                gameinfos = extractGameInfosFromXml(args.gameinfoxml)
+                hudconfig = getHudConfig(system, args.systemname, system.config['emulator'], effectiveCore, rom, gameinfos, hud_bezel, gameResolution)
+                hud_config_file = Path('/var/run/hud.config')
+                with hud_config_file.open('w') as f:
+                    f.write(hudconfig)
+                cmd.env["OV_HUD_CONFIG"] = hud_config_file
+
+                if want_hud:
                     cmd.env["MANGOHUD_DLSYM"] = "1"
                     # libEGL.so.1 is a symbol-less stub in front of libmali on the mali
                     # boards, and mangohud's elfhacks lookup only reads one object's own
                     # symbol table.  Simple load uses dlopen/dlsym, which follows NEEDED.
                     cmd.env["MANGOHUD_EGL_SIMPLE_LOAD"] = "1"
-                    hudconfig = getHudConfig(system, args.systemname, system.config['emulator'], effectiveCore, rom, gameinfos, hud_bezel, gameResolution)
-                    hud_config_file = Path('/var/run/hud.config')
-                    with hud_config_file.open('w') as f:
-                        f.write(hudconfig)
                     cmd.env["MANGOHUD_CONFIGFILE"] = hud_config_file
                     if not generator.hasInternalMangoHUDCall():
                         cmd.array.insert(0, "mangohud")
