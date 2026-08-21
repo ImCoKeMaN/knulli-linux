@@ -219,6 +219,10 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: str, romConfigur
                 if previous:
                     preload.append(str(previous))
                 cmd.env["LD_PRELOAD"] = ":".join(preload)
+            else:
+                # The Vulkan layer is implicit, so the loader picks it up on its
+                # own and it has to be turned off by name.
+                cmd.env["OV_DISABLE_VK_LAYER"] = "1"
 
             # The bezel is knulli-overlay's to draw, so it is resolved whatever
             # the board can do about a performance HUD.
