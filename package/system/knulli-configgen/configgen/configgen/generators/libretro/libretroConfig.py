@@ -216,9 +216,13 @@ def createLibretroConfig(generator: Generator, system: Emulator, controllers: Co
     else:
         retroarchConfig['vrr_runloop_enable'] = 'false'
 
-    # required at least for vulkan (to get the correct resolution)
+    # Vulkan drives the display itself (KHR_display on the a133), where asking
+    # for a named fullscreen mode fails; 0 means "keep the current one".
     # For rotated screens like the rg28xx
-    if gameResolution["width"] < gameResolution["height"]:
+    if gfxBackend == 'vulkan':
+        retroarchConfig['video_fullscreen_x'] = 0
+        retroarchConfig['video_fullscreen_y'] = 0
+    elif gameResolution["width"] < gameResolution["height"]:
         retroarchConfig['video_fullscreen_x'] = gameResolution["height"]
         retroarchConfig['video_fullscreen_y'] = gameResolution["width"]
     else:
