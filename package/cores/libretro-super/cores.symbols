@@ -43,6 +43,7 @@ doublecherrygb_libretro.so            BR2_PACKAGE_LIBRETRO_DOUBLECHERRYGB
 easyrpg_libretro.so                   BR2_PACKAGE_LIBRETRO_EASYRPG
 ecwolf_libretro.so                    BR2_PACKAGE_LIBRETRO_ECWOLF
 emuscv_libretro.so                    BR2_PACKAGE_LIBRETRO_EMUSCV
+ep128emu-core_libretro.so             BR2_PACKAGE_LIBRETRO_EP128EMU_CORE
 fake08_libretro.so                    BR2_PACKAGE_LIBRETRO_FAKE08
 fbalpha2012_cps1_libretro.so          BR2_PACKAGE_LIBRETRO_FBALPHA2012_CPS1
 fbalpha2012_cps2_libretro.so          BR2_PACKAGE_LIBRETRO_FBALPHA2012_CPS2

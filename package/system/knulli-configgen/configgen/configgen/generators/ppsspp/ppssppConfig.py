@@ -51,12 +51,20 @@ def createPPSSPPConfig(iniConfig, system):
     ppssppFailedGfx.unlink(missing_ok=True)
 
     have_vulkan = subprocess.run(["/usr/bin/knulli-vulkan", "hasVulkan"], text=True, capture_output=True).stdout.strip()
-    if have_vulkan == "true":
+    # A board that asks for OpenGL means it: PPSSPP reaches the display through
+    # VK_KHR_display, which cannot see a framebuffer SDL rotates for it, and
+    # then finds no video mode matching the size it asked for.
+    wanted = system.config['gfxbackend'] if system.isOptSet('gfxbackend') else None
+
+    if have_vulkan == "true" and wanted in (None, "vulkan"):
         eslog.debug("Vulkan driver is available on the system.")
         iniConfig.set("Graphics", "GraphicsBackend", "3 (VULKAN)")
         iniConfig.set("Graphics", "DisabledGraphicsBackends", "")
     else:
-        eslog.debug("Vulkan driver is not available on the system. Falling back to OpenGL")
+        if have_vulkan == "true":
+            eslog.debug(f"Vulkan is available but the system asks for {wanted}. Using OpenGL")
+        else:
+            eslog.debug("Vulkan driver is not available on the system. Falling back to OpenGL")
         iniConfig.set("Graphics", "GraphicsBackend", "0 (OPENGL)")
         # Without this PPSSPP falls back to Vulkan on its own and dies in SDL_CreateWindow
         iniConfig.set("Graphics", "DisabledGraphicsBackends", "VULKAN")

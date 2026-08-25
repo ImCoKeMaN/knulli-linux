@@ -8,6 +8,7 @@ chimerasnes libretro-chimerasnes https://github.com/jamsilva/chimerasnes.git mas
 crocods libretro-crocods https://github.com/libretro/libretro-crocods.git master YES GENERIC Makefile .
 dinothawr libretro-dinothawr https://github.com/libretro/Dinothawr.git master YES GENERIC Makefile .
 doublecherrygb libretro-doublecherrygb https://github.com/TimOelrichs/doublecherryGB-libretro.git master YES GENERIC Makefile .
+ep128emu_core libretro-ep128emu-core https://github.com/libretro/ep128emu-core.git core_v1.2.11 YES GENERIC Makefile .
 fbalpha2012_cps1 libretro-fbalpha2012_cps1 https://github.com/libretro/fbalpha2012_cps1.git master YES GENERIC makefile.libretro .
 fbalpha2012_cps2 libretro-fbalpha2012_cps2 https://github.com/libretro/fbalpha2012_cps2.git master YES GENERIC makefile.libretro .
 fbalpha2012_neogeo libretro-fbalpha_neogeo https://github.com/libretro/fbalpha2012_neogeo.git master YES GENERIC Makefile .

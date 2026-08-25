@@ -8,6 +8,7 @@ chimerasnes libretro-chimerasnes https://github.com/jamsilva/chimerasnes.git mas
 crocods libretro-crocods https://github.com/libretro/libretro-crocods.git master YES GENERIC Makefile .
 dinothawr libretro-dinothawr https://github.com/libretro/Dinothawr.git master YES GENERIC Makefile .
 doublecherrygb libretro-doublecherrygb https://github.com/TimOelrichs/doublecherryGB-libretro.git master YES GENERIC Makefile . platform=unix TARGET_NAME=doublecherrygb
+ep128emu_core libretro-ep128emu-core https://github.com/libretro/ep128emu-core.git core_v1.2.11 YES GENERIC Makefile .
 fbalpha2012_cps1 libretro-fbalpha2012_cps1 https://github.com/libretro/fbalpha2012_cps1.git master YES GENERIC makefile.libretro .
 fbalpha2012_cps2 libretro-fbalpha2012_cps2 https://github.com/libretro/fbalpha2012_cps2.git master YES GENERIC makefile.libretro .
 fbalpha2012_neogeo libretro-fbalpha_neogeo https://github.com/libretro/fbalpha2012_neogeo.git master YES GENERIC Makefile .
@@ -123,7 +124,7 @@ pcsx2 libretro-pcsx2 https://github.com/libretro/pcsx2.git libretro NO CMAKE Mak
 swanstation libretro-swanstation https://github.com/libretro/swanstation.git main YES CMAKE Makefile build
 tic80 libretro-tic80 https://github.com/nesbox/TIC-80.git main YES CMAKE Makefile builddir -DBUILD_LIBRETRO=ON -DBUILD_SDL=OFF -DBUILD_PLAYER=OFF -DBUILD_EDITORS=OFF -DBUILD_TOOLS=OFF
 ppsspp libretro-ppsspp https://github.com/hrydgard/ppsspp.git master YES CMAKE Makefile build -DCMAKE_TOOLCHAIN_FILE=/opt/fdata/knulli/rework-knulli-linux/knulli-linux/package/cores/libretro-super/overlay/cmake/aarch64-v8a-toolchain.cmake -DUSING_GLES2=ON -DUSING_EGL=ON -DUSING_X11_VULKAN=OFF -DCMAKE_BUILD_TYPE=Release -DLIBRETRO=ON -DBUILD_SHARED_LIBS=OFF -DUSE_SYSTEM_FFMPEG=OFF -DUSE_DISCORD=OFF -DUSING_FBDEV=OFF -DUNITTEST=OFF -DSIMULATOR=OFF -DENABLE_CTEST=OFF -DVULKAN=OFF -DANDROID=OFF -DWIN32=OFF -DAPPLE=OFF
-mame libretro-mame https://github.com/libretro/mame.git master NO GENERIC Makefile.libretro .
+mame libretro-mame https://github.com/libretro/mame.git master YES GENERIC Makefile.libretro .
 dolphin libretro-dolphin https://github.com/libretro/dolphin.git master YES CMAKE Makefile build -DCMAKE_CXX_STANDARD_LIBRARIES=-Wl,--unresolved-symbols=ignore-all
 play libretro-play https://github.com/jpd002/Play-.git master YES CMAKE Makefile build -DBUILD_PLAY=OFF -DBUILD_LIBRETRO_CORE=ON -DBUILD_TESTS=OFF -DUSE_GLES=ON NO_FAST_MATH=1
 azahar libretro-azahar https://github.com/johndoe6345789/azahar_libretro.git master YES CMAKE Makefile build -DCMAKE_TOOLCHAIN_FILE=/opt/fdata/knulli/rework-knulli-linux/knulli-linux/package/cores/libretro-super/overlay/cmake/aarch64-v8a-toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_LIBRETRO=ON -DENABLE_SDL2_FRONTEND=OFF -DENABLE_QT=OFF -DBUILD_SHARED_LIBS=OFF -DENABLE_TESTS=OFF -DENABLE_ROOM=OFF -DENABLE_WEB_SERVICE=OFF -DUSE_DISCORD_PRESENCE=OFF -DCITRA_WARNINGS_AS_ERRORS=OFF -DENABLE_SOFTWARE_RENDERER=ON -DENABLE_SSE42=OFF -DENABLE_LTO=OFF -DUSE_SYSTEM_BOOST=OFF

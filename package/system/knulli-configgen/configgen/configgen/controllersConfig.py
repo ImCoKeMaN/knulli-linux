@@ -2,14 +2,11 @@ from __future__ import annotations
 
 import logging
 import re
-import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import TYPE_CHECKING, NotRequired, TypedDict
 
 import evdev
 import pyudev
-
-from .batoceraPaths import ES_GAMES_METADATA
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -156,61 +153,6 @@ def getGuns() -> GunDict:
         eslog.info("no gun found")
 
     return guns
-
-def shortNameFromPath(path: str | Path) -> str:
-    redname = Path(path).stem.lower()
-    inpar   = False
-    inblock = False
-    ret = ""
-    for c in redname:
-        if not inpar and not inblock and ( (c >= 'a' and c <= 'z') or (c >= '0' and c <= '9') ):
-            ret += c
-        elif c == '(':
-            inpar = True
-        elif c == ')':
-            inpar = False
-        elif c == '[':
-            inblock = True
-        elif c == ']':
-            inblock = True
-    return ret
-
-def getGamesMetaData(system: str, rom: str | Path) -> dict[str, str]:
-    # load the database
-    tree = ET.parse(ES_GAMES_METADATA)
-    root = tree.getroot()
-    game = shortNameFromPath(rom)
-    res: dict[str, str] = {}
-    eslog.info("looking for game metadata ({}, {})".format(system, game))
-
-    targetSystem = system
-    # hardcoded list of system for arcade
-    # this list can be found in es_system.yml
-    # at this stage we don't know if arcade will be kept as one system only in metadata, so i hardcode this list for now
-    if system in ['naomi', 'naomi2', 'atomiswave', 'fbneo', 'mame', 'neogeo', 'triforce', 'hypseus-singe', 'model2', 'model3', 'hikaru', 'gaelco', 'cave3rd', 'namco2x6']:
-        targetSystem = 'arcade'
-
-    for nodesystem in root.findall(".//system"):
-        for sysname in nodesystem.get("name").split(','):
-            if sysname == targetSystem:
-                # search the game named default
-                for nodegame in nodesystem.findall(".//game"):
-                    if nodegame.get("name") == "default":
-                        for child in nodegame:
-                            for attribute in child.attrib:
-                                key = "{}_{}".format(child.tag, attribute)
-                                res[key] = child.get(attribute)
-                                eslog.info("found game metadata {}={} (system level)".format(key, res[key]))
-                        break
-                for nodegame in nodesystem.findall(".//game"):
-                    if nodegame.get("name") != "default" and nodegame.get("name") in game:
-                        for child in nodegame:
-                            for attribute in child.attrib:
-                                key = "{}_{}".format(child.tag, attribute)
-                                res[key] = child.get(attribute)
-                                eslog.info("found game metadata {}={}".format(key, res[key]))
-                        return res
-    return res
 
 def dev2int(dev: str) -> int | None:
     matches = re.match(r"^/dev/input/event([0-9]*)$", dev)

@@ -5,9 +5,11 @@
 #
 # mame (0.2xx): too heavy for the 32-bit devices (Cortex-A7/A9, Mali-400) --
 # they are not powerful enough to run it, so building it for them is waste.
-# ENABLED=NO for now as well: it takes a very long time to compile and is
-# being kept out of the current test cycle.  Flip to YES to build it.
-mame libretro-mame https://github.com/libretro/mame.git master NO GENERIC Makefile.libretro .
+# It is the only core for a long tail of computers and consoles (the Sharp MZ
+# and NEC PC families, Loopy, Beena, TRS-80, ...), so the systems gated on
+# BR2_PACKAGE_LIBRETRO_MAME in es_systems.yml appear on aarch64 only.
+# Expect it to dominate the build time of a drop.
+mame libretro-mame https://github.com/libretro/mame.git master YES GENERIC Makefile.libretro .
 
 # dolphin: CMakeLists.txt:235 aborts on any 4-byte-pointer target --
 # "You're building on an unsupported platform: 'armv7l' with 4-byte

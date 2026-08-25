@@ -36,6 +36,10 @@ mednafen_saturn_libretro.so         beetle-saturn_libretro.so
 genesis_plus_gx_libretro.so         genesisplusgx_libretro.so
 genesis_plus_gx_wide_libretro.so    genesisplusgx-wide_libretro.so
 
+# ep128emu-core: an underscore in the name the repo builds, a hyphen in the
+# spelling es_systems.yml and libretro-core-info use.
+ep128emu_core_libretro.so           ep128emu-core_libretro.so
+
 # MAME family.  knulli names these by MAME version rather than by core:
 # mame2010 is MAME 0.139, mame2003-plus is 0.78+.  post-build-script.sh also
 # symlinks mame0139_libretro.info from mame2010_libretro.info, so the target
