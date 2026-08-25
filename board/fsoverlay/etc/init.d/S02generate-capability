@@ -72,6 +72,7 @@ case "$ARCH" in
         BOARD_CAPABILITIES[rumble]="rg-arc-s powkiddy-x55 powkiddy-rgb30 rg-ds miniloong"
         BOARD_CAPABILITIES[adb]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip rg-ds miniloong"
         BOARD_CAPABILITIES[hud]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip rg-ds miniloong"
+        BOARD_CAPABILITIES[rotatedpanel]="miniloong powkiddy-x55 rg-arc-s"
 	BOARD_CAPABILITIES[pwrled]="rg-arc-s powkiddy-x55 powkiddy-rgb30 miyoo-flip rg-ds"
         ;;
     rk3576)
