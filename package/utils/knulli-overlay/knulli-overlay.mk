@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-KNULLI_OVERLAY_VERSION = 25c2269290c3fedea1e94fbca683ddfc462a6f42
+KNULLI_OVERLAY_VERSION = 70ccb7881b8fc94d5acee1028a221f4c397ccf18
 KNULLI_OVERLAY_SITE = https://github.com/knulli-cfw/knulli-overlay.git
 KNULLI_OVERLAY_SITE_METHOD = git
 KNULLI_OVERLAY_LICENSE = GPL-3.0
