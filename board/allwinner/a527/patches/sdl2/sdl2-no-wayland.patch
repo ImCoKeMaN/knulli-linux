@@ -1,0 +1,13 @@
+diff --git a/configure b/configure
+index 05b9ef8..7a67492 100755
+--- a/configure
++++ b/configure
+@@ -23294,7 +23294,7 @@ then :
+ else $as_nop
+   WAYLAND_SCANNER_CODE_MODE=code
+ fi
+-                video_wayland=yes
++#                video_wayland=yes
+             fi
+         fi
+         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $video_wayland" >&5
